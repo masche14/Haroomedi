@@ -1,3 +1,14 @@
+:root {
+    --primary-color: #70d9c5;
+    --highlight-color: rgb(25, 118, 202);
+    --navbar-color: #ffffff;
+    --text-color: #000000;
+    --white-text: #ffffff;
+    --button-color: #1976ca;
+    --divider-color: #e0e0e0;
+}
+
+
 /* 공통 스타일 */
 html {
     height: 100%;
@@ -6,10 +17,11 @@ html {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    background-color: var(--primary-color);
 }
 
 body {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--primary-color);
     margin: 3.75rem 0 0 0;
     width: 100%;
     height: 100%;
@@ -18,14 +30,6 @@ body {
     align-items: center;
     flex-direction: column;
     font-family: 'Spoqa Han Sans Neo', 'Spoqa Han Sans JP', sans-serif;
-}
-
-/* 배경 이미지 설정 */
-html {
-    background-image: url("/background3.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 header {
@@ -121,7 +125,7 @@ footer {
     width: 100%;
     min-width: 23.75rem !important; /* 380px -> 23.75rem */
     padding: 0.625rem; /* 10px -> 0.625rem */
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 1);
     border-radius: 0.625rem; /* 10px -> 0.625rem */
     box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.3); /* 0 4px 10px -> 0.25rem 0.625rem */
     display: flex;

@@ -9,8 +9,6 @@
     <link rel="stylesheet" href="/css/userStyles.css"/> <!-- CSS 경로 수정 -->
     <script src="/js/setReferrer.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
-    <script src="/js/setReferrer.js" defer></script>
-    
     <script>
         var userId = "<%= userId %>";
         var error = "<%= msg %>"
@@ -29,7 +27,7 @@
                 document.getElementById('input_id').value = "";
             }
 
-            const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
+            // const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
 
             if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
                 document.getElementById("loginNav").style.display = "none";
@@ -56,7 +54,7 @@
 <!-- 네비게이션 바 -->
 <div class="navbar">
     <!-- 좌측 로고 -->
-    <img src="/nestifyLogo.png" alt="Logo" class="logo">
+<!--    <img src="/nestifyLogo.png" alt="Logo" class="logo">-->
 
     <!-- 우측 메뉴 -->
     <div class="menu">
