@@ -1,0 +1,493 @@
+/* 공통 스타일 */
+html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+body {
+    background-color: rgba(0, 0, 0, 0.6);
+    margin: 3.75rem 0 0 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Spoqa Han Sans Neo', 'Spoqa Han Sans JP', sans-serif;
+}
+
+/* 배경 이미지 설정 */
+html {
+    background-image: url("/background3.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+header {
+    width: 100%;
+    max-height: 15%;
+    text-align: center;
+    margin: 0;
+}
+
+footer {
+    width: 100%;
+    max-height: 15%;
+    text-align: center;
+}
+
+/* 네비게이션 바 스타일 */
+.navbar {
+    width: 100%;
+    height: 3.75rem; /* 60px -> 3.75rem */
+    background-color: #ffffff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem; /* 0 20px -> 0 1.25rem */
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.2); /* 0 4px 10px -> 0.25rem 0.625rem */
+}
+
+.navbar .logo {
+    width: 7.5rem; /* 120px -> 7.5rem */
+    margin-left: 1.25rem; /* 20px -> 1.25rem */
+    margin-top: 0.3125rem; /* 5px -> 0.3125rem */
+}
+
+.navbar .menu {
+    display: flex;
+    gap: 1.25rem; /* 20px -> 1.25rem */
+}
+
+.navbar .menu {
+    margin-right: 1.25rem; /* 20px -> 1.25rem */
+}
+
+.black {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    /*flex-direction: column;*/
+}
+
+.black_direction {
+    flex-direction: column !important;
+}
+
+.content_wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.content {
+    min-width: 20%;
+    /*margin: 0 auto;*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.select_menu {
+    justify-content: space-evenly !important;
+    height: 50% !important;
+    min-height: 26.875rem;
+}
+
+.space_even {
+    height: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    width: 100%;
+    min-width: 23.75rem !important; /* 380px -> 23.75rem */
+    padding: 0.625rem; /* 10px -> 0.625rem */
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 0.625rem; /* 10px -> 0.625rem */
+    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.3); /* 0 4px 10px -> 0.25rem 0.625rem */
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.add_height_25 {
+    height: 25% !important;
+    min-height: 7rem;
+    background-color: rgba(255, 255, 255, 0.6) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: larger;
+    border : 0;
+    color : black;
+}
+
+/* 폼 스타일 */
+div > form {
+    width: 100%;
+    height: 100%;
+}
+
+.form_box {
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.3125rem; /* 5px -> 0.3125rem */
+}
+
+.form-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.input_box {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 0.3125rem; /* 5px -> 0.3125rem */
+    height: auto;
+    gap: 0.3125rem; /* 5px -> 0.3125rem */
+}
+
+.full {
+    background-color: white !important;
+}
+
+.input_info {
+    flex: 1;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    padding-left: 0.625rem; /* 10px -> 0.625rem */
+    margin-top: 0.3125rem; /* 5px -> 0.3125rem */
+    border: 0.0625rem solid rgba(197, 204, 210, 0.76); /* 1px -> 0.0625rem */
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+input {
+    padding: 0;
+    font-size: 1rem; /* 16px -> 1rem */
+}
+
+label {
+    margin-left: 0.125rem;
+}
+
+.margin_left_4px {
+    margin-left: 0.125rem;
+}
+
+.margin_lef_zero {
+    margin-left: 0 !important;
+}
+
+.label_bold {
+    font-weight: 400;
+}
+
+button {
+    color: white;
+}
+
+/* 버튼 스타일 */
+.btn_login, .btn_reset_pwd, .btn_next, .btn_signup {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 0 0.625rem; /* 10px -> 0.625rem */
+    background-color: #4697ff;
+    border: 0;
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    font-weight: 550;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    white-space: nowrap;
+    margin-top: 0.625rem; /* 10px -> 0.625rem */
+    font-size: large;
+}
+
+.side_btn {
+    flex: 0 0 auto;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.3125rem; /* 5px -> 0.3125rem */
+    background-color: #519cf8;
+    box-sizing: border-box;
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    border: 0;
+    white-space: nowrap;
+    padding: 0.1875rem 0.5rem; /* 3px 8px -> 0.1875rem 0.5rem */
+    font-weight: 545;
+    cursor: pointer;
+}
+
+.two_button_wrapper {
+    width: 100%;
+}
+
+.two_button {
+    width: 45%;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    background-color: #4697ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1); /* 0 4px 10px -> 0.25rem 0.625rem */
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    border: 0;
+    white-space: nowrap;
+    font-weight: 550;
+    font-size: medium;
+    cursor: pointer;
+}
+
+/* 링크 스타일 */
+a {
+    text-decoration: none;
+    color: black;
+}
+
+/* 기타 스타일 */
+.forgot_login {
+    text-align: center;
+    padding-top: 0.3125rem; /* 5px -> 0.3125rem */
+    font-weight: 400;
+}
+
+.extra_top_margin {
+    margin-top: 1.25rem !important; /* 20px -> 1.25rem */
+}
+
+.show_info {
+    padding: 0.625rem 0.9375rem; /* 10px 15px -> 0.625rem 0.9375rem */
+}
+
+.show_info > span {
+    font-size: 1.25rem; /* large 약 1.25rem */
+}
+
+.radio_box {
+    padding: 0.3125rem 0; /* 5px 0px -> 0.3125rem 0 */
+}
+
+#nicknameMessage {
+    display: none; /* 처음에는 보이지 않게 설정 */
+}
+
+#idMessage {
+    display: none; /* 처음에는 보이지 않게 설정 */
+}
+
+.info_box {
+    width: 100%;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    padding-bottom: 0.625rem; /* 10px -> 0.625rem */
+    padding-left: 0.3125rem; /* 5px -> 0.3125rem */
+
+    /*border-bottom: 0.0625rem solid;*/
+    /*border-bottom-style: groove;*/
+}
+
+.myPage {
+    flex-direction: row !important;
+    padding: 1.125rem 0.8125rem !important; /* 18px 13px -> 1.125rem 0.8125rem */
+    /*gap: 0.9375rem; !* 15px -> 0.9375rem *!*/
+}
+
+.form_wrap {
+    width: 55%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-left: 1rem;
+    padding-right: 0.3125rem;
+}
+
+.info_wrap {
+    height: 100%;
+    width: 31.25rem; /* 500px -> 31.25rem */
+    padding: 0.625rem 0; /* 10px -> 0.625rem */
+    padding-left: 0 !important;
+    padding-right: 1rem !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    border-right: 0.0625rem solid;
+    border-right-style: groove;
+    gap: 0.625rem;
+}
+
+.info_box_container {
+    height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    margin-top: 10px    ;
+}
+
+.info_box > div > span {
+    font-size: larger;
+}
+
+.img_wrap {
+    height: 100%;
+    /*padding: 0.3125rem 1rem;*/
+    padding-top: 0 !important;
+    padding-left: 0.3125rem !important;
+}
+
+.img_box {
+    height: 100%;
+    padding: 0.3125rem; /* 5px -> 0.3125rem */
+    background-image: url("/myPageImg.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0.625rem;
+}
+
+.img-container {
+    height: 100%;
+    padding: 0.3125rem; /* 5px -> 0.3125rem */
+    background-image: url("/myPageImg.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0.625rem;
+}
+
+#goDelete:hover {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+#goUpdate:hover {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* 모달 기본 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4); /* 반투명 배경 */
+}
+
+.autoWidth {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    padding-bottom: 30px !important;
+}
+
+.modal-content {
+    width: 21%;
+    min-width: 21.375rem;
+    height: 25%;
+    min-height: 16.375rem;
+    background-color: #fff;
+    padding: 10px 20px 20px 20px;
+    border: 1px solid #888;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 0.5rem;
+}
+
+.terms-content {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    width: 100%;
+    height: 80%;
+}
+
+.terms-content>p {
+    margin: 0;
+}
+
+.agree-btn {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 0 0.625rem; /* 10px -> 0.625rem */
+    background-color: #4697ff;
+    border: 0;
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    font-weight: 550;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    white-space: nowrap;
+    margin-top: 0.625rem; /* 10px -> 0.625rem */
+    font-size: large;
+}
+
+.close_wrapper {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.generate-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.generate-message > span {
+    font-size: medium;
+}

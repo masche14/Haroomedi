@@ -1,0 +1,203 @@
+/* 공통 스타일 */
+/*body, html {*/
+/*    height: 100%;*/
+/*    margin: 0;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    flex-direction: column;*/
+/*}*/
+
+/* 공통 스타일 */
+html {
+    height: 100%; //
+margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+body {
+    width: 20%; //
+margin:0 auto;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* 배경 이미지 설정 */
+html {
+    background-image: url("../background.png"); /* 이미지 경로를 확인하세요 */
+    background-size: cover; /* 배경 이미지가 전체를 덮도록 설정 */
+    background-repeat: no-repeat; /* 이미지 반복을 막음 */
+    background-position: center; /* 이미지가 중앙에 위치하도록 설정 */
+}
+
+/* 네비게이션 바 스타일 */
+.navbar {
+    width: 100%;
+    height: 60px;
+    background-color: #ffffff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 좌우 정렬 */
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.navbar .logo {
+    width: 120px; /* 로고 크기 조정 */
+    margin-left: 20px;
+    margin-top:5px;
+}
+
+.navbar .menu {
+    display: flex;
+    gap: 20px; /* 메뉴 항목 간 간격 */
+}
+
+.menu {
+    margin-right: 20px;
+}
+
+/* 컨테이너 스타일 */
+.container {
+    width: 100%;
+    min-width: 380px !important;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    /*margin-top: 60px; !* 네비게이션 바 높이 만큼 여백 추가 *!*/
+}
+
+/* 폼 스타일 */
+div > form {
+    width: 100%;
+    height: 100%;
+}
+
+.form_box {
+    width: 100%;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+.input_box {
+    display: flex; /* Flexbox 사용 */
+    justify-content: space-evenly; /* 요소들을 양 끝에 배치 */
+    align-items: center; /* 요소를 수직으로 중앙 정렬 */
+    margin-top: 5px;
+    height: auto;
+    gap: 5px; /* 입력 박스와 버튼 사이의 간격 조정 */
+}
+
+.input_info {
+    flex: 1; /* 입력 필드가 버튼과 나란히 배치되도록 설정 */
+    height: 50px;
+    padding-left: 10px;
+    margin-top: 5px;
+    border: 1px solid #c5ccd2;
+    border-radius: 8px;
+    box-sizing: border-box; /* 테두리와 패딩을 포함한 크기 계산 */
+}
+
+input {
+    padding: 0;
+}
+
+.label_bold {
+    font-weight: 500;
+}
+
+/* 버튼 스타일 */
+.btn_login, .btn_reset_pwd, .btn_next, .btn_signup{
+    width: 100%;
+    flex: 0 0 auto; /* 버튼은 크기가 고정되도록 설정 */
+    padding: 0 10px; /* 버튼 크기 조정 */
+    background-color: #F1E398;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 550;
+    box-sizing: border-box; /* 테두리와 패딩을 포함한 크기 계산 */
+    cursor: pointer;
+    display: flex;
+    align-items: center; /* 텍스트를 수직 중앙 정렬 */
+    justify-content: center; /* 텍스트를 가로 중앙 정렬 */
+    height: 50px; /* 입력 필드와 동일한 높이 설정 */
+    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    margin-top: 10px;;
+}
+
+.side_btn {
+    flex: 0 0 auto; /* 버튼은 크기가 고정되도록 설정 */
+    height: 50px; /* 입력 필드와 동일한 높이 설정 */
+    display: flex; /* Flexbox 사용 */
+    align-items: center; /* 텍스트를 수직 중앙 정렬 */
+    justify-content: center; /* 텍스트를 가로 중앙 정렬 */
+    margin-top: 5px;
+    background-color: #F1E398;
+    box-sizing: border-box; /* 테두리와 패딩을 포함한 크기 계산 */
+    border-radius: 8px;
+    border: 0;
+    white-space: nowrap;
+    padding: 3px 8px;
+    font-weight: 545;
+    cursor: pointer;
+}
+
+.two_button {
+    width:45%;
+    height:50px;
+    background-color: #F1E398;
+    display: flex; /* Flexbox 사용 */
+    align-items: center; /* 텍스트를 수직 중앙 정렬 */
+    justify-content: center; /* 텍스트를 가로 중앙 정렬 */
+    box-sizing: border-box; /* 테두리와 패딩을 포함한 크기 계산 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* 그림자 */
+    border-radius: 8px;
+    border: 0;
+    white-space: nowrap;
+    font-weight: 550;
+    cursor: pointer;
+}
+
+
+/* 링크 스타일 */
+a {
+    text-decoration: none;
+    color: black;
+}
+
+/* 기타 스타일 */
+.forgot_login {
+    text-align: center;
+    padding-top: 5px;
+    font-weight: 400;
+}
+
+.extra_top_margin {
+    margin-top: 20px !important; //
+}
+
+.show_info {
+    padding:10px 15px;
+}
+
+.show_info > span {
+    font-size: large;
+}
+
+.radio_box {
+    padding: 5px 0px;
+}

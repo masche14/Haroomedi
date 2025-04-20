@@ -1,0 +1,356 @@
+:root {
+    --primary-color: #70d9c5;
+    --highlight-color: rgb(25, 118, 202);
+    --navbar-color: #ffffff;
+    --text-color: #000000;
+    --white-text: #ffffff;
+    --button-color: #1976ca;
+    --divider-color: #e0e0e0;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+nav {
+    width: 100%;
+    height: 3.75rem;
+    background-color: var(--navbar-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.25rem;
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.2);
+}
+
+.nav-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-group {
+    display: flex;
+    gap: 1.5rem;
+}
+
+nav a {
+    margin: 0 0.9375rem;
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    display: inline-block;
+    text-align: center;
+    width: 8.75rem;
+}
+
+.login {
+    background-color: var(--button-color);
+    color: white;
+    padding: 0.625rem 0rem;
+    border-radius: 0.625rem;
+    width: 8.75rem;
+    text-align: center;
+}
+
+.back-container, .auth-container {
+    margin-top: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 70px);
+}
+
+.justify-center{
+    display: flex;
+    justify-content: center;
+}
+
+.direction-column {
+    flex-direction: column;
+}
+
+.direction-row {
+    flex-direction: row;
+}
+
+.back-box, .auth-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0.625rem 0.625rem 0.25rem rgba(0, 0, 0, 0.25);
+}
+
+.auth-box {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 30px;
+    width: auto;
+}
+
+.image-wrap {
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.h4 {
+    margin-top: 0;
+    margin-left: 6px;
+    margin-bottom:15px;
+}
+
+.margin_lef_zero {
+    margin-left: -2px !important;
+}
+
+.image-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    justify-content: left;
+}
+
+.image-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+
+.image-label img {
+    width: 100px;
+    height: 100px;
+    border: 3px solid lightgray;
+    border-radius: 20%; /* 둥근 모서리 추가 (선택사항) */
+    transition: border 0.3s ease; /* 부드러운 전환 효과 */
+    object-fit: cover;
+}
+/* 라디오 버튼 숨기기 */
+.image-label input[type="radio"] {
+    display: none;
+}
+/* 선택된 이미지에 테두리 적용 */
+.image-label input[type="radio"]:checked + img {
+    border: 3px solid blue;
+}
+.image-label p {
+    margin : 0;
+}
+
+.divider {
+    width: 2px;
+    background-color: var(--divider-color);
+}
+
+.info-wrap {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    max-width: 460px;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.input-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: space-between;
+}
+
+.info-label {
+    width: 85px;
+    text-align: left;
+    margin-right: 10px;
+}
+
+input[type="text"], select {
+    margin: 5px 0;
+    padding: 10px;
+    height:39px;
+    flex: 1;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.button-wrap button, .button-group button, .modal-content button {
+    background-color: #2a9fd6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    height: 49px;
+    font-size: inherit;
+    font-weight: bold;
+}
+
+.input-wrap {
+    width: 100%;
+}
+.button-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.submit-button {
+    width: 60% !important;
+}
+
+.cancel-button {
+    width: 40% !important;
+}
+
+.cancel {
+    background-color: #ebebeb !important;
+    color: black !important;
+}
+
+input {
+    height: 39px;
+}
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+button {
+    margin-left: 10px;
+}
+
+.agree-wrap{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    margin-bottom: 30px;
+}
+
+.agree-container {
+    width: 100%;
+}
+
+.agree-label {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+}
+
+.steps-container {
+    display: flex;
+    margin: 20px 0;
+    gap: 15px;
+}
+
+.step {
+    text-align: center;
+    /*width: 140px;*/
+}
+
+.step p {
+    font-size: small;
+}
+
+.step-icon img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.certification-header {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.next {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    font-size: xx-large;
+}
+
+.certification-header p {
+    margin: 5px;
+}
+
+.padding-left-zero {
+    padding-left: 20px;
+}
+
+.button-group {
+    display: flex;
+    width: 100%;
+    gap:5px;
+}
+
+.margin-bottom-30 {
+    margin-bottom: 30px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    width: 500px;
+    text-align: center;
+}
+
+.modal-content p {
+    text-align: left;
+}
+
+.show {
+    display: block;
+}
