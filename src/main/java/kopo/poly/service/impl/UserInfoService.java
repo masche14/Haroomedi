@@ -1,11 +1,17 @@
 package kopo.poly.service.impl;
 
+import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IUserInfoMapper;
+import kopo.poly.service.IMailService;
 import kopo.poly.service.IUserInfoService;
+import kopo.poly.util.CmmUtil;
+import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -13,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserInfoService implements IUserInfoService {
 
     private final IUserInfoMapper userInfoMapper;
+    private final IMailService mailService;
 
     @Override
     public UserInfoDTO getUserIdExists(UserInfoDTO pDTO) throws Exception {
@@ -39,7 +46,30 @@ public class UserInfoService implements IUserInfoService {
 
         UserInfoDTO rDTO = UserInfoDTO.builder().existsYn(existYn).build();
 
+        log.info("rDTO: {}", rDTO);
 
+        int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
+
+        log.info("authNumber : {}", authNumber);
+
+        MailDTO dto = MailDTO.builder().build();
+
+//        dto.setTitle("이메일 확인 인증번호 발송 메일");
+//        dto.setContents("인증번호는 " + authNumber + " 입니다.");
+//        dto.setToMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.getUserEmail())));
+
+        dto.builder().title("이메일 확인 인증번호 발송 메일")
+                .contents("인증번호는 " + authNumber + " 입니다.")
+                .toMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.userEmail())))
+                .build();
+
+        mailService.doSendMail(dto);
+
+        dto=null;
+
+        rDTO.builder().authNumber(authNumber).build();
+
+        log.info("{}.getUserEmailExists End", this.getClass().getName());
 
         return rDTO;
     }
