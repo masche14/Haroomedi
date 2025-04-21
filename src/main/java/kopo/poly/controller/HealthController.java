@@ -23,7 +23,7 @@ public class HealthController {
 
     @GetMapping("/auth")
     public String authPage() {
-        return "health/auth"; // templates/health/auth.html 로 매핑됨
+        return "/health/auth"; // templates/health/auth.html 로 매핑됨
     }
 
 //    @PostMapping("/certificate")
@@ -120,7 +120,7 @@ public class HealthController {
         if (healthResult != null && analyzeResult != null) {
             return "/health/analyzeResult";
         }else {
-            return "/health/health";
+            return "/health/auth";
         }
     }
 }
