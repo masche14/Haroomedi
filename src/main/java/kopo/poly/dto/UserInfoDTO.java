@@ -19,5 +19,7 @@ public record UserInfoDTO(
         String chgDt,
         String gender,
         String existsYn,
+        String fieldName,
+        String value,
         int authNumber
 ) {}

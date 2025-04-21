@@ -50,8 +50,8 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
     }
 
     @Override
-    public boolean checkFieldExists(String fieldName, String value, String colNm) {
-        Query query = new Query(Criteria.where(fieldName).is(value));
+    public boolean checkFieldExists(String colNm, UserInfoDTO pDTO) {
+        Query query = new Query(Criteria.where(pDTO.fieldName()).is(pDTO.value()));
         return mongodb.exists(query, colNm);
     }
 
@@ -74,6 +74,10 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
     public UserInfoDTO getLogin(String colNm, UserInfoDTO pDTO) throws Exception {
 
         log.info("{}.getLogin Start", this.getClass().getSimpleName());
+
+        if (super.createCollection(mongodb, colNm)) {
+            log.info("{} 생성되었습니다.", colNm);
+        }
 
         UserInfoDTO rDTO = null;
 

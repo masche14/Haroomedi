@@ -6,7 +6,7 @@ public interface IUserInfoMapper {
 
     int insertUserInfo(String colNm, UserInfoDTO pDTO) throws Exception;
 
-    boolean checkFieldExists(String fieldName, String value, String colNm);
+    boolean checkFieldExists(String colNm, UserInfoDTO pDTO);
 
 //    UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception;
 //
