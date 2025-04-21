@@ -28,9 +28,7 @@ public class UserInfoService implements IUserInfoService {
 
         String colNm = "UserInfo";
 
-        String existYn = userInfoMapper.checkFieldExists(colNm, pDTO)?"Y":"N";
-
-        UserInfoDTO rDTO = UserInfoDTO.builder().existsYn(existYn).build();
+        UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
         return rDTO;
     }
@@ -42,9 +40,7 @@ public class UserInfoService implements IUserInfoService {
 
         String colNm = "UserInfo";
 
-        String existYn = userInfoMapper.checkFieldExists(colNm, pDTO)?"Y":"N";
-
-        UserInfoDTO rDTO = UserInfoDTO.builder().existsYn(existYn).build();
+        UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
         log.info("rDTO: {}", rDTO);
 
@@ -111,9 +107,7 @@ public class UserInfoService implements IUserInfoService {
 
         String colNm = "UserInfo";
 
-        String existYn = userInfoMapper.checkFieldExists(colNm, pDTO)?"Y":"N";
-
-        UserInfoDTO rDTO = UserInfoDTO.builder().existsYn(existYn).build();
+        UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
         return rDTO;
     }

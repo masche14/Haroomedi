@@ -50,9 +50,27 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
     }
 
     @Override
-    public boolean checkFieldExists(String colNm, UserInfoDTO pDTO) {
+    public UserInfoDTO checkFieldExists(String colNm, UserInfoDTO pDTO) {
+
+        log.info("{}.checkFieldExists Start", this.getClass().getSimpleName());
+
         Query query = new Query(Criteria.where(pDTO.fieldName()).is(pDTO.value()));
-        return mongodb.exists(query, colNm);
+        String existYn = mongodb.exists(query, colNm)? "Y" : "N";
+        UserInfoDTO rDTO = null;
+
+        rDTO.builder().existsYn(existYn).build();
+
+        switch (pDTO.fieldName()) {
+            case "userEmail" -> rDTO.builder().userEmail(pDTO.value()).build();
+            case "userId" -> rDTO.builder().userId(pDTO.value()).build();
+            case "userNickname" -> rDTO.builder().userNickname(pDTO.value()).build();
+            // 필요 시 다른 필드도 추가
+            default -> throw new IllegalArgumentException("지원하지 않는 필드명입니다: " + pDTO.fieldName());
+        }
+
+        log.info("{}.checkFieldExists End", this.getClass().getSimpleName());
+
+        return rDTO;
     }
 
 //    @Override
