@@ -6,11 +6,13 @@ public interface IUserInfoMapper {
 
     int insertUserInfo(String colNm, UserInfoDTO pDTO) throws Exception;
 
-    UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception;
+    boolean checkFieldExists(String fieldName, String value, String colNm);
 
-    UserInfoDTO getUserNicknameExists(String colNm, UserInfoDTO pDTO) throws Exception;
-
-    UserInfoDTO getUserEmailExists(String colNm, UserInfoDTO pDTO) throws Exception;
+//    UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception;
+//
+//    UserInfoDTO getUserNicknameExists(String colNm, UserInfoDTO pDTO) throws Exception;
+//
+//    UserInfoDTO getUserEmailExists(String colNm, UserInfoDTO pDTO) throws Exception;
 
     UserInfoDTO getLogin(String colNm, UserInfoDTO pDTO) throws Exception;
 
