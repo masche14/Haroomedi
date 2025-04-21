@@ -1,7 +1,6 @@
 package kopo.poly.persistance.mongodb;
 
 import kopo.poly.dto.UserInfoDTO;
-import org.apache.ibatis.annotations.Mapper;
 
 public interface IUserInfoMapper {
 
