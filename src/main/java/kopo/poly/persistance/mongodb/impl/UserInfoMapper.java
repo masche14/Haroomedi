@@ -46,7 +46,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         log.info("{}.insertUserInfo End", this.getClass().getSimpleName());
 
-        return 0;
+        return res;
     }
 
     @Override

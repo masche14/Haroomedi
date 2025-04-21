@@ -76,7 +76,34 @@ public class UserInfoService implements IUserInfoService {
 
     @Override
     public int insertUserInfo(UserInfoDTO pDTO) throws Exception {
-        return 0;
+
+        log.info("{}.insertUserInfo", this.getClass().getName());
+
+        String colNm = "UserInfo";
+
+        int res;
+
+        int success = userInfoMapper.insertUserInfo(colNm, pDTO);
+
+        if (success > 0) {
+            res = 1;
+            MailDTO mDTO = MailDTO.builder().build();
+
+            mDTO.builder().toMail(EncryptUtil.decAES128CBC(pDTO.userEmail()))
+                    .title("회원가입을 축하드립니다.").build();
+
+
+            mDTO.builder().contents(CmmUtil.nvl(pDTO.userName())+"님의 회원가입을 진심으로 축하드립니다.").build();
+
+            mailService.doSendMail(mDTO);
+
+        } else {
+            res = 0;
+        }
+
+        log.info("{}.insertUserInfo End", this.getClass().getName());
+
+        return res;
     }
 
     @Override
