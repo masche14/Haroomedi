@@ -63,7 +63,16 @@ public class UserInfoService implements IUserInfoService {
 
     @Override
     public UserInfoDTO getLogin(UserInfoDTO pDTO) throws Exception {
-        return null;
+
+        log.info("{}.getLogin Start", this.getClass().getName());
+
+        String colNm = "UserInfo";
+
+        UserInfoDTO rDTO = userInfoMapper.getLogin(colNm, pDTO);
+
+        log.info("{}.getLogin End", this.getClass().getName());
+
+        return rDTO;
     }
 
     @Override
