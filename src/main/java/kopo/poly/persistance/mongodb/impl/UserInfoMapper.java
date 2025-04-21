@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
+import kopo.poly.dto.MelonDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IMelonMapper;
@@ -73,7 +74,41 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         return rDTO;
     }
 
-//    @Override
+    @Override
+    public UserInfoDTO getUserIdAndUserNameByUserEmail(String colNm, UserInfoDTO pDTO) {
+
+        log.info("{}.getUserId Start", this.getClass().getSimpleName());
+
+        UserInfoDTO rDTO = null;
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        Document query = new Document();
+        query.append("userEmail", CmmUtil.nvl(pDTO.value()));
+
+        Document projection = new Document();
+        projection.append("userId", "$userId");
+        projection.append("userName", "$userName");
+        projection.append("_id", 0);
+
+        FindIterable<Document> rs = col.find(query).projection(projection);
+
+        for (Document doc : rs) {
+            if (doc != null) {
+                String userId = CmmUtil.nvl(doc.getString("userId"));
+                String userName = CmmUtil.nvl(doc.getString("userName"));
+
+                rDTO = rDTO.builder().userId(userId).userName(userName).build();
+                break;
+            }
+        }
+
+        log.info("{}.getUserId End", this.getClass().getSimpleName());
+
+        return rDTO;
+    }
+
+    //    @Override
 //    public UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception {
 //        return null;
 //    }
@@ -107,15 +142,27 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         Document projection = new Document();
         projection.append("userId", "$userId");
         projection.append("password", "$password");
+        projection.append("userName", "$userName");
+        projection.append("userEmail", "$userEmail");
+        projection.append("userNickname", "$userNickname");
         projection.append("_id", 0);
 
         FindIterable<Document> rs = col.find(query).projection(projection);
 
         for (Document doc : rs) {
             if (doc != null) {
+                String userId = CmmUtil.nvl(doc.getString("userId"));
+                String password = CmmUtil.nvl(doc.getString("password"));
+                String userName = CmmUtil.nvl(doc.getString("userName"));
+                String userEmail = CmmUtil.nvl(doc.getString("userEmail"));
+                String userNickname = CmmUtil.nvl(doc.getString("userNickname"));
+
                 rDTO = UserInfoDTO.builder()
-                        .userId(doc.getString("userId"))
-                        .password(doc.getString("password"))
+                        .userId(userId)
+                        .password(password)
+                        .userName(userName)
+                        .userEmail(userEmail)
+                        .userNickname(userNickname)
                         .build();
                 break; // 어차피 하나만 찾을 거니까 첫 번째에서 바로 종료
             }

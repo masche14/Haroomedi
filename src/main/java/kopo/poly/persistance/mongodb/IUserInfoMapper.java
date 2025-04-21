@@ -8,6 +8,8 @@ public interface IUserInfoMapper {
 
     UserInfoDTO checkFieldExists(String colNm, UserInfoDTO pDTO);
 
+    UserInfoDTO getUserIdAndUserNameByUserEmail(String colNm, UserInfoDTO pDTO);
+
 //    UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception;
 //
 //    UserInfoDTO getUserNicknameExists(String colNm, UserInfoDTO pDTO) throws Exception;

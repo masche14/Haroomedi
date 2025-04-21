@@ -42,6 +42,10 @@ public class UserInfoService implements IUserInfoService {
 
         UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
+        UserInfoDTO rDTO2 = userInfoMapper.getUserIdAndUserNameByUserEmail(colNm, pDTO);
+
+        rDTO.builder().userId(rDTO2.userId()).userName(rDTO2.userName()).build();
+
         log.info("rDTO: {}", rDTO);
 
         int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
