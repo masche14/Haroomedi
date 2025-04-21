@@ -1,0 +1,363 @@
+
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간편인증 페이지</title>
+    <link rel="stylesheet" href="/css/authStyles.css">
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+</head>
+<script>
+    function showModal(modalId, checkboxId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+        }
+
+        // 체크박스 체크 처리
+        const checkbox = document.getElementById(checkboxId);
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+    }
+
+    // 모달 닫기 함수
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    $(document).ready(function () {
+
+        // 전체동의 체크박스
+        const checkAll = document.getElementById("checkAll");
+        // 개별동의 체크박스들
+        const checkboxes = document.querySelectorAll(".agree");
+
+        // 전체동의 클릭 시
+        checkAll.addEventListener("change", function() {
+            checkboxes.forEach((checkbox) => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // 개별 체크박스 클릭 시 전체동의 상태 업데이트
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener("change", function() {
+                checkAll.checked = Array.from(checkboxes).every((cb) => cb.checked);
+            });
+        });
+
+        // 모달 관련 이벤트 설정
+        document.querySelectorAll('.modal button').forEach((button) => {
+            button.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal-id');
+                closeModal(modalId);
+            });
+        });
+
+        // 레이블 클릭 이벤트 설정
+        document.querySelectorAll('.label-button').forEach((labelButton) => {
+            labelButton.addEventListener("click", function(event) {
+                // 체크박스를 직접 클릭한 경우 모달을 띄우지 않음
+                if (event.target.tagName === 'INPUT') {
+                    return;
+                }
+
+                // 체크박스와 모달 ID 매핑
+                const checkbox = labelButton.querySelector('input[type="checkbox"]');
+                const checkboxId = checkbox.id;
+                let modalId = "";
+                if (checkboxId === "checkbox1") modalId = "modal1";
+                if (checkboxId === "checkbox2") modalId = "modal2";
+                if (checkboxId === "checkbox3") modalId = "modal3";
+
+                // 클릭 후 모달 띄우기 (순서 보장)
+                setTimeout(() => {
+                    if (checkbox.checked) {
+                        showModal(modalId);
+                    }
+                }, 50);
+            });
+        });
+
+        // 입력 필드 유효성 검사 함수
+        function validateInputFields() {
+            const inputFields = document.querySelectorAll(".input-box input, .input-box select");
+
+            for (const field of inputFields) {
+                if (!field.value.trim()) {
+                    const label = field.closest(".input-box").querySelector("label").innerText;
+                    alert(label + '을(를) 입력해주세요.');
+                    field.focus(); // 해당 필드로 포커스 이동
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // 민간 인증서 유효성 검사 함수
+        function validateForm() {
+            const radios = document.getElementsByName('PrivateAuthType');
+            let isChecked = false;
+            let selectedImageSrc = "";
+            let selectedImageAlt = "";
+
+            for (const radio of radios) {
+                if (radio.checked) {
+                    isChecked = true;
+                    // 선택된 이미지의 src 가져오기
+                    const selectedImage = radio.parentElement.querySelector("img");
+                    if (selectedImage) {
+                        selectedImageSrc = selectedImage.src;
+                        selectedImageAlt = selectedImage.alt;
+                    }
+                    break;
+                }
+            }
+
+            if (!isChecked) {
+                alert('민간 인증서를 선택해주세요.');
+                return false;
+            }
+
+            // 입력 필드 유효성 검사 호출
+            if (!validateInputFields()) {
+                return false;
+            }
+
+            // hidden input에 이미지 경로 넣기
+            let hiddenImageInput = document.getElementById("selectedImageSrc");
+            if (!hiddenImageInput) {
+                hiddenImageInput = document.createElement("input");
+                hiddenImageInput.type = "hidden";
+                hiddenImageInput.name = "selectedImageSrc";
+                hiddenImageInput.id = "selectedImageSrc";
+                document.getElementById("health").appendChild(hiddenImageInput);
+            }
+            hiddenImageInput.value = selectedImageSrc;
+
+            let hiddenAltInput = document.getElementById("selectedImageAlt");
+            if (!hiddenAltInput) {
+                hiddenAltInput = document.createElement("input");
+                hiddenAltInput.type = "hidden";
+                hiddenAltInput.name = "selectedImageAlt";
+                hiddenAltInput.id = "selectedImageAlt";
+                document.getElementById("health").appendChild(hiddenAltInput);
+            }
+            hiddenAltInput.value = selectedImageAlt;
+
+            return true;
+        }
+
+        // 폼 제출 이벤트
+        document.getElementById("health").addEventListener("submit", function (event) {
+            event.preventDefault(); // 기본 전송 막기
+
+            // 유효성 검사 수행
+            if (!validateForm()) {
+                return;
+            }
+
+            // 번호 합치기
+            const prefix = document.querySelector("select[name='phonePrefix']").value.trim();
+            const number = document.querySelector("input[name='number']").value.trim();
+            const fullNumber = prefix + number;
+
+            console.log("Full number:", fullNumber);
+
+            // hidden input에 합친 번호 넣기
+            let hiddenInput = document.getElementById("fullPhoneNumber");
+            if (!hiddenInput) {
+                hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "UserCellphoneNumber";
+                hiddenInput.id = "fullPhoneNumber";
+                this.appendChild(hiddenInput);
+            }
+            hiddenInput.value = fullNumber;
+
+            // 폼 전송
+            this.submit();
+        });
+    });
+
+</script>
+<body>
+<!-- 모달 창 -->
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h3>개인정보 수집·이용 동의</h3>
+        <p>국민건강보험공단(이하 “기관”이라 한다) 대표 홈페이지 이용과 관련하여, 귀하의 개인정보를 수집·이용 하오니, 동의여부를 결정하여 주시기 바랍니다.<br><br>
+            1.개인정보 수집·이용 목적<br>
+            국민건강보험공단 대표홈페이지 서비스 이용<br><br>
+            2.수집하려는 개인정보의 항목<br>
+            - 간편인증: 성명, 생년월일, 휴대전화번호, 이용자가 선택한 인증사업자, CI(연계정보)<br>
+            - 이력관리: DI(중복가입확인정보), IP주소, 브라우저 정보, 쿠키<br><br>
+            3.개인정보의 보유 및 이용 기간<br>
+            - 간편인증: 개인정보 수집·이용 목적이 소멸되면 즉시 파기<br>
+            - 이력관리: 접속일로부터 10년 보유 후 삭제<br><br>
+            4.동의 거부 권리<br>
+            신청인은 위의 개인정보 수집·이용에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 대표홈페이지 서비스 이용이 제한될 수 있습니다.
+        </p>
+        <button onclick="closeModal('modal1')">확인</button>
+    </div>
+</div>
+
+<div id="modal2" class="modal">
+    <div class="modal-content">
+        <h3>제3자 정보제공 동의</h3>
+        <p>국민건강보험공단(이하 “기관”이라 한다) 대표 홈페이지 이용과 관련하여, 귀하의 개인정보를 제공하오니, 동의여부를 결정하여 주시기 바랍니다.<br><br>
+            1.개인정보를 제공받는 자<br>
+            이용자가 선택한 인증사업자<br><br>
+            2.개인정보를 제공받는 자의 개인정보 이용 목적<br>
+            간편인증 시 본인인증 또는 전자서명<br><br>
+            3.제공하는 개인정보의 항목<br>
+            생년월일, 성명, 휴대폰번호<br><br>
+            4.개인정보를 제공받는 자의 개인정보 보유 및 이용 기간<br>
+            본인인증 또는 전자서명 후 즉시 파기<br><br>
+            5.동의 거부 권리<br>
+            신청인은 위의 개인정보 제3자 제공에 대한 동의를 거부할 권리가 있습니다. 그러나 동의를 거부할 경우 대표홈페이지 서비스 이용이 제한될 수 있습니다.
+        </p>
+        <button onclick="closeModal('modal2')">확인</button>
+    </div>
+</div>
+
+<div id="modal3" class="modal">
+    <div class="modal-content">
+        <h3>기타 고지사항</h3>
+        <p>국민건강보험공단은 아래와 같이 법률에 근거하여 개인정보를 수집·이용합니다.<br><br>
+            1.목적<br>
+            국민건강보험공단 대표홈페이지 서비스 이용을 위함<br><br>
+            2.항목<br>
+            주민등록번호, 외국인등록번호<br><br>
+            3.수집·이용 근거<br>
+            「국민건강보험법」 제14조(업무 등) 같은 법 시행령 제9조의2(공단의 업무) 및 같은 법 시행령 제81조 제1항 제2호(민감정보 및 고유식별 정보의 처리)</p>
+        <button onclick="closeModal('modal3')">확인</button>
+    </div>
+</div>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group">
+            <a href="#" class="text-left">홈</a>
+        </div>
+        <div class="nav-group">
+            <a href="#">처방 내역 조회</a>
+            <a href="#">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group">
+            <a href="#" class="login">로그인 / Login</a>
+        </div>
+    </div>
+</nav>
+<div class="auth-container">
+    <form id="health" action="/health/certificate" method="post" class="auth-box">
+        <!-- 민간 인증서 부분 -->
+        <div class="image-wrap">
+            <h3 class="h4">민간 인증서</h3>
+            <div class="image-container">
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="0" style="display:none;">
+                    <img src="/authImgs/kakaotalk.png" alt="카카오톡">
+                    <p>카카오톡</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="1" style="display:none;">
+                    <img src="/authImgs/payco.png" alt="페이코">
+                    <p>페이코</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="2" style="display:none;">
+                    <img src="/authImgs/kb.png" alt="국민은행">
+                    <p>국민은행</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="3" style="display:none;">
+                    <img src="/authImgs/samsung.png" alt="삼성 패스">
+                    <p>삼성 패스</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="4" style="display:none;">
+                    <img src="/authImgs/pass.png" alt="통신사 패스">
+                    <p>통신사 패스</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="5" style="display:none;">
+                    <img src="/authImgs/shinhan.png" alt="신한은행">
+                    <p>신한은행</p>
+                </label>
+                <label class="image-label">
+                    <input type="radio" name="PrivateAuthType" value="6" style="display:none;">
+                    <img src="/authImgs/naver.png" alt="네이버">
+                    <p>네이버</p>
+                </label>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <div class="info-wrap">
+            <div class="info-container">
+                <h3 class="h4 margin_lef_zero">본인인증 정보 입력</h3>
+                <div class="input-wrap">
+                    <div class="input-box">
+                        <label class="info-label" for="UserName">이름</label>
+                        <input type="text" name="UserName" id="UserName" placeholder="홍길동">
+                    </div>
+                    <div class="input-box">
+                        <label class="info-label" for="BirthDate">생년월일</label>
+                        <input type="text" name="BirthDate" id="BirthDate" placeholder="19900101">
+                    </div>
+                    <div class="input-box">
+                        <label class="info-label" for="phonePrefix">휴대폰 번호</label>
+                        <select name="phonePrefix" id="phonePrefix">
+                            <option value="010">010</option>
+                            <option value="011">011</option>
+                            <option value="016">016</option>
+                            <option value="017">017</option>
+                            <option value="018">018</option>
+                            <option value="019">019</option>
+                        </select>
+                        <input type="text" name="number" placeholder="12341234">
+                    </div>
+                </div>
+            </div>
+            <div class="agree-wrap">
+                <h3 class="h4 margin_lef_zero">서비스 이용에 대한 동의</h3>
+                <div class="agree-container">
+                    <div>
+                        <label class="agree-label"><input type="checkbox" id="checkAll"> 전체동의</label>
+                    </div>
+                    <div class="label-button" id="agree1">
+                        <label class="agree-label" for="checkbox1">
+                            <input type="checkbox" id="checkbox1" class="agree" required>[필수] 개인정보 수집·이용 동의
+                        </label>
+                    </div>
+                    <div class="label-button" id="agree2">
+                        <label class="agree-label" for="checkbox2">
+                            <input type="checkbox" id="checkbox2" class="agree" required>[필수] 제3자 정보제공 동의
+                        </label>
+                    </div>
+                    <div class="label-button" id="other-agree">
+                        <label class="agree-label" for="checkbox3">
+                            <input type="checkbox" id="checkbox3" class="agree" required>[필수] 기타 고지사항
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="button-wrap">
+                <div class="cancel-button">
+                    <button type="button" class="cancel" onclick="location.href='/user/index'">취소</button>
+                </div>
+                <div class="submit-button">
+                    <button type="submit" class="submit">데이터 전송</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

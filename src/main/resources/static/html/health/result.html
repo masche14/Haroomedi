@@ -1,0 +1,64 @@
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>간편인증</title>
+    <link rel="stylesheet" href="/css/authStyles.css">
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group">
+            <a href="#">홈</a>
+        </div>
+        <div class="nav-group">
+            <a href="#">처방 내역 조회</a>
+            <a href="#">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group">
+            <a href="#" class="login">로그인 / Login</a>
+        </div>
+    </div>
+</nav>
+
+<div class="back-container">
+    <div class="back-box justify-center direction-column">
+        <div class="certification-header justify-center direction-column text-center">
+            <h2>간편인증</h2>
+            <p>인증을 진행해 주세요.</p>
+            <p>입력하신 휴대폰으로 인증 요청 메시지를 보냈습니다.</p>
+            <p>앱에서 인증을 진행해주세요.</p>
+        </div>
+        <div class="steps-container direction-row justify-center margin-bottom-30">
+            <div class="step">
+                <div class="step-icon"><img src="${sessionScope.selectedImageSrc}" alt="Step 1"></div>
+                <p>STEP 01<br>앱에서 인증요청 메시지 확인</p>
+            </div>
+            <span class="next">&gt;</span>
+            <div class="step">
+                <div class="step-icon"><img src="/authImgs/secure.png" alt="Step 2"></div>
+                <p>STEP 02<br>간편인증 (비밀번호 입력 등)</p>
+            </div>
+            <span class="next">&gt;</span>
+            <div class="step">
+                <div class="step-icon"><img src="/authImgs/check.png" alt="Step 3"></div>
+                <p>STEP 03<br>인증 완료 후, 하단의 인증완료 클릭</p>
+            </div>
+        </div>
+        <form id="health" action="/health/resultProcess" method="post">
+            <div class="button-group direction-row">
+                <button type="button" class="cancel" onclick="location.href='/user/index'">인증 취소</button>
+                <button type="submit" class="complete">인증 완료</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+
