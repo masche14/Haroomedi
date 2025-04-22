@@ -3,8 +3,11 @@ package kopo.poly.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
+import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IUserInfoService;
+import kopo.poly.util.CmmUtil;
+import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
@@ -85,17 +88,57 @@ public class UserController {
 
         log.info("{}.getEmailExists Start", this.getClass().getSimpleName());
 
-        log.info("pDTO : {}", pDTO);
+        log.info("pDTO : {}", pDTO.toString());
+
+        String encEmail = EncryptUtil.encAES128CBC(CmmUtil.nvl(pDTO.getValue()));
+
+        pDTO.setValue(encEmail);
+
+        log.info("after encoding pDTO : {}", pDTO.toString());
 
         UserInfoDTO rDTO = userInfoService.getUserEmailExists(pDTO);
 
-        log.info("rDTO : {}", rDTO);
+        log.info("rDTO : {}", rDTO.toString());
+
+        session.setAttribute("emailResultDTO", rDTO);
 
         log.info("{}.getEmailExists End", this.getClass().getSimpleName());
 
         return ResponseEntity.ok(
           CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO)
         );
+    }
+
+    @PostMapping("/approveCode")
+    public ResponseEntity<CommonResponse<MsgDTO>> approveCode(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.approveCode Start", this.getClass().getSimpleName());
+        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
+
+        log.info("input_auth : {}", pDTO.getAuthNumber());
+        log.info("auth : {}", emailResultDTO.getAuthNumber());
+
+        MsgDTO dto = new MsgDTO();
+        int res;
+        String msg="";
+        if (pDTO.getAuthNumber()==emailResultDTO.getAuthNumber()){
+            res = 1;
+            msg = "인증에 성공하였습니다.";
+        }else {
+            res = 0;
+            msg = "인증에 실패하였습니다. 인증코드를 다시 확인해주세요.";
+        }
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        log.info("{}.approveCode End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+    }
+
+    @PostMapping("email_verification")
+    public String emailVerification(HttpSession session) throws Exception {
+        String source = (String) session.getAttribute("source");
+        return "/user/"+source;
     }
 
     @GetMapping("/signup_detail")
@@ -106,17 +149,54 @@ public class UserController {
             return "redirect:/user/index";
         }
 
-//        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
-//        if (emailResultDTO==null){
-//            return "redirect:/user/index";
-//        }
+        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
+        if (emailResultDTO==null){
+            return "redirect:/user/index";
+        }
 
-//        if (emailResultDTO.existsYn().equals("Y")) {
-//            String alert = "해당 이메일로 가입된 계정이 이미 존재합니다.";
-//            session.setAttribute("error", alert);
-//        }
+        if (emailResultDTO.getExistYn().equals("Y")) {
+            String alert = "해당 이메일로 가입된 계정이 이미 존재합니다.";
+            session.setAttribute("error", alert);
+        }
 
         return "/user/signup_detail";
+    }
+
+    @PostMapping("/checkDuplicate")
+    public ResponseEntity<CommonResponse<MsgDTO>> checkDuplicate(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.checkDuplicate Start", this.getClass().getSimpleName());
+
+        log.info("fieldName : {}", pDTO.getFieldName());
+        log.info("value : {}", pDTO.getValue());
+
+        UserInfoDTO rDTO = userInfoService.checkDuplicate(pDTO);
+
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg="";
+
+        if (pDTO.getFieldName().equals("userId")){
+            if (rDTO.getExistYn().equals("Y")){
+                res = 1;
+                msg = "이미 존재하는 아이디입니다.";
+            }else{
+                msg = "사용 가능한 아이디입니다.";
+            }
+        }else if (pDTO.getFieldName().equals("userNickname")){
+            if (rDTO.getExistYn().equals("Y")){
+                res = 1;
+                msg = "이미 존재하는 닉네임입니다.";
+            }else {
+                msg = "사용 가능한 닉네임입니다.";
+            }
+        }
+
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        log.info("{}.checkDuplicate End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
 
     @GetMapping("/reset_pwd")
@@ -127,10 +207,10 @@ public class UserController {
             return "redirect:/user/index";
         }
 
-//        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
-//        if (emailResultDTO==null){
-//            return "redirect:/user/index";
-//        }
+        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
+        if (emailResultDTO==null){
+            return "redirect:/user/index";
+        }
 
         return "/user/reset_pwd";
     }
@@ -143,21 +223,21 @@ public class UserController {
             return "redirect:/user/index";
         }
 
-//        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
-//        if (emailResultDTO==null){
-//            return "redirect:/user/index";
-//        }
-//
-//        if (emailResultDTO.existsYn().equals("Y")) {
-//            model.addAttribute("userName", emailResultDTO.userName());
-//            model.addAttribute("userId", emailResultDTO.userId());
-//            session.setAttribute("userEmail", emailResultDTO.userEmail());
-//            session.setAttribute("userId", emailResultDTO.userId());
-//        } else {
-//            // 이메일이 일치하지 않는 경우 빈 문자열을 명시적으로 전달
-//            model.addAttribute("userName", "");
-//            model.addAttribute("userId", "");
-//        }
+        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
+        if (emailResultDTO==null){
+            return "redirect:/user/index";
+        }
+
+        if (emailResultDTO.getExistYn().equals("Y")) {
+            model.addAttribute("userName", emailResultDTO.getUserName());
+            model.addAttribute("userId", emailResultDTO.getUserId());
+            session.setAttribute("userEmail", emailResultDTO.getUserEmail());
+            session.setAttribute("userId", emailResultDTO.getUserId());
+        } else {
+            // 이메일이 일치하지 않는 경우 빈 문자열을 명시적으로 전달
+            model.addAttribute("userName", "");
+            model.addAttribute("userId", "");
+        }
 
         return "/user/find_id";
     }

@@ -1,13 +1,17 @@
 package kopo.poly.dto;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Builder
-public record MailDTO(
-        String toMail,
-        String title,
-        String contents,
-        String fromMail,
-        String sendDT
-) {
+@ToString
+@Getter
+@Setter
+public class MailDTO{
+    private String toMail;
+    private String title;
+    private String contents;
+    private String fromMail;
+    private String sendDT;
 }

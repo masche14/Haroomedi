@@ -34,6 +34,15 @@ public class UserInfoService implements IUserInfoService {
     }
 
     @Override
+    public UserInfoDTO checkDuplicate(UserInfoDTO pDTO) throws Exception {
+        log.info("{}.checkDuplicate Start", this.getClass().getName());
+        String colNm = "UserInfo";
+        UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
+        log.info("{}.checkDuplicate End", this.getClass().getName());
+        return rDTO;
+    }
+
+    @Override
     public UserInfoDTO getUserEmailExists(UserInfoDTO pDTO) throws Exception {
 
         log.info("{}.getUserEmailExists Start", this.getClass().getName());
@@ -42,45 +51,33 @@ public class UserInfoService implements IUserInfoService {
 
         UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
-        log.info("rDTO : {}", rDTO);
+        log.info("rDTO : {}", rDTO.toString());
 
-        if (rDTO.existsYn().equals("Y")) {
+        if (rDTO.getExistYn().equals("Y")) {
             UserInfoDTO rDTO2 = userInfoMapper.getUserIdAndUserNameByUserEmail(colNm, pDTO);
-
-            // 새로운 DTO 생성 (필요한 필드 조합)
-            UserInfoDTO finalDTO = UserInfoDTO.builder()
-                    .existsYn(rDTO.existsYn())
-                    .userEmail(rDTO.userEmail()) // 필요하면 유지
-                    .userName(rDTO2.userName())
-                    .userId(rDTO2.userId())
-                    .build();
-
-            // 기존 rDTO를 교체
-            rDTO = finalDTO;
+            rDTO.setUserId(rDTO2.getUserId());
+            rDTO.setUserName(rDTO2.getUserName());
         }
 
-        log.info("rDTO: {}", rDTO);
+        log.info("rDTO: {}", rDTO.toString());
 
         int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
 
         log.info("authNumber : {}", authNumber);
 
-        MailDTO dto = MailDTO.builder().build();
+        MailDTO dto = new MailDTO();
 
-//        dto.setTitle("이메일 확인 인증번호 발송 메일");
-//        dto.setContents("인증번호는 " + authNumber + " 입니다.");
-//        dto.setToMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.getUserEmail())));
+        dto.setTitle("이메일 확인 인증번호 발송 메일");
+        dto.setContents("인증번호는 " + authNumber + " 입니다.");
+        dto.setToMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(rDTO.getUserEmail())));
 
-        dto.builder().title("이메일 확인 인증번호 발송 메일")
-                .contents("인증번호는 " + authNumber + " 입니다.")
-                .toMail(EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.userEmail())))
-                .build();
+        log.info("dto: {}", dto.toString());
 
         mailService.doSendMail(dto);
 
         dto=null;
 
-        rDTO.builder().authNumber(authNumber).build();
+        rDTO.setAuthNumber(authNumber);
 
         log.info("{}.getUserEmailExists End", this.getClass().getName());
 
@@ -100,13 +97,11 @@ public class UserInfoService implements IUserInfoService {
 
         if (success > 0) {
             res = 1;
-            MailDTO mDTO = MailDTO.builder().build();
+            MailDTO mDTO = null;
 
-            mDTO.builder().toMail(EncryptUtil.decAES128CBC(pDTO.userEmail()))
-                    .title("회원가입을 축하드립니다.").build();
-
-
-            mDTO.builder().contents(CmmUtil.nvl(pDTO.userName())+"님의 회원가입을 진심으로 축하드립니다.").build();
+            mDTO.setToMail(EncryptUtil.decAES128CBC(pDTO.getUserEmail()));
+            mDTO.setTitle("회원가입을 축하드립니다.");
+            mDTO.setContents(CmmUtil.nvl(pDTO.getUserName())+"님의 회원가입을 진심으로 축하드립니다.");
 
             mailService.doSendMail(mDTO);
 

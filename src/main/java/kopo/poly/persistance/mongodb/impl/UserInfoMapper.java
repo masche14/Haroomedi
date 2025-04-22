@@ -55,31 +55,29 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         log.info("{}.checkFieldExists Start", this.getClass().getSimpleName());
 
-        Query query = new Query(Criteria.where(pDTO.fieldName()).is(pDTO.value()));
+        Query query = new Query(Criteria.where(pDTO.getFieldName()).is(pDTO.getValue()));
         String existYn = mongodb.exists(query, colNm)? "Y" : "N";
 
         log.info("existYn : {}", existYn);
 
-        UserInfoDTO rDTO;
+        UserInfoDTO rDTO = new UserInfoDTO();
 
-        switch (pDTO.fieldName()) {
-            case "userEmail" -> rDTO = UserInfoDTO.builder()
-                    .userEmail(pDTO.value())
-                    .existsYn(existYn)
-                    .build();
-
-            case "userId" -> rDTO = UserInfoDTO.builder()
-                    .userId(pDTO.value())
-                    .existsYn(existYn)
-                    .build();
-
-            case "userNickname" -> rDTO = UserInfoDTO.builder()
-                    .userNickname(pDTO.value())
-                    .existsYn(existYn)
-                    .build();
-
-            default -> throw new IllegalArgumentException("지원하지 않는 필드명입니다: " + pDTO.fieldName());
+        switch (pDTO.getFieldName()) {
+            case "userEmail" -> {
+                rDTO.setUserEmail(pDTO.getValue());
+                rDTO.setExistYn(existYn);
+            }
+            case "userId" -> {
+                rDTO.setUserId(pDTO.getValue());
+                rDTO.setExistYn(existYn);
+            }
+            case "userNickname" -> {
+                rDTO.setUserNickname(pDTO.getValue());
+                rDTO.setExistYn(existYn);
+            }
+            default -> throw new IllegalArgumentException("지원하지 않는 필드명입니다: " + pDTO.getFieldName());
         }
+
 
         log.info("rDTO : {}", rDTO);
 
@@ -93,12 +91,12 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         log.info("{}.getUserId Start", this.getClass().getSimpleName());
 
-        UserInfoDTO rDTO = UserInfoDTO.builder().build();
+        UserInfoDTO rDTO = new UserInfoDTO();
 
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 
         Document query = new Document();
-        query.append("userEmail", CmmUtil.nvl(pDTO.value()));
+        query.append("userEmail", CmmUtil.nvl(pDTO.getValue()));
 
         Document projection = new Document();
         projection.append("userId", "$userId");
@@ -112,7 +110,8 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 String userId = CmmUtil.nvl(doc.getString("userId"));
                 String userName = CmmUtil.nvl(doc.getString("userName"));
 
-                rDTO = rDTO.builder().userId(userId).userName(userName).build();
+                rDTO.setUserId(userId);
+                rDTO.setUserName(userName);
                 break;
             }
         }
@@ -146,12 +145,12 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
             log.info("{} 생성되었습니다.", colNm);
         }
 
-        UserInfoDTO rDTO = UserInfoDTO.builder().build();
+        UserInfoDTO rDTO = new UserInfoDTO();
 
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 
         Document query = new Document();
-        query.append("userId", CmmUtil.nvl(pDTO.userId()));
+        query.append("userId", CmmUtil.nvl(pDTO.getUserId()));
 
         Document projection = new Document();
         projection.append("userId", "$userId");
@@ -171,13 +170,12 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 String userEmail = CmmUtil.nvl(doc.getString("userEmail"));
                 String userNickname = CmmUtil.nvl(doc.getString("userNickname"));
 
-                rDTO = UserInfoDTO.builder()
-                        .userId(userId)
-                        .password(password)
-                        .userName(userName)
-                        .userEmail(userEmail)
-                        .userNickname(userNickname)
-                        .build();
+                rDTO.setUserId(userId);
+                rDTO.setUserName(userName);
+                rDTO.setUserEmail(userEmail);
+                rDTO.setUserNickname(userNickname);
+                rDTO.setPassword(password);
+
                 break; // 어차피 하나만 찾을 거니까 첫 번째에서 바로 종료
             }
         }
@@ -187,36 +185,31 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
     @Override
     public int updateUserInfo(String colNm, UserInfoDTO pDTO) throws Exception {
-        Query query = new Query(Criteria.where("userId").is(pDTO.userId())); // 수정 기준
+        Query query = new Query(Criteria.where("userId").is(pDTO.getUserId())); // 수정 기준
 
         Update updateFields = new Update();
 
         // null 체크 후 업데이트 대상에 추가
-        if (pDTO.password() != null && !pDTO.password().isBlank()) {
-            updateFields.set("password", pDTO.password());
+        if (pDTO.getPassword() != null && !pDTO.getPassword().isBlank()) {
+            updateFields.set("password", pDTO.getPassword());
         }
-        if (pDTO.userName() != null && !pDTO.userName().isBlank()) {
-            updateFields.set("userName", pDTO.userName());
+        if (pDTO.getUserName() != null && !pDTO.getUserName().isBlank()) {
+            updateFields.set("userName", pDTO.getUserName());
         }
-        if (pDTO.userEmail() != null && !pDTO.userEmail().isBlank()) {
-            updateFields.set("userEmail", pDTO.userEmail());
+        if (pDTO.getUserEmail() != null && !pDTO.getUserEmail().isBlank()) {
+            updateFields.set("userEmail", pDTO.getUserEmail());
         }
-        if (pDTO.userNickname() != null && !pDTO.userNickname().isBlank()) {
-            updateFields.set("userNickname", pDTO.userNickname());
+        if (pDTO.getUserNickname() != null && !pDTO.getUserNickname().isBlank()) {
+            updateFields.set("userNickname", pDTO.getUserNickname());
         }
-        if (pDTO.gender() != null && !pDTO.gender().isBlank()) {
-            updateFields.set("gender", pDTO.gender());
+        if (pDTO.getGender() != null && !pDTO.getGender().isBlank()) {
+            updateFields.set("gender", pDTO.getGender());
         }
-        if (pDTO.chgId() != null) {
-            updateFields.set("chgId", pDTO.chgId());
+        if (pDTO.getChgId() != null) {
+            updateFields.set("chgId", pDTO.getChgId());
         }
-        if (pDTO.chgDt() != null) {
-            updateFields.set("chgDt", pDTO.chgDt());
-        }
-
-        // int는 primitive 타입이라 0이 기본값 → 0이 아니면 수정 대상
-        if (pDTO.authNumber() != 0) {
-            updateFields.set("authNumber", pDTO.authNumber());
+        if (pDTO.getChgDt() != null) {
+            updateFields.set("chgDt", pDTO.getChgDt());
         }
 
         if (updateFields.getUpdateObject().isEmpty()) {

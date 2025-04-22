@@ -40,7 +40,9 @@ public class MelonController {
             msg = "멜론차트 수집 실패!";
         }
 
-        MsgDTO dto = MsgDTO.builder().result(res).msg(msg).build();
+        MsgDTO dto = new MsgDTO();
+        dto.setResult(res);
+        dto.setMsg(msg);
 
         log.info("{}.collectMelonSong End!", this.getClass().getName());
 

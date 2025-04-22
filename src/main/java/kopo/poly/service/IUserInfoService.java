@@ -9,6 +9,6 @@ public interface IUserInfoService {
     UserInfoDTO getUserNicknameExists(UserInfoDTO pDTO) throws Exception;
     UserInfoDTO getLogin(UserInfoDTO pDTO) throws Exception;
     int updateUserInfo(UserInfoDTO pDTO) throws Exception;
-
+    UserInfoDTO checkDuplicate(UserInfoDTO pDTO) throws Exception;
     int deleteUserInfo(UserInfoDTO pDTO) throws Exception;
 }

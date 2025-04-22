@@ -28,15 +28,15 @@ public class MailService implements IMailService {
 
         int res = 1;
 
-        log.info("pDTO: {}", pDTO);
+        log.info("pDTO: {}", pDTO.toString());
 
         if (pDTO == null) {
-            pDTO = MailDTO.builder().build();
+            pDTO = new MailDTO();
         }
 
-        String toMail = CmmUtil.nvl(pDTO.toMail());
-        String title = CmmUtil.nvl(pDTO.title());
-        String contents = CmmUtil.nvl(pDTO.contents());
+        String toMail = CmmUtil.nvl(pDTO.getToMail());
+        String title = CmmUtil.nvl(pDTO.getTitle());
+        String contents = CmmUtil.nvl(pDTO.getContents());
 
         log.info("toMail : {} / title : {} / contents : {}", toMail, title, contents);
 

@@ -44,11 +44,13 @@ public class MailController {
         // 로그 출력 (받는 사람, 제목, 내용)
         log.info("toMail : {} / title : {} / contents : {}", toMail, title, contents);
 
-        MailDTO pDTO = MailDTO.builder().build();
+        MailDTO pDTO = new MailDTO();
 
 // 웹에서 받은 값을 DTO에 넣기
+        pDTO.setToMail(toMail);       // 받는 사람을 DTO에 저장
+        pDTO.setTitle(title);         // 제목을 DTO에 저장
+        pDTO.setContents(contents);   // 내용을 DTO에 저장
 
-        pDTO.builder().toMail(toMail).title(title).contents(contents).build();
 // 메일 발송하기
         int res = mailService.doSendMail(pDTO);
 
@@ -61,8 +63,8 @@ public class MailController {
         log.info(msg);
 
 // 결과 메시지 전달하기
-        MsgDTO dto = MsgDTO.builder().build();
-        dto.builder().msg(msg).build();
+        MsgDTO dto = new MsgDTO();
+        dto.setMsg(msg);
 
 // 로그 찍기 (추후 찍은 로그를 통해 이 함수 호출이 끝났는지 파악하기 용이하다.)
         log.info("{}.sendMail End!", this.getClass().getName());

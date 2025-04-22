@@ -43,7 +43,10 @@ public class MongoController {
             msg = "저장 실패하였습니다.";
         }
 
-        MsgDTO dto = MsgDTO.builder().result(res).msg(msg).build();
+        MsgDTO dto = new MsgDTO();
+        dto.setResult(res);
+        dto.setMsg(msg);
+
 
         log.info(this.getClass().getName()+".basic End!");
 
