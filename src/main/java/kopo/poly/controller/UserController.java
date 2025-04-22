@@ -2,14 +2,19 @@ package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IUserInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -53,6 +58,18 @@ public class UserController {
         return "/user/signin";
     }
 
+    @PostMapping("/setSource")
+    public String setSource(HttpSession session, HttpServletRequest request, Model model) {
+
+        String source = request.getParameter("source");
+
+        log.info("source : {}", source);
+
+        session.setAttribute("source", source);
+
+        return "redirect:/user/email_verification";
+    }
+
     @GetMapping("/email_verification")
     public String showEmailVerificationPage(HttpSession session) {
         String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
@@ -61,6 +78,24 @@ public class UserController {
             return "redirect:/user/index";
         }
         return "/user/email_verification";
+    }
+
+    @PostMapping("/getEmailExists")
+    public ResponseEntity<CommonResponse<UserInfoDTO>> getEmailExists(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.getEmailExists Start", this.getClass().getSimpleName());
+
+        log.info("pDTO : {}", pDTO);
+
+        UserInfoDTO rDTO = userInfoService.getUserEmailExists(pDTO);
+
+        log.info("rDTO : {}", rDTO);
+
+        log.info("{}.getEmailExists End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(
+          CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO)
+        );
     }
 
     @GetMapping("/signup_detail")

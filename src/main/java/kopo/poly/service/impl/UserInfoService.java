@@ -42,9 +42,22 @@ public class UserInfoService implements IUserInfoService {
 
         UserInfoDTO rDTO = userInfoMapper.checkFieldExists(colNm, pDTO);
 
-        UserInfoDTO rDTO2 = userInfoMapper.getUserIdAndUserNameByUserEmail(colNm, pDTO);
+        log.info("rDTO : {}", rDTO);
 
-        rDTO.builder().userId(rDTO2.userId()).userName(rDTO2.userName()).build();
+        if (rDTO.existsYn().equals("Y")) {
+            UserInfoDTO rDTO2 = userInfoMapper.getUserIdAndUserNameByUserEmail(colNm, pDTO);
+
+            // 새로운 DTO 생성 (필요한 필드 조합)
+            UserInfoDTO finalDTO = UserInfoDTO.builder()
+                    .existsYn(rDTO.existsYn())
+                    .userEmail(rDTO.userEmail()) // 필요하면 유지
+                    .userName(rDTO2.userName())
+                    .userId(rDTO2.userId())
+                    .build();
+
+            // 기존 rDTO를 교체
+            rDTO = finalDTO;
+        }
 
         log.info("rDTO: {}", rDTO);
 

@@ -371,7 +371,7 @@ a {
 .img_box {
     height: 100%;
     padding: 0.3125rem; /* 5px -> 0.3125rem */
-    background-image: url("/myPageImg.webp");
+    /*background-image: url("/myPageImg.webp");*/
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -381,7 +381,7 @@ a {
 .img-container {
     height: 100%;
     padding: 0.3125rem; /* 5px -> 0.3125rem */
-    background-image: url("/myPageImg.webp");
+    /*background-image: url("/myPageImg.webp");*/
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -494,4 +494,15 @@ a {
 
 .generate-message > span {
     font-size: medium;
+}
+
+.signin_two_button_wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.signin_two_button {
+    width: 48% !important;
 }

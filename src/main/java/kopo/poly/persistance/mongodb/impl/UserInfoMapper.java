@@ -57,17 +57,31 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         Query query = new Query(Criteria.where(pDTO.fieldName()).is(pDTO.value()));
         String existYn = mongodb.exists(query, colNm)? "Y" : "N";
-        UserInfoDTO rDTO = null;
 
-        rDTO.builder().existsYn(existYn).build();
+        log.info("existYn : {}", existYn);
+
+        UserInfoDTO rDTO;
 
         switch (pDTO.fieldName()) {
-            case "userEmail" -> rDTO.builder().userEmail(pDTO.value()).build();
-            case "userId" -> rDTO.builder().userId(pDTO.value()).build();
-            case "userNickname" -> rDTO.builder().userNickname(pDTO.value()).build();
-            // 필요 시 다른 필드도 추가
+            case "userEmail" -> rDTO = UserInfoDTO.builder()
+                    .userEmail(pDTO.value())
+                    .existsYn(existYn)
+                    .build();
+
+            case "userId" -> rDTO = UserInfoDTO.builder()
+                    .userId(pDTO.value())
+                    .existsYn(existYn)
+                    .build();
+
+            case "userNickname" -> rDTO = UserInfoDTO.builder()
+                    .userNickname(pDTO.value())
+                    .existsYn(existYn)
+                    .build();
+
             default -> throw new IllegalArgumentException("지원하지 않는 필드명입니다: " + pDTO.fieldName());
         }
+
+        log.info("rDTO : {}", rDTO);
 
         log.info("{}.checkFieldExists End", this.getClass().getSimpleName());
 
@@ -79,7 +93,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         log.info("{}.getUserId Start", this.getClass().getSimpleName());
 
-        UserInfoDTO rDTO = null;
+        UserInfoDTO rDTO = UserInfoDTO.builder().build();
 
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 
@@ -132,7 +146,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
             log.info("{} 생성되었습니다.", colNm);
         }
 
-        UserInfoDTO rDTO = null;
+        UserInfoDTO rDTO = UserInfoDTO.builder().build();
 
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 

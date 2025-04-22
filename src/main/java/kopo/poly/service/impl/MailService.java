@@ -28,6 +28,8 @@ public class MailService implements IMailService {
 
         int res = 1;
 
+        log.info("pDTO: {}", pDTO);
+
         if (pDTO == null) {
             pDTO = MailDTO.builder().build();
         }
