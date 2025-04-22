@@ -7,6 +7,7 @@
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="/css/userStyles.css">
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/checkDuplicate.js" defer></script>
 
@@ -66,8 +67,110 @@
                 }
             });
 
-            // 폼 제출 시 확인
             $('#goToLogin').on('click', function (event) {
+                const birth = $('#birthDate').val().trim();
+                const phone = $('#phoneNumber').val().trim();
+                const mealCnt = parseInt($('#input_mealCnt').val());
+
+                if (!birth) {
+                    alert("생년월일을 입력해주세요.");
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!phone) {
+                    alert("핸드폰 번호를 입력해주세요.");
+                    event.preventDefault();
+                    return;
+                }
+
+                if (isNaN(mealCnt) || mealCnt <= 0) {
+                    alert("식사량을 1 이상으로 입력해주세요.");
+                    event.preventDefault();
+                    return;
+                }
+
+                const times = $('input[name="mealTime"]');
+                if (times.length !== mealCnt) {
+                    alert("식사 시간 입력란이 부족합니다. 다시 확인해주세요.");
+                    event.preventDefault();
+                    return;
+                }
+
+                for (let i = 0; i < times.length; i++) {
+                    if (!times[i].value) {
+                        alert(`${i + 1}번째 식사 시간을 입력해주세요.`);
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                if (!$('#confirm_terms').is(':checked')) {
+                    alert("이용약관에 동의해주세요.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // 서버에 중복 여부 확인 요청 (jQuery 방식)
+                $.ajax({
+                    url: "/user/signup_detail",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "JSON",
+                    data: JSON.stringify($("#signupForm").serializeObject()), // x-www-form-urlencoded 방식
+                }).then(
+                    // function (json) {
+                    //     $message.text(json.data.msg);
+                    //
+                    //     if (json.data.result == 1){
+                    //         $message.css("color", "red")
+                    //     }else{
+                    //         if (type === "input_id") {
+                    //             check_id = value;
+                    //             idPossible = true;
+                    //         } else if (type === "input_nickname") {
+                    //             check_nick = value;
+                    //             nicknamePossible = true;
+                    //         }
+                    //         $message.css("color", "green")
+                    //     }
+                    // }
+                    function (){
+                        alert("회원가입요청완료");
+                    }
+                );
+            });
+
+            $('#goNext').on('click', function (event) {
+                // 먼저 required 입력값들이 비어있는지 검사
+                let isEmpty = false;
+
+                $('#first').find('input[required]').each(function () {
+                    const type = $(this).attr('type');
+                    const name = $(this).attr('name');
+
+                    if (type === 'radio') {
+                        // 라디오 그룹 중 체크된 게 하나도 없으면 alert
+                        if ($(`input[name="${name}"]:checked`).length === 0) {
+                            alert("성별을 선택해주세요.");
+                            isEmpty = true;
+                            return false; // break
+                        }
+                    } else {
+                        if (!$(this).val().trim()) {
+                            alert("모든 필수 입력 항목을 입력해주세요.");
+                            $(this).focus(); // 비어있는 곳으로 커서 이동
+                            isEmpty = true;
+                            return false; // break
+                        }
+                    }
+                });
+
+                if (isEmpty) {
+                    event.preventDefault();
+                    return;
+                }
+
                 if (!idPossible || !nicknamePossible) {
                     event.preventDefault();
                     alert("아이디와 닉네임 중복 여부를 확인해주세요.");
@@ -93,6 +196,38 @@
                     event.preventDefault();
                     alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
                     return;
+                }
+
+                $('#first').hide();
+                $('#second').css('display', 'flex');
+            });
+
+
+            $('#goBack').on('click', function () {
+                $('#second').hide();
+                $('#first').css('display', 'flex');
+            });
+
+            $('#set_mealCnt').on('click', function () {
+                const count = parseInt($('#input_mealCnt').val());
+
+                if (isNaN(count) || count <= 0) {
+                    alert("1 이상의 식사량을 입력해주세요.");
+                    return;
+                }
+
+                const $container = $('#mealTimeInputs');
+                $container.empty();
+
+                for (let i = 1; i <= count; i++) {
+                    const $formBox = $('<div class="form_box"></div>');
+                    const $label = $('<label class="label_bold"></label>').text(`${i}번째 식사시간`);
+                    const $inputBox = $('<div class="input_box"></div>');
+                    const $input = $('<input type="time" class="input_info" name="mealTime" required>');
+
+                    $inputBox.append($input);
+                    $formBox.append($label).append($inputBox);
+                    $container.append($formBox);
                 }
             });
         });
@@ -139,55 +274,84 @@
 <div class="content">
     <div class="container">
         <form method="post" action="signup_detail" id="signupForm">
-            <div class="form_box">
-                <label class="label_bold" for="input_name">이름 / NAME</label>
-                <div class="input_box">
-                    <input type="text" class="input_info" id="input_name" name="name" placeholder="이름을 입력하세요." required>
+            <div id="first">
+                <div class="form_box">
+                    <label class="label_bold" for="input_name">이름 / NAME</label>
+                    <div class="input_box">
+                        <input type="text" class="input_info" id="input_name" name="name" placeholder="이름을 입력하세요." required>
+                    </div>
+                </div>
+                <div class="form_box">
+                    <div class="radio_box">
+                        <span class="margin_left_4px">성별</span>
+                        <input type="radio" id="male" name="gender" value="남성" required>
+                        <label for="male">남성</label>
+                        <input type="radio" id="female" name="gender" value="여성">
+                        <label for="female">여성</label>
+                    </div>
+                </div>
+                <div class="form_box">
+                    <label class="label_bold" for="input_id">아이디 / ID</label>
+                    <div class="input_box">
+                        <input type="text" class="send_code input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
+                        <button type="button" class="side_btn" id="id_check" onclick="checkDuplicate('input_id')">중복확인</button>
+                    </div>
+                    <p id="input_idMessage"></p>
+                </div>
+                <div class="form_box">
+                    <label class="label_bold" for="input_nickname">닉네임 / NICKNAME</label>
+                    <div class="input_box">
+                        <input type="text" class="send_code input_info" id="input_nickname" name="userNickname" placeholder="닉네임을 입력하세요." required>
+                        <button type="button" class="side_btn" id="nick_check" onclick="checkDuplicate('input_nickname')">중복확인</button>
+                    </div>
+                    <p id="input_nicknameMessage"></p>
+                </div>
+                <div class="form_box">
+                    <label class="label_bold" for="input_pwd">비밀번호 / PASSWORD</label>
+                    <div class="input_box">
+                        <input type="password" class="input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요." required>
+                    </div>
+                </div>
+                <div class="form_box">
+                    <label class="label_bold" for="chk_pwd">비밀번호 확인 / PASSWORD CHECK</label>
+                    <div class="input_box">
+                        <input type="password" class="input_info" id="chk_pwd" name="chk_pwd" placeholder="비밀번호를 확인하세요." required>
+                    </div>
+                </div>
+                <div class="button_login_wrap">
+                    <button type="button" class="btn_signup" id="goNext">다음</button>
                 </div>
             </div>
-            <div class="form_box">
-                <div class="radio_box">
-                    <span class="margin_left_4px">성별</span>
-                    <input type="radio" id="male" name="gender" value="남성" required>
-                    <label for="male">남성</label>
-                    <input type="radio" id="female" name="gender" value="여성">
-                    <label for="female">여성</label>
+            <div id="second">
+                <div class="form_box">
+                    <label class="label_bold" for="birthDate">생년월일</label>
+                    <div class="input_box">
+                        <input type="text" class="input_info" id="birthDate" name="birthDate" placeholder="생년월일을 확인하세요.(19990101)" required>
+                    </div>
                 </div>
-            </div>
-            <div class="form_box">
-                <label class="label_bold" for="input_id">아이디 / ID</label>
-                <div class="input_box">
-                    <input type="text" class="send_code input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
-                    <button type="button" class="side_btn" id="id_check" onclick="checkDuplicate('input_id')">중복확인</button>
+                <div class="form_box">
+                    <label class="label_bold" for="phoneNumber">핸드폰 번호</label>
+                    <div class="input_box">
+                        <input type="text" class="input_info" id="phoneNumber" name="phoneNumber" placeholder="핸드폰번호를 확인하세요.(01012345678)" required>
+                    </div>
                 </div>
-                <p id="input_idMessage"></p>
-            </div>
-            <div class="form_box">
-                <label class="label_bold" for="input_nickname">닉네임 / NICKNAME</label>
-                <div class="input_box">
-                    <input type="text" class="send_code input_info" id="input_nickname" name="userNickname" placeholder="닉네임을 입력하세요." required>
-                    <button type="button" class="side_btn" id="nick_check" onclick="checkDuplicate('input_nickname')">중복확인</button>
+                <div class="form_box">
+                    <label class="label_bold" for="input_mealCnt">식사량</label>
+                    <div class="input_box">
+                        <input type="number" class="send_code input_info" id="input_mealCnt" name="mealCnt" placeholder="식사량을 입력하세요." required>
+                        <button type="button" class="side_btn" style="width: 20%" id="set_mealCnt">확인</button>
+                    </div>
                 </div>
-                <p id="input_nicknameMessage"></p>
-            </div>
-            <div class="form_box">
-                <label class="label_bold" for="input_pwd">비밀번호 / PASSWORD</label>
-                <div class="input_box">
-                    <input type="password" class="input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요." required>
+                <!-- 식사 시간 입력창이 동적으로 들어올 영역 -->
+                <div class="form_box" id="mealTimeInputs"></div>
+                <div class="form_box">
+                    <input type="checkbox" class="auto_login_chk" id="confirm_terms" name="auto_login" required>
+                    <label for="confirm_terms">이용약관에 동의</label>
                 </div>
-            </div>
-            <div class="form_box">
-                <label class="label_bold" for="chk_pwd">비밀번호 확인 / PASSWORD CHECK</label>
-                <div class="input_box">
-                    <input type="password" class="input_info" id="chk_pwd" name="chk_pwd" placeholder="비밀번호를 확인하세요." required>
+                <div class="input_box" style="justify-content: space-between !important;">
+                    <button type="button" class="two_button" style="width: 50%" id="goBack">뒤로가기</button>
+                    <button type="button" class="two_button" style="width: 50%" id="goToLogin">회원가입</button>
                 </div>
-            </div>
-            <div class="form_box">
-                <input type="checkbox" class="auto_login_chk" id="confirm_terms" name="auto_login" required>
-                <label for="confirm_terms">이용약관에 동의</label>
-            </div>
-            <div class="button_login_wrap">
-                <button type="submit" class="btn_signup" id="goToLogin">회원가입</button>
             </div>
         </form>
     </div>

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @ToString
 @Getter
 @Setter
@@ -25,4 +27,9 @@ public class UserInfoDTO {
     private String fieldName;
     private String value;
     private int authNumber;
+    private String birthDate;
+    private String phoneNumber;
+    private int mealCnt;
+    private List<String> mealTime;
+
 }

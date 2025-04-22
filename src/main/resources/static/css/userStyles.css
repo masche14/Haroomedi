@@ -506,3 +506,11 @@ a {
 .signin_two_button {
     width: 48% !important;
 }
+#first {
+    flex-direction: column;
+}
+
+#second {
+    display: none;
+    flex-direction: column;
+}

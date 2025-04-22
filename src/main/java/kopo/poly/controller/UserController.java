@@ -162,6 +162,22 @@ public class UserController {
         return "/user/signup_detail";
     }
 
+    @PostMapping("/signup_detail")
+    public ResponseEntity<CommonResponse<MsgDTO>> signupDetail(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.signupDetail Start", this.getClass().getSimpleName());
+
+        log.info("pDTO : {}", pDTO.toString());
+
+        log.info("{}.signupDetail End", this.getClass().getSimpleName());
+
+        MsgDTO dto = new MsgDTO();
+        int res=0;
+        String msg="";
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+    }
+
     @PostMapping("/checkDuplicate")
     public ResponseEntity<CommonResponse<MsgDTO>> checkDuplicate(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
         log.info("{}.checkDuplicate Start", this.getClass().getSimpleName());
