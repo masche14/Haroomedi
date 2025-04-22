@@ -111,13 +111,22 @@
                     return;
                 }
 
+                const data = $("#signupForm").serializeObject();
+
+                // 👇 모든 name="mealTime"인 input 요소들을 배열로 수집
+                const mealTimes = $('input[name="mealTime"]').map(function () {
+                    return $(this).val();
+                }).get(); // [ "07:35" ] 또는 [ "07:35", "12:30", "18:00" ]
+
+                data.mealTime = mealTimes;
+
                 // 서버에 중복 여부 확인 요청 (jQuery 방식)
                 $.ajax({
                     url: "/user/signup_detail",
                     type: "POST",
                     contentType: "application/json",
                     dataType: "JSON",
-                    data: JSON.stringify($("#signupForm").serializeObject()), // x-www-form-urlencoded 방식
+                    data: JSON.stringify(data), // x-www-form-urlencoded 방식
                 }).then(
                     // function (json) {
                     //     $message.text(json.data.msg);
@@ -189,10 +198,10 @@
                     return;
                 }
 
-                const pwd = $('#input_pwd').val();
-                const pwd2 = $('#chk_pwd').val();
+                const password = $('#input_password').val();
+                const password2 = $('#chk_password').val();
 
-                if (pwd !== pwd2) {
+                if (password !== password2) {
                     event.preventDefault();
                     alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
                     return;
@@ -278,7 +287,7 @@
                 <div class="form_box">
                     <label class="label_bold" for="input_name">이름 / NAME</label>
                     <div class="input_box">
-                        <input type="text" class="input_info" id="input_name" name="name" placeholder="이름을 입력하세요." required>
+                        <input type="text" class="input_info" id="input_name" name="userName" placeholder="이름을 입력하세요." required>
                     </div>
                 </div>
                 <div class="form_box">
@@ -307,15 +316,15 @@
                     <p id="input_nicknameMessage"></p>
                 </div>
                 <div class="form_box">
-                    <label class="label_bold" for="input_pwd">비밀번호 / PASSWORD</label>
+                    <label class="label_bold" for="input_password">비밀번호 / PASSWORD</label>
                     <div class="input_box">
-                        <input type="password" class="input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요." required>
+                        <input type="password" class="input_info" id="input_password" name="password" placeholder="비밀번호를 입력하세요." required>
                     </div>
                 </div>
                 <div class="form_box">
-                    <label class="label_bold" for="chk_pwd">비밀번호 확인 / PASSWORD CHECK</label>
+                    <label class="label_bold" for="chk_password">비밀번호 확인 / PASSWORD CHECK</label>
                     <div class="input_box">
-                        <input type="password" class="input_info" id="chk_pwd" name="chk_pwd" placeholder="비밀번호를 확인하세요." required>
+                        <input type="password" class="input_info" id="chk_password" name="chk_password" placeholder="비밀번호를 확인하세요." required>
                     </div>
                 </div>
                 <div class="button_login_wrap">
