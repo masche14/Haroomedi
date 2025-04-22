@@ -1,49 +1,43 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="/css/userStyles.css"/> <!-- CSS 경로 수정 -->
+    <link rel="stylesheet" href="/css/userStyles.css"/>
     <script src="/js/setReferrer.js" defer></script>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
-    <script>
-        var userId = "<%= userId %>";
-        var error = "<%= msg %>"
+    <script src="/js/jquery-3.6.0.min.js"></script>
 
-        // DOMContentLoaded 이벤트 리스너를 사용하여 DOM이 완전히 로드된 후에 실행되도록 설정
+    <script th:inline="javascript">
+        let userId = /*[[${userId}]]*/ null;
+        let error = /*[[${msg}]]*/ null;
+        let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
+
         $(document).ready(function () {
-            if (error!=="null"){
-                if(error.includes("않습니다.")){
+
+            if (error && error.trim() !== "null") {
+                if (error.includes("않습니다.")) {
                     alert(error);
                 }
             }
-            // 첫 번째 스크립트: savedId가 있으면 input_id 요소에 값을 설정
-            if (userId!=="null"){
-                document.getElementById('input_id').value = userId;
+
+            if (userId && userId.trim() !== "null") {
+                $('#input_id').val(userId);
             } else {
-                document.getElementById('input_id').value = "";
+                $('#input_id').val("");
             }
 
-            // const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
-
             if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
-                document.getElementById("loginNav").style.display = "none";
+                $('#loginNav').hide();
             } else {
-                document.getElementById("myPageNav").style.display = "none";
-                document.getElementById("logoutNav").style.display = "none";
+                $('#myPageNav').hide();
+                $('#logoutNav').hide();
             }
         });
 
-        // source를 설정하고 폼을 생성하여 제출하는 함수
         function setSourceAndSubmit(source) {
-
-            console.log(source);
-
             const form = document.createElement('form');
-
             form.method = 'POST';
             form.action = '/user/setSource';
 
@@ -64,14 +58,14 @@
 <!-- 네비게이션 바 -->
 <div class="navbar">
     <!-- 좌측 로고 -->
-<!--    <img src="/nestifyLogo.png" alt="Logo" class="logo">-->
+    <!-- <img src="/nestifyLogo.png" alt="Logo" class="logo"> -->
 
     <!-- 우측 메뉴 -->
     <div class="menu">
         <a href="/user/index">홈</a>
         <a href="/interior/choose">인테리어</a>
         <a href="javascript:void(0);" id="loginNav" onclick="setReferrer()">로그인</a>
-        <a href="/user/delOrUpdate" id="myPageNav" >마이페이지</a>
+        <a href="/user/delOrUpdate" id="myPageNav">마이페이지</a>
         <a href="/user/logout" id="logoutNav">로그아웃</a>
     </div>
 </div>
