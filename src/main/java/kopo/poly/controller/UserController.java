@@ -169,6 +169,15 @@ public class UserController {
 
         log.info("pDTO : {}", pDTO.toString());
 
+        UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
+        String userEmail = emailResultDTO.getUserEmail();
+        log.info("userEmail : {}", userEmail);
+        pDTO.setUserEmail(userEmail);
+
+        String encPassword = EncryptUtil.encHashSHA256(CmmUtil.nvl(pDTO.getPassword()));
+        pDTO.setPassword(encPassword);
+        log.info("After Encoding pDTO : {}", pDTO.toString());
+
         log.info("{}.signupDetail End", this.getClass().getSimpleName());
 
         MsgDTO dto = new MsgDTO();
