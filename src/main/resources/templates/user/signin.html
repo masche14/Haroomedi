@@ -8,11 +8,12 @@
     <link rel="stylesheet" href="/css/userStyles.css"/>
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/jquery-3.6.0.min.js"></script>
-
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
         let error = /*[[${msg}]]*/ null;
         let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
+        let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {
 
@@ -34,6 +35,24 @@
                 $('#myPageNav').hide();
                 $('#logoutNav').hide();
             }
+
+            $("#login").on("click", function (){
+                // Ajax 호출해서 멜론차트 조회하기
+                $.ajax({
+                    url: "/user/signin",
+                    type: "post", // 전송방식은 Post
+                    contentType: "application/json",
+                    data: JSON.stringify($("#signinForm").serializeObject()), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+                    dataType: "JSON", // 전송 결과는 JSON으로 받기
+                }).then(
+                    function (json) {
+                        alert(json.data.msg);
+                        if (json.data.result == 1) {
+                            window.location = ref;
+                        }
+                    }
+                )
+            });
         });
 
         function setSourceAndSubmit(source) {
@@ -76,13 +95,13 @@
             <div class="form_box">
                 <label class="label_bold" for="input_id">아이디 / ID</label>
                 <div class="input_box">
-                    <input type="text" class="input_info" id="input_id" name="id" placeholder="아이디를 입력하세요." required>
+                    <input type="text" class="input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
                 </div>
             </div>
             <div class="form_box">
                 <label class="label_bold" for="input_pwd">비밀번호 / PASSWORD</label>
                 <div class="input_box">
-                    <input type="password" class="input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요." required>
+                    <input type="password" class="input_info" id="input_pwd" name="password" placeholder="비밀번호를 입력하세요." required>
                 </div>
             </div>
             <div class="form_box">
@@ -90,7 +109,7 @@
                 <label class="margin_lef_zero" for="auto_login">자동 로그인</label>
             </div>
             <div class="button_login_wrap">
-                <button type="submit" class="btn_login">로그인</button>
+                <button type="button" class="btn_login" id="login">로그인</button>
             </div>
             <div class="forgot_login">
                 <a href="#" onclick="setSourceAndSubmit('signup_detail')">회원가입</a>

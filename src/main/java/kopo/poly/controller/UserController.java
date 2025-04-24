@@ -50,6 +50,20 @@ public class UserController {
             return "redirect:/user/index";
         }
 
+        String referrer = (String) session.getAttribute("referrer");
+        String ref = "";
+
+        if (referrer != null) {
+            ref = referrer.replace("http://localhost:11000", "");
+
+        } else {
+            ref = "/user/index";
+        }
+
+        log.info("ref : {}", ref);
+
+        model.addAttribute("ref", ref);
+
         String userId= (String) session.getAttribute("userId");
 
         if (userId != null){
@@ -59,6 +73,58 @@ public class UserController {
         }
 
         return "/user/signin";
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<CommonResponse<MsgDTO>> signin(HttpSession session, @RequestBody UserInfoDTO pDTO, Model model) {
+
+        log.info("{}.signin start", this.getClass().getSimpleName());
+
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg = "";
+
+
+        try {
+            String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
+            pDTO.setPassword(encPassword);
+
+            UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
+
+            if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {
+
+
+                if (CmmUtil.nvl(pDTO.getPassword()).equals(CmmUtil.nvl(rDTO.getPassword()))) {
+                    session.removeAttribute("emailResultDTO");
+
+                    res = 1;
+
+                    msg = "로그인에 성공하였습니다.";
+                    session.setAttribute("SS_USER_ID", rDTO.getUserId());
+                    session.setAttribute("SS_USER_NAME", rDTO.getUserName());
+                    session.setAttribute("SS_USER_NICKNAME", rDTO.getUserNickname());
+                    session.setAttribute("SS_USER_EMAIL", rDTO.getUserEmail());
+                } else {
+                    msg = "비밀번호가 올바르지 않습니다.";
+                }
+
+            } else {
+                msg = "존재하지 않는 회원 아이디 입니다.";
+            }
+        } catch (Exception e) {
+            msg = "시스템 문제로 로그인이 실패하였습니다.";
+            res = 2;
+            log.info(e.toString());
+        } finally {
+            log.info("{}.loginProc End", this.getClass().getName());
+        }
+
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
+        );
     }
 
     @PostMapping("/setSource")
@@ -295,7 +361,10 @@ public class UserController {
     }
 
     @GetMapping("/index")
-    public String showHomePage() {
+    public String showHomePage(HttpSession session, Model model) {
+        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        log.info("SS_USER_ID : {}", SS_USER_ID);
+
         return "/user/index"; // /WEB-INF/views/index.jsp
     }
 
