@@ -11,24 +11,19 @@
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/getExists.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
-    <script>
+    <script th:inline="javascript">
+        let userId = /*[[${userId}]]*/ null;
+        let error = /*[[${msg}]]*/ null;
+        let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
+
         // DOM이 완전히 로드된 후에 실행되도록 설정
         $(document).ready(function () {
-            const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
 
             if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
                 document.getElementById("loginNav").style.display = "none";
             } else {
                 document.getElementById("myPageNav").style.display = "none";
                 document.getElementById("logoutNav").style.display = "none";
-            }
-
-            const errorMsg = "<%= (String) session.getAttribute("errorMsg") %>";
-
-            
-
-            if (errorMsg && errorMsg.trim() !== "null"){
-                alert(errorMsg)
             }
 
         });

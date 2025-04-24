@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="/css/userStyles.css">
     <script src="/js/setReferrer.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
-    
-    <script>
-        var userId = "<%= userId %>";
-        var exists = "<%= exists %>";
+
+    <script th:inline="javascript">
+        let userId = /*[[${userId}]]*/ null;
+        let error = /*[[${msg}]]*/ null;
+        let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
 
         $(document).ready(function () {
 
@@ -27,13 +28,12 @@
                 document.getElementById('input_id').value = userId;
             }
 
-            const deferentId = "<%= (String) session.getAttribute("deferentId") %>"
+            // const deferentId = "<%= (String) session.getAttribute("deferentId") %>"
+            //
+            // if (deferentId && deferentId.trim() !== "null") {
+            //     alert(deferentId)
+            // }
 
-            if (deferentId && deferentId.trim() !== "null") {
-                alert(deferentId)
-            }
-
-            const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
 
             if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
                 document.getElementById("loginNav").style.display = "none";

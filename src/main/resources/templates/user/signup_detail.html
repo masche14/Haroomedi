@@ -13,12 +13,14 @@
 
     <!-- Thymeleaf session 값 JS에 전달 -->
     <script th:inline="javascript">
-        const error = /*[[${session.error}]]*/ null;
+        const error = /*[[${error}]]*/ null;
         const SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
     </script>
 
     <script>
         $(document).ready(function () {
+            console.log(error);
+
             if (error && error.trim() !== "null") {
                 alert(error);
                 $('#redirectForm').submit();
@@ -128,24 +130,11 @@
                     dataType: "JSON",
                     data: JSON.stringify(data), // x-www-form-urlencoded 방식
                 }).then(
-                    // function (json) {
-                    //     $message.text(json.data.msg);
-                    //
-                    //     if (json.data.result == 1){
-                    //         $message.css("color", "red")
-                    //     }else{
-                    //         if (type === "input_id") {
-                    //             check_id = value;
-                    //             idPossible = true;
-                    //         } else if (type === "input_nickname") {
-                    //             check_nick = value;
-                    //             nicknamePossible = true;
-                    //         }
-                    //         $message.css("color", "green")
-                    //     }
-                    // }
-                    function (){
-                        alert("회원가입요청완료");
+                    function (json){
+                        alert(json.data.msg);
+                        if (json.data.result == 1){
+                            window.location = "/user/signin";
+                        }
                     }
                 );
             });

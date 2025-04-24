@@ -97,7 +97,7 @@ public class UserInfoService implements IUserInfoService {
 
         if (success > 0) {
             res = 1;
-            MailDTO mDTO = null;
+            MailDTO mDTO = new MailDTO();
 
             mDTO.setToMail(EncryptUtil.decAES128CBC(pDTO.getUserEmail()));
             mDTO.setTitle("회원가입을 축하드립니다.");

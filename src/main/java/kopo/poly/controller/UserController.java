@@ -138,7 +138,8 @@ public class UserController {
     @PostMapping("email_verification")
     public String emailVerification(HttpSession session) throws Exception {
         String source = (String) session.getAttribute("source");
-        return "/user/"+source;
+        log.info("source : {}", source);
+        return "redirect:/user/"+source;
     }
 
     @GetMapping("/signup_detail")
@@ -154,9 +155,12 @@ public class UserController {
             return "redirect:/user/index";
         }
 
+        log.info("ExistYN : {}", emailResultDTO.getExistYn());
+
         if (emailResultDTO.getExistYn().equals("Y")) {
+            log.info("해당 이메일로 가입된 계정이 이미 존재합니다.");
             String alert = "해당 이메일로 가입된 계정이 이미 존재합니다.";
-            session.setAttribute("error", alert);
+            model.addAttribute("error", alert);
         }
 
         return "/user/signup_detail";
@@ -174,6 +178,11 @@ public class UserController {
         log.info("userEmail : {}", userEmail);
         pDTO.setUserEmail(userEmail);
 
+        String encPhoneNumber = EncryptUtil.encAES128CBC(pDTO.getPhoneNumber());
+        pDTO.setPhoneNumber(encPhoneNumber);
+
+        log.info("phoneNumber : {}", EncryptUtil.decAES128CBC(CmmUtil.nvl(pDTO.getPhoneNumber())));
+
         String encPassword = EncryptUtil.encHashSHA256(CmmUtil.nvl(pDTO.getPassword()));
         pDTO.setPassword(encPassword);
         log.info("After Encoding pDTO : {}", pDTO.toString());
@@ -183,6 +192,18 @@ public class UserController {
         MsgDTO dto = new MsgDTO();
         int res=0;
         String msg="";
+
+        res = userInfoService.insertUserInfo(pDTO);
+
+        if (res > 0) {
+            msg = "성공적으로 회원가입이 완료되었습니다.";
+            session.setAttribute("userId", pDTO.getUserId());
+        } else {
+            msg = "회원가입에 실패하였습니다.";
+        }
+
+        dto.setResult(res);
+        dto.setMsg(msg);
 
         return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
