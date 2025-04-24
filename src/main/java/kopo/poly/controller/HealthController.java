@@ -25,7 +25,10 @@ public class HealthController {
     private final IHealthService healthService;
 
     @GetMapping("/auth")
-    public String authPage() {
+    public String authPage(HttpSession session, Model model) {
+        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+
+        log.info("SS_USER_ID: {}", SS_USER_ID);
         return "/health/auth"; // templates/health/auth.html 로 매핑됨
     }
 
