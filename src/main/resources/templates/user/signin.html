@@ -12,7 +12,7 @@
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
         let error = /*[[${msg}]]*/ null;
-        let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
+        let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
         let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {

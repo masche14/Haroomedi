@@ -372,9 +372,9 @@ public class UserController {
     public String showDelOrUpdate(HttpSession session) {
         String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
 
-//        if (SS_USER_ID == null){
-//            return "redirect:/user/index";
-//        }
+        if (SS_USER_ID == null){
+            return "redirect:/user/index";
+        }
 
         return "/user/delOrUpdate";
     }
@@ -390,26 +390,26 @@ public class UserController {
         }
     }
 
-//    @GetMapping("/delInfo")
-//    public String showDelInfo(HttpSession session){
-//        String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
-//
-//        if (pwdVerifyResult==null) {
-//            return "redirect:/user/index";
-//        }
-//
-//        session.removeAttribute("pwdVerifyResult");
-//
-//        return "/user/delInfo";
-//    }
+    @GetMapping("/delInfo")
+    public String showDelInfo(HttpSession session){
+        String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
+
+        if (pwdVerifyResult==null) {
+            return "redirect:/user/index";
+        }
+
+        session.removeAttribute("pwdVerifyResult");
+
+        return "/user/delInfo";
+    }
 
     @GetMapping("/myPage")
     public String showMyPage(HttpSession session, Model model) {
         String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
 
-//        if (pwdVerifyResult==null) {
-//            return "redirect:/user/index";
-//        }
+        if (pwdVerifyResult==null) {
+            return "redirect:/user/index";
+        }
 
         return "/user/myPage";
     }
