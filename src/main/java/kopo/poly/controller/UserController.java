@@ -258,6 +258,9 @@ public class UserController {
             return "redirect:/user/index";
         }
 
+        model.addAttribute("existYN", emailResultDTO.getExistYn());
+        model.addAttribute("userId", emailResultDTO.getUserId());
+
         return "/user/reset_pwd";
     }
 
@@ -275,6 +278,9 @@ public class UserController {
         }
 
         if (emailResultDTO.getExistYn().equals("Y")) {
+            log.info("userName : {}", emailResultDTO.getUserName());
+            log.info("userId : {}", emailResultDTO.getUserId());
+
             model.addAttribute("userName", emailResultDTO.getUserName());
             model.addAttribute("userId", emailResultDTO.getUserId());
             session.setAttribute("userEmail", emailResultDTO.getUserEmail());

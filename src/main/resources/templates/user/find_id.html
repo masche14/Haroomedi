@@ -11,9 +11,11 @@
     <script src="/js/setSource.js" defer></script>
     <script src="/js/setReferrer.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
-    <script>
-        const userName = "<%= (String)request.getAttribute("userName") %>";
-        const userId = "<%= (String)request.getAttribute("userId") %>";
+    <script th:inline="javascript">
+        let userId = /*[[${userId}]]*/ null;
+        let userName = /*[[${userName}]]*/ null;
+        let error = /*[[${msg}]]*/ null;
+        let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
 
         // DOMContentLoaded 이벤트 리스너를 사용하여 DOM이 완전히 로드된 후에 실행되도록 설정
         $(document).ready(function () {
@@ -28,14 +30,20 @@
                 window.location.href="signup_detail"
             }
 
-            const SS_USER_ID = "<%= (String) session.getAttribute("SS_USER_ID") %>"
-
             if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
                 document.getElementById("loginNav").style.display = "none";
             } else {
                 document.getElementById("myPageNav").style.display = "none";
                 document.getElementById("logoutNav").style.display = "none";
             }
+
+            $("#goToLogin").on("click", function () {
+                window.location = "/user/signin";
+            })
+
+            $("#goToResetPwd").on("click", function () {
+                window.location = "/user/reset_pwd";
+            })
         });
     </script>
 </head>
@@ -72,8 +80,8 @@
                     </div>
                     <div class="extra_top_margin input_box">
                         <input type="hidden" name="findIdSource" id="findIdSource">
-                        <button type="button" class="two_button" id="goToLogin" onclick="setSource('signin')">로그인 페이지</button>
-                        <button type="button" class="two_button" id="goToResetPwd" onclick="setSource('reset_pwd')">비밀번호 재설정</button>
+                        <button type="button" class="two_button" id="goToLogin">로그인 페이지</button>
+                        <button type="button" class="two_button" id="goToResetPwd">비밀번호 재설정</button>
                     </div>
                 </div>
             </div>

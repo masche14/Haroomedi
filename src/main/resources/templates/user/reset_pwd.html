@@ -13,12 +13,16 @@
 
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
-        let error = /*[[${msg}]]*/ null;
+        let existYN = /*[[${existYN}]]*/ null;
         let SS_USER_ID = /*[[${SS_USER_ID}]]*/ null;
 
         $(document).ready(function () {
 
-            if (exists === "N") {
+            const segments = document.referrer.split("/");
+            const referrer = segments[segments.length - 1];
+            console.log("이전 페이지의 마지막 경로:", referrer);
+
+            if (existYN === "N") {
                 alert("해당 이메일로 가입된 계정이 존재하지 않습니다.");
                 window.location.href="signup_detail"
             }
