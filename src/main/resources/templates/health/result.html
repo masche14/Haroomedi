@@ -1,13 +1,11 @@
-
-
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>간편인증</title>
-    <link rel="stylesheet" href="/css/authStyles.css">
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/authStyles.css}">
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
 </head>
 <body>
 <nav>
@@ -37,21 +35,23 @@
         </div>
         <div class="steps-container direction-row justify-center margin-bottom-30">
             <div class="step">
-                <div class="step-icon"><img src="${sessionScope.selectedImageSrc}" alt="Step 1"></div>
+                <div class="step-icon">
+                    <img th:src="@{${selectedImageSrc}}" alt="Step 1">
+                </div>
                 <p>STEP 01<br>앱에서 인증요청 메시지 확인</p>
             </div>
             <span class="next">&gt;</span>
             <div class="step">
-                <div class="step-icon"><img src="/authImgs/secure.png" alt="Step 2"></div>
+                <div class="step-icon"><img th:src="@{/authImgs/secure.png}" alt="Step 2"></div>
                 <p>STEP 02<br>간편인증 (비밀번호 입력 등)</p>
             </div>
             <span class="next">&gt;</span>
             <div class="step">
-                <div class="step-icon"><img src="/authImgs/check.png" alt="Step 3"></div>
+                <div class="step-icon"><img th:src="@{/authImgs/check.png}" alt="Step 3"></div>
                 <p>STEP 03<br>인증 완료 후, 하단의 인증완료 클릭</p>
             </div>
         </div>
-        <form id="health" action="/health/resultProcess" method="post">
+        <form id="health" th:action="@{/health/resultProcess}" method="post">
             <div class="button-group direction-row">
                 <button type="button" class="cancel" onclick="location.href='/user/index'">인증 취소</button>
                 <button type="submit" class="complete">인증 완료</button>
@@ -61,4 +61,3 @@
 </div>
 </body>
 </html>
-

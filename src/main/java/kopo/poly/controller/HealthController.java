@@ -9,6 +9,7 @@ import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +57,9 @@ public class HealthController {
     }
 
     @GetMapping("/result")
-    public String getResult(){
+    public String getResult(HttpSession session, Model model){
+        String selectedImageSrc = (String) session.getAttribute("selectedImageSrc");
+        model.addAttribute("selectedImageSrc", selectedImageSrc);
         return "/health/result";
     }
 
