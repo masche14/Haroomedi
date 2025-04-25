@@ -42,52 +42,211 @@
       document.getElementById("nicknameDisplay").textContent = SS_USER_NICKNAME;
       document.getElementById("emailDisplay").textContent = SS_USER_EMAIL;
 
-      // 폼 제출 전 확인하는 함수
-      function validateForm(event) {
-        if (document.getElementById("input_nickname").value){
-          if (!nicknameChecked) {
-            event.preventDefault();  // 폼 제출을 막음
-            alert("닉네임 중복 여부를 확인해주세요.");
-            return false;
-          }
+      // // 폼 제출 전 확인하는 함수
+      // function validateForm(event) {
+      //   if (document.getElementById("input_nickname").value){
+      //     if (!nicknameChecked) {
+      //       event.preventDefault();  // 폼 제출을 막음
+      //       alert("닉네임 중복 여부를 확인해주세요.");
+      //       return false;
+      //     }
+      //   }
+      //
+      //   console.log(check_nick);
+      //
+      //   console.log(document.getElementById("input_nickname").value);
+      //
+      //   if (document.getElementById("input_nickname").value !== ""){
+      //     if (document.getElementById("input_nickname").value !== check_nick.trim()){
+      //       event.preventDefault();
+      //       alert("닉네임 중복확인을 다시 진행해주세요.")
+      //       return false;
+      //     }
+      //   }
+      //   // 중복 확인이 완료되었으면 폼을 제출
+      //   const pwd = document.getElementById("input_pwd").value;
+      //   const pwd2 = document.getElementById("chk_pwd").value;
+      //
+      //   if (pwd !== pwd2){
+      //     event.preventDefault();
+      //     alert("비밀번호와 비밀번호 확인에 입력된 값이\n일치하지 않습니다.");
+      //     return false;
+      //   }
+      //
+      //   const emailInput = document.getElementById("input_email").value.trim();
+      //
+      //   // 이메일이 존재하고, approveResult가 'y'가 아닐 경우 경고창 표시
+      //   if (emailInput && approveResult !== 'y') {
+      //     event.preventDefault();
+      //     alert("이메일 인증을 완료해야 합니다.");
+      //     return false; // 이메일 인증이 완료되지 않았으므로 폼 제출을 막음
+      //   }
+      //
+      //   // 모든 조건이 만족되었을 경우 폼 제출 허용
+      //   return true;
+      // }
+      //
+      // // 회원가입 버튼 클릭 시 validateForm 실행
+      // document.getElementById('goToMain').addEventListener('click', validateForm);
+      $('#goToLogin').on('click', function (event) {
+        const birth = $('#birthDate').val().trim();
+        const phone = $('#phoneNumber').val().trim();
+        const mealCnt = parseInt($('#input_mealCnt').val());
+
+        if (!birth) {
+          alert("생년월일을 입력해주세요.");
+          event.preventDefault();
+          return;
         }
 
-        console.log(check_nick);
+        if (!phone) {
+          alert("핸드폰 번호를 입력해주세요.");
+          event.preventDefault();
+          return;
+        }
 
-        console.log(document.getElementById("input_nickname").value);
+        if (isNaN(mealCnt) || mealCnt <= 0) {
+          alert("식사량을 1 이상으로 입력해주세요.");
+          event.preventDefault();
+          return;
+        }
 
-        if (document.getElementById("input_nickname").value !== ""){
-          if (document.getElementById("input_nickname").value !== check_nick.trim()){
+        const times = $('input[name="mealTime"]');
+        if (times.length !== mealCnt) {
+          alert("식사 시간 입력란이 부족합니다. 다시 확인해주세요.");
+          event.preventDefault();
+          return;
+        }
+
+        for (let i = 0; i < times.length; i++) {
+          if (!times[i].value) {
+            alert(`${i + 1}번째 식사 시간을 입력해주세요.`);
             event.preventDefault();
-            alert("닉네임 중복확인을 다시 진행해주세요.")
-            return false;
+            return;
           }
         }
-        // 중복 확인이 완료되었으면 폼을 제출
-        const pwd = document.getElementById("input_pwd").value;
-        const pwd2 = document.getElementById("chk_pwd").value;
 
-        if (pwd !== pwd2){
+        if (!$('#confirm_terms').is(':checked')) {
+          alert("이용약관에 동의해주세요.");
           event.preventDefault();
-          alert("비밀번호와 비밀번호 확인에 입력된 값이\n일치하지 않습니다.");
-          return false;
+          return;
         }
 
-        const emailInput = document.getElementById("input_email").value.trim();
+        const data = $("#signupForm").serializeObject();
 
-        // 이메일이 존재하고, approveResult가 'y'가 아닐 경우 경고창 표시
-        if (emailInput && approveResult !== 'y') {
+        // 👇 모든 name="mealTime"인 input 요소들을 배열로 수집
+        const mealTimes = $('input[name="mealTime"]').map(function () {
+          return $(this).val();
+        }).get(); // [ "07:35" ] 또는 [ "07:35", "12:30", "18:00" ]
+
+        data.mealTime = mealTimes;
+
+        // 서버에 중복 여부 확인 요청 (jQuery 방식)
+        $.ajax({
+          url: "/user/signup_detail",
+          type: "POST",
+          contentType: "application/json",
+          dataType: "JSON",
+          data: JSON.stringify(data), // x-www-form-urlencoded 방식
+        }).then(
+                function (json){
+                  alert(json.data.msg);
+                  if (json.data.result == 1){
+                    window.location = "/user/signin";
+                  }
+                }
+        );
+      });
+
+      $('#goNext').on('click', function (event) {
+        // 먼저 required 입력값들이 비어있는지 검사
+        let isEmpty = false;
+
+        $('#first').find('input[required]').each(function () {
+          const type = $(this).attr('type');
+          const name = $(this).attr('name');
+
+          if (type === 'radio') {
+            // 라디오 그룹 중 체크된 게 하나도 없으면 alert
+            if ($(`input[name="${name}"]:checked`).length === 0) {
+              alert("성별을 선택해주세요.");
+              isEmpty = true;
+              return false; // break
+            }
+          } else {
+            if (!$(this).val().trim()) {
+              alert("모든 필수 입력 항목을 입력해주세요.");
+              $(this).focus(); // 비어있는 곳으로 커서 이동
+              isEmpty = true;
+              return false; // break
+            }
+          }
+        });
+
+        if (isEmpty) {
           event.preventDefault();
-          alert("이메일 인증을 완료해야 합니다.");
-          return false; // 이메일 인증이 완료되지 않았으므로 폼 제출을 막음
+          return;
         }
 
-        // 모든 조건이 만족되었을 경우 폼 제출 허용
-        return true;
-      }
+        if (!idPossible || !nicknamePossible) {
+          event.preventDefault();
+          alert("아이디와 닉네임 중복 여부를 확인해주세요.");
+          return;
+        }
 
-      // 회원가입 버튼 클릭 시 validateForm 실행
-      document.getElementById('goToMain').addEventListener('click', validateForm);
+        if ($('#input_id').val() !== check_id.trim()) {
+          event.preventDefault();
+          alert("아이디 중복확인을 다시 진행해주세요.");
+          return;
+        }
+
+        if ($('#input_nickname').val() !== check_nick.trim()) {
+          event.preventDefault();
+          alert("닉네임 중복확인을 다시 진행해주세요.");
+          return;
+        }
+
+        const password = $('#input_password').val();
+        const password2 = $('#chk_password').val();
+
+        if (password !== password2) {
+          event.preventDefault();
+          alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+          return;
+        }
+
+        $('#first').hide();
+        $('#second').css('display', 'flex');
+      });
+
+
+      $('#goBack').on('click', function () {
+        $('#second').hide();
+        $('#first').css('display', 'flex');
+      });
+
+      $('#set_mealCnt').on('click', function () {
+        const count = parseInt($('#input_mealCnt').val());
+
+        if (isNaN(count) || count <= 0) {
+          alert("1 이상의 식사량을 입력해주세요.");
+          return;
+        }
+
+        const $container = $('#mealTimeInputs');
+        $container.empty();
+
+        for (let i = 1; i <= count; i++) {
+          const $formBox = $('<div class="form_box"></div>');
+          const $label = $('<label class="label_bold"></label>').text(`${i}번째 식사시간`);
+          const $inputBox = $('<div class="input_box"></div>');
+          const $input = $('<input type="time" class="input_info" name="mealTime" required>');
+
+          $inputBox.append($input);
+          $formBox.append($label).append($inputBox);
+          $container.append($formBox);
+        }
+      });
     });
   </script>
 
@@ -102,8 +261,8 @@
       <a href="/user/index">하루약속</a>
     </div>
     <div class="nav-group" id="serviceNav">
-      <a href="/health/auth">처방 내역 조회</a>
-      <a href="#">처방 내역 동기화</a>
+      <a href="#">처방 내역 조회</a>
+      <a href="/health/auth">처방 내역 동기화</a>
       <a href="#">AI 챗봇 상담</a>
       <a href="#">주변 약국 찾기</a>
     </div>
@@ -145,43 +304,85 @@
       </div>
     </div>
     <div class="form_wrap">
-      <form method="post" action="/user/myPage" id="signupForm">
-        <div class="form_box">
-          <label class="label_bold" for="input_nickname">닉네임 변경 / CHG_NICKNAME</label>
-          <div class="input_box">
-            <input type="text" class="send_code input_info" id="input_nickname" name="nickname" placeholder="닉네임을 입력하세요.">
-            <button type="button" class="side_btn" id="nick_check" onclick="checkDuplicate('input_nickname')">중복확인</button>
+      <form method="post" action="signup_detail" id="signupForm">
+        <div id="first">
+          <div class="form_box">
+            <label class="label_bold" for="input_name">이름 / NAME</label>
+            <div class="input_box">
+              <input type="text" class="input_info" id="input_name" name="userName" placeholder="이름을 입력하세요." required>
+            </div>
           </div>
-          <p id="input_nicknameMessage"></p> <!-- 닉네임 중복 확인 결과 표시 -->
-        </div>
-        <div class="form_box">
-          <label class="label_bold" for="input_pwd">비밀번호 변경 / CHG_PASSWORD</label>
-          <div class="input_box">
-            <input type="password" class="input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요.">
+          <div class="form_box">
+            <div class="radio_box">
+              <span class="margin_left_4px">성별</span>
+              <input type="radio" id="male" name="gender" value="남성" required>
+              <label for="male">남성</label>
+              <input type="radio" id="female" name="gender" value="여성">
+              <label for="female">여성</label>
+            </div>
+          </div>
+          <div class="form_box">
+            <label class="label_bold" for="input_id">아이디 / ID</label>
+            <div class="input_box">
+              <input type="text" class="send_code input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
+              <button type="button" class="side_btn" id="id_check" onclick="checkDuplicate('input_id')">중복확인</button>
+            </div>
+            <p id="input_idMessage"></p>
+          </div>
+          <div class="form_box">
+            <label class="label_bold" for="input_nickname">닉네임 / NICKNAME</label>
+            <div class="input_box">
+              <input type="text" class="send_code input_info" id="input_nickname" name="userNickname" placeholder="닉네임을 입력하세요." required>
+              <button type="button" class="side_btn" id="nick_check" onclick="checkDuplicate('input_nickname')">중복확인</button>
+            </div>
+            <p id="input_nicknameMessage"></p>
+          </div>
+          <div class="form_box">
+            <label class="label_bold" for="input_password">비밀번호 / PASSWORD</label>
+            <div class="input_box">
+              <input type="password" class="input_info" id="input_password" name="password" placeholder="비밀번호를 입력하세요." required>
+            </div>
+          </div>
+          <div class="form_box">
+            <label class="label_bold" for="chk_password">비밀번호 확인 / PASSWORD CHECK</label>
+            <div class="input_box">
+              <input type="password" class="input_info" id="chk_password" name="chk_password" placeholder="비밀번호를 확인하세요." required>
+            </div>
+          </div>
+          <div class="button_login_wrap">
+            <button type="button" class="btn_signup" id="goNext">다음</button>
           </div>
         </div>
-        <div class="form_box">
-          <label class="label_bold" for="chk_pwd">비밀번호 확인 / PASSWORD CHECK</label>
-          <div class="input_box">
-            <input type="password" class="input_info" id="chk_pwd" name="chk_pwd" placeholder="비밀번호를 확인하세요.">
+        <div id="second">
+          <div class="form_box">
+            <label class="label_bold" for="birthDate">생년월일</label>
+            <div class="input_box">
+              <input type="text" class="input_info" id="birthDate" name="birthDate" placeholder="생년월일을 확인하세요.(19990101)" required>
+            </div>
           </div>
-        </div>
-        <div class="form_box">
-          <label class="label_bold" for="input_email">이메일 / E-MAIL</label>
-          <div class="input_box">
-            <input type="email" class="send_code input_info" id="input_email" name="email" placeholder="이메일을 입력하세요.">
-            <button type="button" id="send_code" class="side_btn" onclick="getEmailExists('input_email')">코드전송</button>
+          <div class="form_box">
+            <label class="label_bold" for="phoneNumber">핸드폰 번호</label>
+            <div class="input_box">
+              <input type="text" class="input_info" id="phoneNumber" name="phoneNumber" placeholder="핸드폰번호를 확인하세요.(01012345678)" required>
+            </div>
           </div>
-        </div>
-        <div class="form_box">
-          <label class="label_bold" for="email_confirm">인증코드 입력</label>
-          <div class="input_box">
-            <input type="text" class="confirm_code input_info" id="email_confirm" name="email_confirm" placeholder="인증코드 입력.">
-            <button type="button" id="check_code" class="side_btn" onclick="approveCode()">인증확인</button>
+          <div class="form_box">
+            <label class="label_bold" for="input_mealCnt">식사량</label>
+            <div class="input_box">
+              <input type="number" class="send_code input_info" id="input_mealCnt" name="mealCnt" placeholder="식사량을 입력하세요." required>
+              <button type="button" class="side_btn" style="width: 20%" id="set_mealCnt">확인</button>
+            </div>
           </div>
-        </div>
-        <div class="button_login_wrap">
-          <button type="submit" class="btn_signup" id="goToMain">회원정보저장</button>
+          <!-- 식사 시간 입력창이 동적으로 들어올 영역 -->
+          <div class="form_box" id="mealTimeInputs"></div>
+          <div class="form_box">
+            <input type="checkbox" class="auto_login_chk" id="confirm_terms" name="auto_login" required>
+            <label for="confirm_terms">이용약관에 동의</label>
+          </div>
+          <div class="input_box" style="justify-content: space-between !important;">
+            <button type="button" class="two_button" style="width: 50%" id="goBack">뒤로가기</button>
+            <button type="button" class="two_button" style="width: 50%" id="goToLogin">회원가입</button>
+          </div>
         </div>
       </form>
     </div>
