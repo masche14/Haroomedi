@@ -6,9 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>간편인증 페이지</title>
     <link rel="stylesheet" href="/css/authStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/nav.js" defer></script>
 </head>
-<script>
+<script th:inline="javascript">
+    let userId = /*[[${userId}]]*/ null;
+    let error = /*[[${msg}]]*/ null;
+    let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
+    let ref = /*[[${ref}]]*/ null;
+
     function showModal(modalId, checkboxId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -240,22 +247,28 @@
         <button onclick="closeModal('modal3')">확인</button>
     </div>
 </div>
+
 <nav>
     <div class="nav-content">
-        <div class="nav-group">
-            <a href="#" class="text-left">홈</a>
+        <div class="nav-group same_width justify-left">
+            <a href="/user/index">하루약속</a>
         </div>
-        <div class="nav-group">
+        <div class="nav-group" id="serviceNav">
             <a href="#">처방 내역 조회</a>
             <a href="#">처방 내역 동기화</a>
             <a href="#">AI 챗봇 상담</a>
             <a href="#">주변 약국 찾기</a>
         </div>
-        <div class="nav-group">
-            <a href="#" class="login">로그인 / Login</a>
+        <div class="nav-group same_width justify-right" id="beforeLoginNav">
+            <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
+        </div>
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav">
+            <a href="/user/delOrUpdate" style="font-size: x-large" title="마이페이지">👤</a>
+            <a href="/user/logout" class="login">로그아웃</a>
         </div>
     </div>
 </nav>
+
 <div class="auth-container">
     <form id="health" action="/health/certificate" method="post" class="auth-box">
         <!-- 민간 인증서 부분 -->

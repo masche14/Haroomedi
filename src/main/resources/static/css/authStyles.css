@@ -25,51 +25,6 @@ html, body {
     flex-direction: column;
 }
 
-nav {
-    width: 100%;
-    height: 3.75rem;
-    background-color: var(--navbar-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1.25rem;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.2);
-}
-
-.nav-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-}
-
-.nav-group {
-    display: flex;
-    gap: 1.5rem;
-}
-
-nav a {
-    margin: 0 0.9375rem;
-    text-decoration: none;
-    color: var(--text-color);
-    font-size: 1rem;
-    display: inline-block;
-    text-align: center;
-    width: 8.75rem;
-}
-
-.login {
-    background-color: var(--button-color);
-    color: white;
-    padding: 0.625rem 0rem;
-    border-radius: 0.625rem;
-    width: 8.75rem;
-    text-align: center;
-}
-
 .back-container, .auth-container {
     margin-top: 5rem;
     display: flex;
