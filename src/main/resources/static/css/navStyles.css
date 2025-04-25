@@ -40,6 +40,23 @@ nav a {
     /*width: 8.75rem;*/
 }
 
+nav a:hover {
+    font-weight: bold;
+}
+
+.nav-icon {
+    font-size: x-large;
+}
+
+.nav-icon:hover{
+    text-shadow:
+        -1px -1px 0 #1976ca,
+        1px -1px 0 #1976ca,
+        -1px 1px 0 #1976ca,
+        1px 1px 0 #1976ca;
+    -webkit-text-stroke: 1px #1976ca;
+}
+
 .login {
     background-color: var(--button-color);
     color: white;
