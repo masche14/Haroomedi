@@ -80,7 +80,8 @@ footer {
 .card  {
     width: 18.75rem;
     height: 18.75rem;
-    background-color: #eaf7f4;
+    /*background-color: #eaf7f4;*/
+    background-color: #ffffff;
     border-radius: 0.625rem;
     box-shadow: 0.625rem 0.625rem 0.25rem rgba(0, 0, 0, 0.25);
     display: flex;
