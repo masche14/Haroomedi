@@ -6,11 +6,12 @@
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="/css/userStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/checkDuplicate.js" defer></script>
-
+    <script src="/js/nav.js" defer></script>
     <!-- Thymeleaf session 값 JS에 전달 -->
     <script th:inline="javascript">
         const error = /*[[${error}]]*/ null;
@@ -27,12 +28,7 @@
                 return;
             }
 
-            if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
-                $("#loginNav").hide();
-            } else {
-                $("#myPageNav").hide();
-                $("#logoutNav").hide();
-            }
+
 
             const modal = document.getElementById("termsModal");
             const closeButton = document.getElementsByClassName("close")[0];
@@ -257,16 +253,26 @@
 <form id="redirectForm" action="/user/find_id" method="get" style="display: none;"></form>
 
 <!-- 네비게이션 -->
-<div class="navbar">
-    <img src="/nestifyLogo.png" alt="Logo" class="logo">
-    <div class="menu">
-        <a href="/user/index">홈</a>
-        <a href="/interior/choose">인테리어</a>
-        <a href="javascript:void(0);" id="loginNav" onclick="setReferrer()">로그인</a>
-        <a href="/user/delOrUpdate" id="myPageNav">마이페이지</a>
-        <a href="/user/logout" id="logoutNav">로그아웃</a>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group">
+            <a href="/user/index" class="text-left">하루약속</a>
+        </div>
+        <div class="nav-group" id="serviceNav">
+            <a href="#">처방 내역 조회</a>
+            <a href="#">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group" id="beforeLoginNav">
+            <a href="/user/signin" class="login">로그인 / Login</a>
+        </div>
+        <div class="nav-group after_login" id="afterLoginNav">
+            <a href="#">마이페이지</a>
+            <a href="/user/logout" class="login">로그아웃</a>
+        </div>
     </div>
-</div>
+</nav>
 
 <!-- 본문 -->
 <div class="content">

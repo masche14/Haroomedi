@@ -8,9 +8,11 @@
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="/css/userStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/getExists.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+    <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
         let error = /*[[${msg}]]*/ null;
@@ -19,12 +21,6 @@
         // DOM이 완전히 로드된 후에 실행되도록 설정
         $(document).ready(function () {
 
-            if (SS_USER_ID && SS_USER_ID.trim() !== "null") {
-                document.getElementById("loginNav").style.display = "none";
-            } else {
-                document.getElementById("myPageNav").style.display = "none";
-                document.getElementById("logoutNav").style.display = "none";
-            }
 
         });
     </script>
@@ -33,19 +29,26 @@
 <header></header>
 
 <!-- 네비게이션 바 -->
-<div class="navbar">
-    <!-- 좌측 로고 -->
-    <img src="/nestifyLogo.png" alt="Logo" class="logo">
-
-    <!-- 우측 메뉴 -->
-    <div class="menu">
-        <a href="/user/index">홈</a>
-        <a href="/interior/choose">인테리어</a>
-        <a href="javascript:void(0);" id="loginNav" onclick="setReferrer()">로그인</a>
-        <a href="/user/delOrUpdate" id="myPageNav" >마이페이지</a>
-        <a href="/user/logout" id="logoutNav">로그아웃</a>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group">
+            <a href="/user/index" class="text-left">하루약속</a>
+        </div>
+        <div class="nav-group" id="serviceNav">
+            <a href="#">처방 내역 조회</a>
+            <a href="#">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group" id="beforeLoginNav">
+            <a href="/user/signin" class="login">로그인 / Login</a>
+        </div>
+        <div class="nav-group after_login" id="afterLoginNav">
+            <a href="#">마이페이지</a>
+            <a href="/user/logout" class="login">로그아웃</a>
+        </div>
     </div>
-</div>
+</nav>
 
 <div class="content">
     <div class="container">

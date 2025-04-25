@@ -10,6 +10,7 @@
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
     <script src="/js/setReferrer.js" defer></script>
+    <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
         let error = /*[[${msg}]]*/ null;
@@ -19,71 +20,51 @@
         $(document).ready(function () {
 
             console.log(SS_USER_ID);
-
-           if (SS_USER_ID && SS_USER_ID.trim() != null) {
-               document.getElementById("loginNav").style.display = "none";
-           } else {
-               document.getElementById("myPageNav").style.display = "none";
-               document.getElementById("logoutNav").style.display = "none";
-           }
-
-            document.querySelectorAll('.service').forEach(box => {
-                box.addEventListener('mouseover', (event) => {
-                    document.querySelectorAll('.service').forEach(otherBox => {
-                        if (otherBox !== event.target) {
-                            otherBox.classList.add('highlight');
-                        }
-                    });
-                });
-
-                box.addEventListener('mouseout', () => {
-                    document.querySelectorAll('.service').forEach(otherBox => {
-                        otherBox.classList.remove('highlight');
-                    });
-                });
-            });
         });
     </script>
 </head>
 <body>
-
-<header></header>
-
-<div class="navbar">
-    <!-- 좌측 로고 -->
-    <img src="/nestifyLogo.png" alt="Logo" class="logo">
-
-    <!-- 우측 메뉴 -->
-    <div class="menu">
-        <a href="/user/index">홈</a>
-        <a href="/interior/choose">인테리어</a>
-        <a href="javascript:void(0);" id="loginNav" onclick="setReferrer()">로그인</a>
-        <a href="/user/delOrUpdate" id="myPageNav" >마이페이지</a>
-        <a href="/user/logout" id="logoutNav">로그아웃</a>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group">
+            <a href="/user/index" class="text-left">하루약속</a>
+        </div>
+        <div class="nav-group" id="serviceNav">
+            <a href="#">처방 내역 조회</a>
+            <a href="#">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group" id="beforeLoginNav">
+            <a href="/user/signin" class="login" onclick="setReferrer()">로그인 / Login</a>
+        </div>
+        <div class="nav-group after_login" id="afterLoginNav">
+            <a href="#">마이페이지</a>
+            <a href="/user/logout" class="login">로그아웃</a>
+        </div>
     </div>
+</nav>
+<div class="container">
+    <a href="#" class="card highlight">
+        <div class="icon">📋</div>
+        <h2>처방 내역 조회</h2>
+        <p class="text-white">처방 내역을 확인 하세요<br>복약 관리가 필요한 처방 내역은<br>알림 신청을 통해 관리 받으세요</p>
+    </a>
+    <a href="#" class="card">
+        <div class="icon">🔄</div>
+        <h2>처방 내역 동기화</h2>
+        <p>약국을 다녀오셨다면<br>처방 내역을 동기화 하세요</p>
+    </a>
+    <a href="#" class="card">
+        <div class="icon">🤖</div>
+        <h2>AI 챗봇 상담</h2>
+        <p>현재 불편한 곳이 있어서<br>도움이 필요하시면<br>AI 챗봇 상담을 받아보세요</p>
+    </a>
+    <a href="#" class="card">
+        <div class="icon">📍</div>
+        <h2>주변 약국 찾기</h2>
+        <p>약국 방문이 필요하시면<br>현재 위치 주변의 약국을 찾아보세요</p>
+    </a>
 </div>
-
-
-
-<div class="content">
-    <div class="top">
-        <div class="head-line">AI를 활용하여</div>
-        <div class="head-line">당신의 자취방을 꾸며보세요</div>
-    </div>
-    <div class="container no-margin">
-        <a href="/interior/makeNew" class="service-box">
-            <div class="service">새로운 인테리어 생성하기</div>
-        </a>
-        <a href="/interior/records" class="service-box">
-            <div class="service">이전 인테리어 확인하기</div>
-        </a>
-        <a href="/search/search" class="service-box">
-            <div class="service">상품 검색하기</div>
-        </a>
-    </div>
-    <div class="bottom"></div>
-</div>
-
-<footer></footer>
 </body>
 </html>
