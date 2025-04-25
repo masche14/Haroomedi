@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>메인페이지</title>
     <link rel="stylesheet" href="/css/indexStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
@@ -26,8 +27,8 @@
 <body>
 <nav>
     <div class="nav-content">
-        <div class="nav-group">
-            <a href="/user/index" class="text-left">하루약속</a>
+        <div class="nav-group same_width justify-left">
+            <a href="/user/index">하루약속</a>
         </div>
         <div class="nav-group" id="serviceNav">
             <a href="#">처방 내역 조회</a>
@@ -35,11 +36,11 @@
             <a href="#">AI 챗봇 상담</a>
             <a href="#">주변 약국 찾기</a>
         </div>
-        <div class="nav-group" id="beforeLoginNav">
-            <a href="/user/signin" class="login" onclick="setReferrer()">로그인 / Login</a>
+        <div class="nav-group same_width justify-right" id="beforeLoginNav">
+            <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
         </div>
-        <div class="nav-group after_login" id="afterLoginNav">
-            <a href="#">마이페이지</a>
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav">
+            <a href="/user/delOrUpdate" style="font-size: x-large" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>
     </div>

@@ -25,9 +25,6 @@ nav {
     align-items: center;
 }
 
-.home {
-
-}
 
 .after_login {
     gap: 0 !important;
@@ -46,8 +43,20 @@ nav a {
 .login {
     background-color: var(--button-color);
     color: white;
-    padding: 0.625rem 0rem;
+    padding: 0.625rem 1rem;
     border-radius: 0.625rem;
-    width: 8.75rem;
+    width: auto;
     text-align: center;
+}
+
+.same_width {
+    width: 200px;
+}
+
+.justify-left {
+    justify-content: left;
+}
+
+.justify-right {
+    justify-content: right;
 }
