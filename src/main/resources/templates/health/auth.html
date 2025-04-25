@@ -39,6 +39,11 @@
 
         $(document).ready(function () {
 
+            if (SS_USER_ID==null){
+                alert("로그인 후 이용 가능힙니다.");
+                setReferrer();
+            }
+
             // 전체동의 체크박스
             const checkAll = document.getElementById("checkAll");
             // 개별동의 체크박스들
