@@ -80,7 +80,7 @@
                     function (json) {
                         alert(json.data.msg);
                         if (json.data.result == 1) {
-                            window.location = "/user/index";
+                            window.location = "/user/signin";
                         }
                     }
                 )
@@ -107,7 +107,7 @@
             <a href="#" class="login" onclick="setReferrer()">로그인</a>
         </div>
         <div class="nav-group after_login same_width justify-right" id="afterLoginNav">
-            <a href="/user/delOrUpdate" style="font-size: x-large" title="마이페이지">👤</a>
+            <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>
     </div>
@@ -119,7 +119,7 @@
             <div class="form_box">
                 <label class="label_bold" for="input_id">아이디 / ID</label>
                 <div class="input_box">
-                    <input type="text" class="input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
+                    <input type="text" class="input_info" id="input_id" name="orgId" placeholder="아이디를 입력하세요." required>
                 </div>
             </div>
             <div class="form_box">

@@ -31,5 +31,6 @@ public class UserInfoDTO {
     private String phoneNumber;
     private int mealCnt;
     private List<String> mealTime;
+    private String orgId;
 
 }

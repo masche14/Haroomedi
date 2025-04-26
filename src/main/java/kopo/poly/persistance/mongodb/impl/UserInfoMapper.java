@@ -188,11 +188,14 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
     @Override
     public int updateUserInfo(String colNm, UserInfoDTO pDTO) throws Exception {
-        Query query = new Query(Criteria.where("userId").is(pDTO.getUserId())); // 수정 기준
+        Query query = new Query(Criteria.where("userId").is(pDTO.getOrgId())); // 수정 기준
 
         Update updateFields = new Update();
 
         // null 체크 후 업데이트 대상에 추가
+        if (pDTO.getUserId() != null && !pDTO.getUserId().isBlank()) {
+            updateFields.set("userId", pDTO.getUserId());
+        }
         if (pDTO.getPassword() != null && !pDTO.getPassword().isBlank()) {
             updateFields.set("password", pDTO.getPassword());
         }

@@ -1,4 +1,6 @@
 var approveResult;
+var checkEmail;
+var finalEmail;
 
 function getEmailExists(type) {
     const fieldName = $("#" + type).attr("name");
@@ -27,6 +29,7 @@ function getEmailExists(type) {
         contentType: "application/json",
         data: JSON.stringify(jsonData),
         success: function (json) {
+            checkEmail = value;
             alert("이메일로 인증번호가 발송되었습니다.\n받은 메일의 인증번호를 입력하기 바랍니다.");
         },
         error: function (xhr, status, error) {
@@ -67,10 +70,16 @@ function approveCode() {
 function handleSubmit(event) {
     event.preventDefault();
 
+    finalEmail = $("#input_email").val();
+
     console.log(approveResult);
 
     if (approveResult === "Y") {
-        $("#emailVerificationForm").submit();
+        if (finalEmail === checkEmail){
+            $("#emailVerificationForm").submit();
+        } else {
+            alert("인증받은 이메일과 다른 이메일을 입력하였습니다.");
+        }
     } else {
         alert("이메일 인증 여부를 확인하세요.");
     }
