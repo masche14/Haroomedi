@@ -193,8 +193,12 @@ public class UserController {
         int res;
         String msg="";
         if (pDTO.getAuthNumber()==emailResultDTO.getAuthNumber()){
-            res = 1;
             msg = "인증에 성공하였습니다.";
+            if (emailResultDTO.getExistYn().equals("Y")){
+                res = 2;
+            } else {
+                res = 1;
+            }
         }else {
             res = 0;
             msg = "인증에 실패하였습니다. 인증코드를 다시 확인해주세요.";
@@ -497,13 +501,48 @@ public class UserController {
 
     @GetMapping("/myPage")
     public String showMyPage(HttpSession session, Model model) {
-        String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
-
-//        if (pwdVerifyResult==null) {
-//            return "redirect:/user/index";
-//        }
-
         return "/user/myPage";
+    }
+
+    @PostMapping("/updateInfo")
+    public ResponseEntity<CommonResponse<MsgDTO>> myPage(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.updateInfo Start", this.getClass().getSimpleName());
+        log.info("pDTO : {}", pDTO.toString());
+        String userId = (String) session.getAttribute("SS_USER_ID");
+        pDTO.setOrgId(userId);
+
+        log.info("password : {}", pDTO.getPassword());
+
+        if (pDTO.getPassword() != null && !pDTO.getPassword().isBlank()){
+            String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
+            pDTO.setPassword(encPassword);
+
+            log.info("encPassword : {}", encPassword);
+        }
+
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg="";
+
+        res = userInfoService.updateUserInfo(pDTO);
+        log.info("res : {}", res);
+
+        msg = "회원정보 수정 완료";
+
+        UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
+
+        session.setAttribute("SS_USER_ID", rDTO.getUserId());
+        session.setAttribute("SS_USER_NAME", rDTO.getUserName());
+        session.setAttribute("SS_USER_NICKNAME", rDTO.getUserNickname());
+        session.setAttribute("SS_USER_EMAIL", EncryptUtil.decAES128CBC(rDTO.getUserEmail()));
+        session.setAttribute("SS_USER_GENDER", rDTO.getGender());
+
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        log.info("{}.updateInfo End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
 
 

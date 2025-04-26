@@ -1,8 +1,14 @@
-var approveResult;
+var approveResult = "N";
+var existYn;
 var checkEmail;
 var finalEmail;
 
 function getEmailExists(type) {
+    approveResult = "N";
+    existYn = undefined;
+    checkEmail = undefined;
+    finalEmail = undefined;
+
     const fieldName = $("#" + type).attr("name");
     const value = $("#" + type).val();
 
@@ -56,10 +62,14 @@ function approveCode() {
         data: JSON.stringify(jsonData),
     }).then(
         function (json) {  // 성공 시 콜백 함수
-            if (json.data.result == 1) {
+            const res = json.data.result;
+            if (res !== 0) {
                 approveResult = "Y";
-            }else{
-                approveResult="N";
+                if (res===1){
+                    existYn = "N";
+                }else{
+                    existYn = "Y";
+                }
             }
             alert(json.data.msg); // 메시지 표시
         }

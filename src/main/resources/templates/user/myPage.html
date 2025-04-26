@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/css/userStyles.css">
   <link rel="stylesheet" href="/css/navStyles.css">
   <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+  <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
   <script src="/js/getExists.js" defer></script>
   <script src="/js/setReferrer.js" defer></script>
   <script src="/js/checkDuplicate.js" defer></script>
@@ -32,7 +33,7 @@
 
       console.log("referrer : "+referrer_page)
 
-      if (referrer_page!=="delOrUpdate"){
+      if (SS_USER_ID === "" || referrer_page!=="delOrUpdate"){
         alert("올바르지 않은 접근입니다.")
         window.location.href="/user/index";
       }
@@ -43,82 +44,29 @@
       $("#nicknameDisplay").text(SS_USER_NICKNAME);
       $("#emailDisplay").text(SS_USER_EMAIL);
 
-      // // 폼 제출 전 확인하는 함수
-      // function validateForm(event) {
-      //   if (document.getElementById("input_nickname").value){
-      //     if (!nicknameChecked) {
-      //       event.preventDefault();  // 폼 제출을 막음
-      //       alert("닉네임 중복 여부를 확인해주세요.");
-      //       return false;
-      //     }
-      //   }
-      //
-      //   console.log(check_nick);
-      //
-      //   console.log(document.getElementById("input_nickname").value);
-      //
-      //   if (document.getElementById("input_nickname").value !== ""){
-      //     if (document.getElementById("input_nickname").value !== check_nick.trim()){
-      //       event.preventDefault();
-      //       alert("닉네임 중복확인을 다시 진행해주세요.")
-      //       return false;
-      //     }
-      //   }
-      //   // 중복 확인이 완료되었으면 폼을 제출
-      //   const pwd = document.getElementById("input_pwd").value;
-      //   const pwd2 = document.getElementById("chk_pwd").value;
-      //
-      //   if (pwd !== pwd2){
-      //     event.preventDefault();
-      //     alert("비밀번호와 비밀번호 확인에 입력된 값이\n일치하지 않습니다.");
-      //     return false;
-      //   }
-      //
-      //   const emailInput = document.getElementById("input_email").value.trim();
-      //
-      //   // 이메일이 존재하고, approveResult가 'y'가 아닐 경우 경고창 표시
-      //   if (emailInput && approveResult !== 'y') {
-      //     event.preventDefault();
-      //     alert("이메일 인증을 완료해야 합니다.");
-      //     return false; // 이메일 인증이 완료되지 않았으므로 폼 제출을 막음
-      //   }
-      //
-      //   // 모든 조건이 만족되었을 경우 폼 제출 허용
-      //   return true;
-      // }
-      //
-      // // 회원가입 버튼 클릭 시 validateForm 실행
-      // document.getElementById('goToMain').addEventListener('click', validateForm);
-
-      $('#goToLogin').on('click', function (event) {
+      $('#goToUpdate').on('click', function (event) {
         const birth = $('#birthDate').val().trim();
         const phone = $('#phoneNumber').val().trim();
         const mealCnt = parseInt($('#input_mealCnt').val());
 
-        if (!birth) {
-          alert("생년월일을 입력해주세요.");
-          event.preventDefault();
-          return;
-        }
-
-        if (!phone) {
-          alert("핸드폰 번호를 입력해주세요.");
-          event.preventDefault();
-          return;
-        }
-
-        if (isNaN(mealCnt) || mealCnt <= 0) {
-          alert("식사량을 1 이상으로 입력해주세요.");
-          event.preventDefault();
-          return;
+        if ($("#input_email").val()!=""){
+          if(approveResult==="N"){
+            alert("이메일 인증을 진행해주세요.");
+            return;
+          }else{
+            if($("#input_email").val()!=checkEmail){
+              alert("인증받은 이메일과 다른 이메일을 입력하였습니다.");
+              return;
+            }else{
+              if (existYn==="Y"){
+                alert("이미 존재하는 이메일입니다.");
+                return;
+              }
+            }
+          }
         }
 
         const times = $('input[name="mealTime"]');
-        if (times.length !== mealCnt) {
-          alert("식사 시간 입력란이 부족합니다. 다시 확인해주세요.");
-          event.preventDefault();
-          return;
-        }
 
         for (let i = 0; i < times.length; i++) {
           if (!times[i].value) {
@@ -126,12 +74,6 @@
             event.preventDefault();
             return;
           }
-        }
-
-        if (!$('#confirm_terms').is(':checked')) {
-          alert("이용약관에 동의해주세요.");
-          event.preventDefault();
-          return;
         }
 
         const data = $("#signupForm").serializeObject();
@@ -145,7 +87,7 @@
 
         // 서버에 중복 여부 확인 요청 (jQuery 방식)
         $.ajax({
-          url: "/user/signup_detail",
+          url: "/user/updateInfo",
           type: "POST",
           contentType: "application/json",
           dataType: "JSON",
@@ -153,47 +95,25 @@
         }).then(
                 function (json){
                   alert(json.data.msg);
-                  if (json.data.result == 1){
-                    window.location = "/user/signin";
-                  }
+                  window.location = "/user/index";
                 }
         );
       });
 
       $('#goNext').on('click', function (event) {
-        // 먼저 required 입력값들이 비어있는지 검사
-        let isEmpty = false;
 
-        $('#first').find('input[required]').each(function () {
-          const type = $(this).attr('type');
-          const name = $(this).attr('name');
-
-          if (type === 'radio') {
-            // 라디오 그룹 중 체크된 게 하나도 없으면 alert
-            if ($(`input[name="${name}"]:checked`).length === 0) {
-              alert("성별을 선택해주세요.");
-              isEmpty = true;
-              return false; // break
-            }
-          } else {
-            if (!$(this).val().trim()) {
-              alert("모든 필수 입력 항목을 입력해주세요.");
-              $(this).focus(); // 비어있는 곳으로 커서 이동
-              isEmpty = true;
-              return false; // break
-            }
+        if ($("#input_id").val()!=""){
+          if(!idPossible){
+            alert("아이디 중복 여부를 확인해주세요.");
+            return;
           }
-        });
-
-        if (isEmpty) {
-          event.preventDefault();
-          return;
         }
 
-        if (!idPossible || !nicknamePossible) {
-          event.preventDefault();
-          alert("아이디와 닉네임 중복 여부를 확인해주세요.");
-          return;
+        if ($("#input_nickname").val()!=""){
+          if(!nicknamePossible){
+            alert("닉네임 중복 여부를 확인해주세요.");
+            return;
+          }
         }
 
         if ($('#input_id').val() !== check_id.trim()) {
@@ -320,13 +240,13 @@
           <div class="form_box">
             <label class="label_bold" for="input_name">이름 / NAME</label>
             <div class="input_box">
-              <input type="text" class="input_info" id="input_name" name="userName" placeholder="이름을 입력하세요." required>
+              <input type="text" class="input_info" id="input_name" name="userName" placeholder="이름을 입력하세요.">
             </div>
           </div>
           <div class="form_box">
             <div class="radio_box">
               <span class="margin_left_4px">성별</span>
-              <input type="radio" id="male" name="gender" value="남성" required>
+              <input type="radio" id="male" name="gender" value="남성">
               <label for="male">남성</label>
               <input type="radio" id="female" name="gender" value="여성">
               <label for="female">여성</label>
@@ -335,7 +255,7 @@
           <div class="form_box">
             <label class="label_bold" for="input_id">아이디 / ID</label>
             <div class="input_box">
-              <input type="text" class="send_code input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요." required>
+              <input type="text" class="send_code input_info" id="input_id" name="userId" placeholder="아이디를 입력하세요.">
               <button type="button" class="side_btn" id="id_check" onclick="checkDuplicate('input_id')">중복확인</button>
             </div>
             <p id="input_idMessage"></p>
@@ -343,7 +263,7 @@
           <div class="form_box">
             <label class="label_bold" for="input_nickname">닉네임 / NICKNAME</label>
             <div class="input_box">
-              <input type="text" class="send_code input_info" id="input_nickname" name="userNickname" placeholder="닉네임을 입력하세요." required>
+              <input type="text" class="send_code input_info" id="input_nickname" name="userNickname" placeholder="닉네임을 입력하세요.">
               <button type="button" class="side_btn" id="nick_check" onclick="checkDuplicate('input_nickname')">중복확인</button>
             </div>
             <p id="input_nicknameMessage"></p>
@@ -351,13 +271,13 @@
           <div class="form_box">
             <label class="label_bold" for="input_password">비밀번호 / PASSWORD</label>
             <div class="input_box">
-              <input type="password" class="input_info" id="input_password" name="password" placeholder="비밀번호를 입력하세요." required>
+              <input type="password" class="input_info" id="input_password" name="password" placeholder="비밀번호를 입력하세요.">
             </div>
           </div>
           <div class="form_box">
             <label class="label_bold" for="chk_password">비밀번호 확인 / PASSWORD CHECK</label>
             <div class="input_box">
-              <input type="password" class="input_info" id="chk_password" name="chk_password" placeholder="비밀번호를 확인하세요." required>
+              <input type="password" class="input_info" id="chk_password" name="chk_password" placeholder="비밀번호를 확인하세요.">
             </div>
           </div>
           <div class="button_login_wrap">
@@ -400,13 +320,9 @@
           </div>
           <!-- 식사 시간 입력창이 동적으로 들어올 영역 -->
           <div class="form_box" id="mealTimeInputs"></div>
-          <div class="form_box">
-            <input type="checkbox" class="auto_login_chk" id="confirm_terms" name="auto_login" required>
-            <label for="confirm_terms">이용약관에 동의</label>
-          </div>
           <div class="input_box" style="justify-content: space-between !important;">
             <button type="button" class="two_button" style="width: 50%" id="goBack">뒤로가기</button>
-            <button type="button" class="two_button" style="width: 50%" id="goToLogin">회원가입</button>
+            <button type="button" class="two_button" style="width: 50%" id="goToUpdate">회원정보 수정</button>
           </div>
         </div>
       </form>
