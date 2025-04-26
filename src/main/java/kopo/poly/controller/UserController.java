@@ -68,6 +68,7 @@ public class UserController {
 
         if (userId != null){
             model.addAttribute("userId", userId);
+            session.removeAttribute("userId");
         } else {
             model.addAttribute("userId", "");
         }
@@ -84,15 +85,19 @@ public class UserController {
         int res = 0;
         String msg = "";
 
+        log.info("password : {}", pDTO.getPassword());
+
 
         try {
             String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
             pDTO.setPassword(encPassword);
 
+            log.info("encPassword : {}", encPassword);
+
             UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
 
             if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {
-
+                log.info("rDTO password : {}", rDTO.getPassword());
 
                 if (CmmUtil.nvl(pDTO.getPassword()).equals(CmmUtil.nvl(rDTO.getPassword()))) {
                     session.removeAttribute("emailResultDTO");
@@ -336,8 +341,12 @@ public class UserController {
         log.info("{}.resetPwd Start", this.getClass().getSimpleName());
         log.info("pDTO : {}", pDTO.toString());
 
+        log.info("password : {}", pDTO.getPassword());
+
         String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
         pDTO.setPassword(encPassword);
+
+        log.info("encPassword : {}", encPassword);
 
         MsgDTO dto = new MsgDTO();
         int res = 0;

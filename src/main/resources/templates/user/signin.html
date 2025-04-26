@@ -13,42 +13,54 @@
     <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
-        let error = /*[[${msg}]]*/ null;
         let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
         let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {
 
-            if (error && error.trim() !== "null") {
-                if (error.includes("않습니다.")) {
-                    alert(error);
+            console.log("userId : ",userId);
+            console.log("ref :",ref);
+
+            $('#input_id').val(userId);
+
+            // Enter 키 입력 시 applyLogin 함수 실행
+            $(document).on("keydown", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // 기본 form 제출 방지
+                    applyLogin();
                 }
-            }
-
-            if (userId && userId.trim() !== "null") {
-                $('#input_id').val(userId);
-            } else {
-                $('#input_id').val("");
-            }
-
-            $("#login").on("click", function (){
-                // Ajax 호출해서 멜론차트 조회하기
-                $.ajax({
-                    url: "/user/signin",
-                    type: "post", // 전송방식은 Post
-                    contentType: "application/json",
-                    data: JSON.stringify($("#signinForm").serializeObject()), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
-                    dataType: "JSON", // 전송 결과는 JSON으로 받기
-                }).then(
-                    function (json) {
-                        alert(json.data.msg);
-                        if (json.data.result == 1) {
-                            window.location = ref;
-                        }
-                    }
-                )
             });
         });
+
+        function applyLogin(){
+            const id = $("#input_id").val();
+            const pwd = $("#input_pwd").val();
+
+            if (id === "") {
+                alert("아이디를 입력하세요.");
+                return;
+            }
+
+            if (pwd === "") {
+                alert("비밀번호를 입력하세요.");
+                return;
+            }
+
+            $.ajax({
+                url: "/user/signin",
+                type: "post", // 전송방식은 Post
+                contentType: "application/json",
+                data: JSON.stringify($("#signinForm").serializeObject()), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+                dataType: "JSON", // 전송 결과는 JSON으로 받기
+            }).then(
+                function (json) {
+                    alert(json.data.msg);
+                    if (json.data.result == 1) {
+                        window.location = ref;
+                    }
+                }
+            )
+        }
 
         function setSourceAndSubmit(source) {
             const form = document.createElement('form');
@@ -111,7 +123,7 @@
                 <label class="margin_lef_zero" for="auto_login">자동 로그인</label>
             </div>
             <div class="button_login_wrap">
-                <button type="button" class="btn_login" id="login">로그인</button>
+                <button type="button" class="btn_login" id="login" onclick="applyLogin()">로그인</button>
             </div>
             <div class="forgot_login">
                 <a href="#" onclick="setSourceAndSubmit('signup_detail')">회원가입</a>
