@@ -407,17 +407,6 @@ public class UserController {
         return "/user/index"; // /WEB-INF/views/index.jsp
     }
 
-    @GetMapping("/delOrUpdate")
-    public String showDelOrUpdate(HttpSession session) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
-
-//        if (SS_USER_ID == null){
-//            return "redirect:/user/index";
-//        }
-
-        return "/user/delOrUpdate";
-    }
-
     @GetMapping("/pwd_verification")
     public String showPwdVerificationPage(HttpSession session){
         String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
@@ -427,6 +416,70 @@ public class UserController {
         } else {
             return "redirect:/user/index";
         }
+    }
+
+    @PostMapping("/pwd_verification")
+    public ResponseEntity<CommonResponse<MsgDTO>> verifyPwdVerification(HttpSession session, @RequestBody UserInfoDTO pDTO) {
+        log.info("{}.verifyPwdVerification Start", this.getClass().getSimpleName());
+        log.info("password : {}", pDTO.getPassword());
+
+        String userId = (String) session.getAttribute("SS_USER_ID");
+        pDTO.setUserId(userId);
+
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg="";
+
+        try {
+            String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
+            pDTO.setPassword(encPassword);
+
+            log.info("encPassword : {}", encPassword);
+
+            UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
+
+            if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {
+                log.info("rDTO password : {}", rDTO.getPassword());
+
+                if (CmmUtil.nvl(pDTO.getPassword()).equals(CmmUtil.nvl(rDTO.getPassword()))) {
+                    res = 1;
+                    msg = "비밀번호 인증에 성공하였습니다.";
+
+                    String pwdVerifyResult = "Y";
+                    session.setAttribute("pwdVerifyResult", pwdVerifyResult);
+                } else {
+                    msg = "비밀번호가 올바르지 않습니다.";
+                }
+
+            } else {
+                msg = "존재하지 않는 회원 아이디 입니다.";
+            }
+        } catch (Exception e) {
+            msg = "시스템 문제로 로그인이 실패하였습니다.";
+            res = 2;
+            log.info(e.toString());
+        } finally {
+            log.info("{}.verifyPwdVerification End", this.getClass().getName());
+        }
+
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+    }
+
+    @GetMapping("/delOrUpdate")
+    public String showDelOrUpdate(HttpSession session, Model model) {
+        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
+        model.addAttribute("pwdVerifyResult", pwdVerifyResult);
+        session.removeAttribute("pwdVerifyResult");
+
+        if (SS_USER_ID == null){
+            return "redirect:/user/index";
+        }
+
+        return "/user/delOrUpdate";
     }
 
     @GetMapping("/delInfo")

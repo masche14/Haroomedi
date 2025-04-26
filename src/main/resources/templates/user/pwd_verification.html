@@ -12,6 +12,7 @@
     <script src="/js/getExists.js" defer></script>
     <script src="/js/setReferrer.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
@@ -20,14 +21,29 @@
 
         $(document).ready(function () {
 
-            console.log(error);
+            $("#pwd_verify").on("click", function (){
+                const value = $("#input_pwd").val();
 
-            if (error && error.trim() !== "null") {
-                alert(error);
-                
-            }
+                if (value === ""){
+                    alert("비밀번호를 입력하세요.");
+                    return;
+                }
 
-            // document.getElementById('sourceField').value = sessionStorage.getItem('source');
+                $.ajax({
+                    url: "/user/pwd_verification",
+                    type: "post", // 전송방식은 Post
+                    contentType: "application/json",
+                    data: JSON.stringify($("#pwdVerifyForm").serializeObject()), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+                    dataType: "JSON", // 전송 결과는 JSON으로 받기
+                }).then(
+                    function (json) {
+                        alert(json.data.msg);
+                        if (json.data.result == 1) {
+                            window.location = "/user/delOrUpdate";
+                        }
+                    }
+                )
+            });
         });
     </script>
 </head>
@@ -62,8 +78,8 @@
             <div class="form_box">
                 <label class="label_bold" for="input_pwd">비밀번호 / PASSWORD</label>
                 <div class="input_box">
-                    <input type="password" class="send_code input_info" id="input_pwd" name="pwd" placeholder="비밀번호를 입력하세요." required>
-                    <button type="submit" id="send_code" class="side_btn">인증하기</button>
+                    <input type="password" class="send_code input_info" id="input_pwd" name="password" placeholder="비밀번호를 입력하세요." required>
+                    <button type="button" id="pwd_verify" class="side_btn">인증하기</button>
                 </div>
             </div>
         </form>

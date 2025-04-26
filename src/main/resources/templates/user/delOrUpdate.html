@@ -14,13 +14,23 @@
     <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
-        let error = /*[[${msg}]]*/ null;
+        let pwdVerifyResult = /*[[${pwdVerifyResult}]]*/ null;
         let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
-        let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {
 
             console.log(SS_USER_ID);
+
+            const segments = document.referrer.split("/");
+            const referrer = segments[segments.length - 1];
+            console.log("이전 페이지의 마지막 경로:", referrer);
+
+            console.log("pwdVerifyResult :", pwdVerifyResult);
+
+            if (!(referrer==="pwd_verification"||referrer==="pwd_verification?")||pwdVerifyResult!=="Y"){
+                alert("올바르지 않은 접근입니다.")
+                window.location="/user/index";
+            }
         });
     </script>
 </head>
@@ -49,7 +59,7 @@
 </nav>
 
 <div class="container">
-    <a href="#" class="card big-height big-width">
+    <a href="/user/myPage" class="card big-height big-width">
         <div class="icon">🤖</div>
         <h2>회원정보 수정</h2>
         <p>아이디, 닉네임, 식사루틴 등<br>회원정보를 수정합니다.</p>
