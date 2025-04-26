@@ -103,7 +103,8 @@ public class UserController {
                     session.setAttribute("SS_USER_ID", rDTO.getUserId());
                     session.setAttribute("SS_USER_NAME", rDTO.getUserName());
                     session.setAttribute("SS_USER_NICKNAME", rDTO.getUserNickname());
-                    session.setAttribute("SS_USER_EMAIL", rDTO.getUserEmail());
+                    session.setAttribute("SS_USER_EMAIL", EncryptUtil.decAES128CBC(rDTO.getUserEmail()));
+                    session.setAttribute("SS_USER_GENDER", rDTO.getGender());
                 } else {
                     msg = "비밀번호가 올바르지 않습니다.";
                 }
@@ -330,6 +331,35 @@ public class UserController {
         return "/user/reset_pwd";
     }
 
+    @PostMapping("/reset_pwd")
+    public ResponseEntity<CommonResponse<MsgDTO>> resetPwd(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.resetPwd Start", this.getClass().getSimpleName());
+        log.info("pDTO : {}", pDTO.toString());
+
+        String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
+        pDTO.setPassword(encPassword);
+
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg="";
+
+        res = userInfoService.updateUserInfo(pDTO);
+        log.info("res : {}", res);
+
+        if (res > 0) {
+            msg = "비밀번호가 변경되었습니다.";
+        } else {
+            msg = "비밀번호 변경에 실패하였습니다.";
+        }
+
+        dto.setResult(res);
+        dto.setMsg(msg);
+
+        log.info("{}.resetPwd End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
+    }
+
     @GetMapping("/find_id")
     public String showFindIdPage(HttpSession session, Model model) {
         String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
@@ -372,9 +402,9 @@ public class UserController {
     public String showDelOrUpdate(HttpSession session) {
         String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
 
-        if (SS_USER_ID == null){
-            return "redirect:/user/index";
-        }
+//        if (SS_USER_ID == null){
+//            return "redirect:/user/index";
+//        }
 
         return "/user/delOrUpdate";
     }
@@ -407,9 +437,9 @@ public class UserController {
     public String showMyPage(HttpSession session, Model model) {
         String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
 
-        if (pwdVerifyResult==null) {
-            return "redirect:/user/index";
-        }
+//        if (pwdVerifyResult==null) {
+//            return "redirect:/user/index";
+//        }
 
         return "/user/myPage";
     }

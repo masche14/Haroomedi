@@ -158,6 +158,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         projection.append("userName", "$userName");
         projection.append("userEmail", "$userEmail");
         projection.append("userNickname", "$userNickname");
+        projection.append("gender", "$gender");
         projection.append("_id", 0);
 
         FindIterable<Document> rs = col.find(query).projection(projection);
@@ -169,12 +170,14 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 String userName = CmmUtil.nvl(doc.getString("userName"));
                 String userEmail = CmmUtil.nvl(doc.getString("userEmail"));
                 String userNickname = CmmUtil.nvl(doc.getString("userNickname"));
+                String gender = CmmUtil.nvl(doc.getString("gender"));
 
                 rDTO.setUserId(userId);
                 rDTO.setUserName(userName);
                 rDTO.setUserEmail(userEmail);
                 rDTO.setUserNickname(userNickname);
                 rDTO.setPassword(password);
+                rDTO.setGender(gender);
 
                 break; // 어차피 하나만 찾을 거니까 첫 번째에서 바로 종료
             }

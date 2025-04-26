@@ -4,41 +4,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>비밀번호 인증</title>
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="/css/indexStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
     <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="/css/userStyles.css">
-    <link rel="stylesheet" href="/css/navStyles.css">
-    <script src="/js/getExists.js" defer></script>
-    <script src="/js/setReferrer.js" defer></script>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+    <script src="/js/setReferrer.js" defer></script>
     <script src="/js/nav.js" defer></script>
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
-        let existYN = /*[[${existYN}]]*/ null;
-        let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
         let error = /*[[${msg}]]*/ null;
+        let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
+        let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {
 
-            console.log(error);
-
-            if (error && error.trim() !== "null") {
-                alert(error);
-                
-            }
+            console.log(SS_USER_ID);
         });
-
-        function goDelOrUpdate(selection) {
-            document.getElementById('selection').value=selection;
-            document.getElementById('delOrUpdate').submit();
-        }
     </script>
 </head>
 <body>
 <header></header>
 
-<!-- 네비게이션 바 -->
 <nav>
     <div class="nav-content">
         <div class="nav-group same_width justify-left">
@@ -54,24 +42,23 @@
             <a href="#" class="login" onclick="setReferrer()">로그인</a>
         </div>
         <div class="nav-group after_login same_width justify-right" id="afterLoginNav">
-            <a href="/user/delOrUpdate" style="font-size: x-large" title="마이페이지">👤</a>
+            <a href="/user/delOrUpdate" class="nav-icon" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>
     </div>
 </nav>
 
-<div class="content_wrapper">
-    <div class="content select_menu full_height">
-        <form class="space_even" action="/user/delOrUpdate" method="post" id="delOrUpdate">
-            <input type="hidden" id="selection" name="selection">
-            <button type="button" class="container add_height_25" id="goUpdate" onclick="goDelOrUpdate('update')">
-                <div>회원정보 수정</div>
-            </button>
-            <button type="button" class="container add_height_25" id="goDelete" onclick="goDelOrUpdate('delete')">
-                <div>회원 탈퇴</div>
-            </button>
-        </form>
-    </div>
+<div class="container">
+    <a href="#" class="card">
+        <div class="icon">🤖</div>
+        <h2>회원정보 수정</h2>
+        <p>아이디, 닉네임, 식사루틴 등<br>회원정보를 수정합니다.</p>
+    </a>
+    <a href="#" class="card">
+        <div class="icon">📍</div>
+        <h2>회원 탈퇴</h2>
+        <p>수집된 모든 정보를 삭제 후<br>회원 탈퇴합니다.</p>
+    </a>
 </div>
 
 <footer></footer>

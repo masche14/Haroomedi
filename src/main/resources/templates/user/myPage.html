@@ -20,27 +20,33 @@
     let userId = /*[[${userId}]]*/ null;
     let existYN = /*[[${existYN}]]*/ null;
     let SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
+    let SS_USER_NAME = /*[[${session.SS_USER_NAME}]]*/ null;
+    let SS_USER_EMAIL = /*[[${session.SS_USER_EMAIL}]]*/ null;
+    let SS_USER_NICKNAME = /*[[${session.SS_USER_NICKNAME}]]*/ null;
+    let SS_USER_GENDER = /*[[${session.SS_USER_GENDER}]]*/ null;
 
     $(document).ready(function () {
 
 
-      if (errorMsg && errorMsg.trim() !== "null"){
-        alert(errorMsg)
-      }
+      // if (errorMsg && errorMsg.trim() !== "null"){
+      //   alert(errorMsg)
+      // }
 
       const referrer = document.referrer;
       const referrer_page = referrer.split('/').pop();
 
       console.log("referrer : "+referrer_page)
 
-      if ((referrer_page!=="myPage")&&(referrer_page!=="pwd_verification")){
-        alert("올바르지 않은 접근입니다.")
-        window.location.href="/user/index";
-      }
+      // if ((referrer_page!=="myPage")&&(referrer_page!=="pwd_verification")){
+      //   alert("올바르지 않은 접근입니다.")
+      //   window.location.href="/user/index";
+      // }
 
-      document.getElementById("nameDisplay").textContent = SS_USER_NAME;
-      document.getElementById("nicknameDisplay").textContent = SS_USER_NICKNAME;
-      document.getElementById("emailDisplay").textContent = SS_USER_EMAIL;
+      $("#nameDisplay").text(SS_USER_NAME);
+      $("#genderDisplay").text(SS_USER_GENDER);
+      $("#userIdDisplay").text(SS_USER_ID);
+      $("#nicknameDisplay").text(SS_USER_NICKNAME);
+      $("#emailDisplay").text(SS_USER_EMAIL);
 
       // // 폼 제출 전 확인하는 함수
       // function validateForm(event) {
@@ -88,6 +94,7 @@
       //
       // // 회원가입 버튼 클릭 시 validateForm 실행
       // document.getElementById('goToMain').addEventListener('click', validateForm);
+
       $('#goToLogin').on('click', function (event) {
         const birth = $('#birthDate').val().trim();
         const phone = $('#phoneNumber').val().trim();
@@ -279,14 +286,23 @@
 <div class="content">
   <div class="container myPage">
     <div class="info_wrap">
-      <div class="img_wrap">
-        <div class="img_box"></div>
-      </div>
       <div class="info_box_container">
         <div class="info_box">
           <div><span>이름</span></div>
           <div>
             <span id="nameDisplay"></span>
+          </div>
+        </div>
+        <div class="info_box">
+          <div><span>성별</span></div>
+          <div>
+            <span id="genderDisplay"></span>
+          </div>
+        </div>
+        <div class="info_box">
+          <div><span>아이디</span></div>
+          <div>
+            <span id="userIdDisplay"></span>
           </div>
         </div>
         <div class="info_box">
@@ -354,6 +370,20 @@
           </div>
         </div>
         <div id="second">
+          <div class="form_box">
+            <label class="label_bold" for="input_email">이메일 / E-MAIL</label>
+            <div class="input_box">
+              <input type="email" class="send_code input_info" id="input_email" name="userEmail" placeholder="이메일을 입력하세요." required>
+              <button type="button" id="send_code" class="side_btn" onclick="getEmailExists('input_email')">코드전송</button>
+            </div>
+          </div>
+          <div class="form_box">
+            <label class="label_bold" for="email_confirm">인증코드 입력</label>
+            <div class="input_box">
+              <input type="text" class="confirm_code input_info" id="email_confirm" name="email_confirm" placeholder="인증코드 입력." required>
+              <button type="button" id="check_code" class="side_btn" onclick="approveCode()">인증확인</button>
+            </div>
+          </div>
           <div class="form_box">
             <label class="label_bold" for="birthDate">생년월일</label>
             <div class="input_box">

@@ -312,7 +312,7 @@ a {
     padding-right: 1rem !important;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     border-right: 0.0625rem solid;
     border-right-style: groove;
     gap: 0.625rem;
@@ -322,8 +322,12 @@ a {
     height: 50%;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
     margin-top: 10px    ;
+}
+
+.info_box {
+    margin-bottom: 10px;
 }
 
 .info_box > div > span {

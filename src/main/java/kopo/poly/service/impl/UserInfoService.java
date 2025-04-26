@@ -140,7 +140,14 @@ public class UserInfoService implements IUserInfoService {
 
     @Override
     public int updateUserInfo(UserInfoDTO pDTO) throws Exception {
-        return 0;
+
+        log.info("{}.updateUserInfo Start", this.getClass().getName());
+        String colNm = "UserInfo";
+
+        int success = 0;
+        success = userInfoMapper.updateUserInfo(colNm, pDTO);
+
+        return success;
     }
 
     @Override
