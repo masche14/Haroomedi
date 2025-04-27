@@ -132,3 +132,11 @@ p {
 .big-height {
     height: 600px !important;
 }
+
+.myPage-icon{
+    font-size: 5rem !important;
+}
+
+.myPage-icon > h2, p {
+    font-size: large;
+}

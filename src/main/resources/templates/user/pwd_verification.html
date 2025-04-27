@@ -21,6 +21,13 @@
 
         $(document).ready(function () {
 
+            $("#input_pwd").on("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // 기본 form 제출 막기
+                    $("#pwd_verify").click(); // 인증하기 버튼 클릭
+                }
+            });
+
             $("#pwd_verify").on("click", function (){
                 const value = $("#input_pwd").val();
 

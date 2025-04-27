@@ -520,6 +520,13 @@ public class UserController {
             log.info("encPassword : {}", encPassword);
         }
 
+        if (pDTO.getUserEmail() != null && !pDTO.getUserEmail().isBlank()){
+            String encUserEmail = EncryptUtil.encAES128CBC(pDTO.getUserEmail());
+            pDTO.setUserEmail(encUserEmail);
+
+            log.info("encUserEmail : {}", encUserEmail);
+        }
+
         MsgDTO dto = new MsgDTO();
         int res = 0;
         String msg="";
@@ -529,7 +536,13 @@ public class UserController {
 
         msg = "회원정보 수정 완료";
 
+        if (!(pDTO.getUserId() != null && !pDTO.getUserId().isBlank())){
+            pDTO.setUserId(pDTO.getOrgId());
+        }
+
         UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
+
+        log.info("rDTO : {}", rDTO.toString());
 
         session.setAttribute("SS_USER_ID", rDTO.getUserId());
         session.setAttribute("SS_USER_NAME", rDTO.getUserName());

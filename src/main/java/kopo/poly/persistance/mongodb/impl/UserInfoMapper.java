@@ -121,21 +121,6 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         return rDTO;
     }
 
-    //    @Override
-//    public UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception {
-//        return null;
-//    }
-//
-//    @Override
-//    public UserInfoDTO getUserNicknameExists(String colNm, UserInfoDTO pDTO) throws Exception {
-//        return null;
-//    }
-//
-//    @Override
-//    public UserInfoDTO getUserEmailExists(String colNm, UserInfoDTO pDTO) throws Exception {
-//        return null;
-//    }
-
     @Override
     public UserInfoDTO getLogin(String colNm, UserInfoDTO pDTO) throws Exception {
 

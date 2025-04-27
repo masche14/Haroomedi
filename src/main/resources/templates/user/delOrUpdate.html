@@ -28,8 +28,8 @@
             console.log("pwdVerifyResult :", pwdVerifyResult);
 
             if (!(referrer==="pwd_verification"||referrer==="pwd_verification?")||pwdVerifyResult!=="Y"){
-                alert("올바르지 않은 접근입니다.")
-                window.location="/user/index";
+                alert("비밀번호 인증을 진행해주세요")
+                window.location="/user/pwd_verification";
             }
         });
     </script>
@@ -60,12 +60,12 @@
 
 <div class="container">
     <a href="/user/myPage" class="card big-height big-width">
-        <div class="icon">🤖</div>
+        <div class="icon myPage-icon">📋</div>
         <h2>회원정보 수정</h2>
         <p>아이디, 닉네임, 식사루틴 등<br>회원정보를 수정합니다.</p>
     </a>
     <a href="#" class="card big-height big-width">
-        <div class="icon">📍</div>
+        <div class="icon myPage-icon">🚫</div>
         <h2>회원 탈퇴</h2>
         <p>수집된 모든 정보를 삭제 후<br>회원 탈퇴합니다.</p>
     </a>
