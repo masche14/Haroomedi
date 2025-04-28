@@ -47,6 +47,8 @@
                         alert(json.data.msg);
                         if (json.data.result == 1) {
                             window.location = "/user/delOrUpdate";
+                        }else{
+                            location.reload();
                         }
                     }
                 )
