@@ -31,11 +31,83 @@
                 alert("비밀번호 인증을 진행해주세요")
                 window.location="/user/pwd_verification";
             }
+
+            const modal = document.getElementById("termsModal");
+            const closeButton = document.getElementsByClassName("close")[0];
+            const disagreeButton = document.getElementById("disagreeButton");
+            const agreeButton = document.getElementById("agreeButton");
+            const termsLabel = document.getElementById("delete_info");
+
+
+            termsLabel.addEventListener('click', function (event) {
+                event.preventDefault();
+                modal.style.display = "flex";
+            });
+
+            closeButton.addEventListener('click', function () {
+                modal.style.display = "none";
+            });
+
+            disagreeButton.addEventListener('click', function () {
+                modal.style.display = "none";
+            });
+
+
+            agreeButton.addEventListener('click', function () {
+                modal.style.display = "none";
+
+                $.ajax({
+                    url: "/user/delInfo",
+                    type: "POST",
+                    contentType: "application/json",
+                    dataType: "JSON",
+                    data: JSON.stringify({userId : SS_USER_ID}), // x-www-form-urlencoded 방식
+                }).then(
+                    function (json){
+                        alert(json.data.msg);
+                        if (json.data.result > 0){
+                            window.location = "/user/logout";
+                        }
+                    }
+                );
+            });
+
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
         });
     </script>
 </head>
 <body>
 <header></header>
+
+<!-- 모달 -->
+<div id="termsModal" class="modal">
+    <div class="modal-content autoWidth">
+        <div class="close-area">
+            <span class="close">&times;</span>
+            <p style="text-align: center; font-weight: bolder; font-size: larger">주의</p>
+        </div>
+        <div class="terms-content">
+            <p>회원 탈퇴하게 되면 다음 서비스 이용이 불가능합니다.</p>
+            <p class="extra_top_margin">
+                - 모든 회원 관리 서비스
+                <br>- 처방 데이터 조회 서비스
+                <br>- 복약 알림서비스
+                <br>- AI 상담 서비스
+            </p>
+            <p class="extra_top_margin">회원탈퇴를 계속 진행하시겠습니까?</p>
+        </div>
+        <div class="extra_top_margin input_box">
+            <input type="hidden" name="findIdSource" id="findIdSource">
+            <button type="button" class="two_button" id="disagreeButton">취소</button>
+            <button type="button" class="two_button" id="agreeButton">회원탈퇴</button>
+        </div>
+    </div>
+</div>
 
 <nav>
     <div class="nav-content">
@@ -64,7 +136,7 @@
         <h2>회원정보 수정</h2>
         <p>아이디, 닉네임, 식사루틴 등<br>회원정보를 수정합니다.</p>
     </a>
-    <a href="#" class="card big-height big-width">
+    <a href="#" class="card big-height big-width" id="delete_info">
         <div class="icon myPage-icon">🚫</div>
         <h2>회원 탈퇴</h2>
         <p>수집된 모든 정보를 삭제 후<br>회원 탈퇴합니다.</p>

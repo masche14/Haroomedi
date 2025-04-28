@@ -152,6 +152,17 @@ public class UserInfoService implements IUserInfoService {
 
     @Override
     public int deleteUserInfo(UserInfoDTO pDTO) throws Exception {
-        return 0;
+
+        log.info("{}.deleteUserInfo Start", this.getClass().getName());
+
+        String colNm = "UserInfo";
+
+        int res = 0;
+
+        res = userInfoMapper.deleteUserInfo(colNm, pDTO);
+
+        log.info("{}.deleteUserInfo End", this.getClass().getName());
+
+        return res;
     }
 }

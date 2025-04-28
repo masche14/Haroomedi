@@ -3,6 +3,7 @@ package kopo.poly.persistance.mongodb.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 import kopo.poly.dto.MelonDTO;
 import kopo.poly.dto.UserInfoDTO;
@@ -213,6 +214,22 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
     @Override
     public int deleteUserInfo(String colNm, UserInfoDTO pDTO) throws Exception {
-        return 0;
+
+        log.info("{}.deleteUserInfo Start", this.getClass().getSimpleName());
+
+        // Mongo 컬렉션 가져오기
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // 삭제 조건 (userId 기준)
+        String userId = CmmUtil.nvl(pDTO.getUserId());
+
+        // 실제 삭제 실행 (딱 하나만)
+        long deletedCount = col.deleteOne(Filters.eq("userId", userId)).getDeletedCount();
+
+        log.info("Deleted user count: {}", deletedCount);
+        log.info("{}.deleteUserInfo End", this.getClass().getSimpleName());
+
+        return (int) deletedCount;
+
     }
 }

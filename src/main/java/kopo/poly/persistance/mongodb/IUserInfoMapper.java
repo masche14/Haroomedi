@@ -10,12 +10,6 @@ public interface IUserInfoMapper {
 
     UserInfoDTO getUserIdAndUserNameByUserEmail(String colNm, UserInfoDTO pDTO);
 
-//    UserInfoDTO getUserIdExists(String colNm, UserInfoDTO pDTO) throws Exception;
-//
-//    UserInfoDTO getUserNicknameExists(String colNm, UserInfoDTO pDTO) throws Exception;
-//
-//    UserInfoDTO getUserEmailExists(String colNm, UserInfoDTO pDTO) throws Exception;
-
     UserInfoDTO getLogin(String colNm, UserInfoDTO pDTO) throws Exception;
 
     int updateUserInfo(String colNm, UserInfoDTO pDTO) throws Exception;

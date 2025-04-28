@@ -486,17 +486,29 @@ public class UserController {
         return "/user/delOrUpdate";
     }
 
-    @GetMapping("/delInfo")
-    public String showDelInfo(HttpSession session){
-        String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
+    @PostMapping("/delInfo")
+    public ResponseEntity<CommonResponse<MsgDTO>> delInfo(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.delInfo Start", this.getClass().getSimpleName());
+        log.info("userId : {}", pDTO.getUserId());
 
-        if (pwdVerifyResult==null) {
-            return "redirect:/user/index";
+        MsgDTO dto = new MsgDTO();
+        int res = 0;
+        String msg="";
+
+        res = userInfoService.deleteUserInfo(pDTO);
+
+        log.info("res : {}", res);
+
+        if (res>0){
+            msg="회원탈퇴가 완료되었습니다.";
+        } else {
+            msg="회원탈퇴에 실패하였습니다.";
         }
 
-        session.removeAttribute("pwdVerifyResult");
+        dto.setResult(res);
+        dto.setMsg(msg);
 
-        return "/user/delInfo";
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
 
     @GetMapping("/myPage")
