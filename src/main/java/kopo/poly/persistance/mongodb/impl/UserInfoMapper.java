@@ -178,6 +178,8 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         Update updateFields = new Update();
 
+        int res = 0;
+
         // null 체크 후 업데이트 대상에 추가
         if (pDTO.getUserId() != null && !pDTO.getUserId().isBlank()) {
             updateFields.set("userId", pDTO.getUserId());
@@ -205,11 +207,15 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         }
 
         if (updateFields.getUpdateObject().isEmpty()) {
-            return 0; // 수정할 값 없음
+            res = 1;// 수정할 값 없음
+            return res;
         }
 
         UpdateResult result = mongodb.updateFirst(query, updateFields, colNm);
-        return (int) result.getModifiedCount();
+
+        res = (int) result.getModifiedCount();
+
+        return res;
     }
 
     @Override

@@ -95,7 +95,9 @@
         }).then(
                 function (json){
                   alert(json.data.msg);
-                  window.location = "/user/index";
+                  if (json.data.result==1){
+                    window.location = "/user/index";
+                  }
                 }
         );
       });

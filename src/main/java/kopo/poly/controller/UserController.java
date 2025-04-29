@@ -544,9 +544,13 @@ public class UserController {
         String msg="";
 
         res = userInfoService.updateUserInfo(pDTO);
+
         log.info("res : {}", res);
 
-        msg = "회원정보 수정 완료";
+        if (res == 1){
+            msg = "회원정보 수정 완료";
+        }
+
 
         if (!(pDTO.getUserId() != null && !pDTO.getUserId().isBlank())){
             pDTO.setUserId(pDTO.getOrgId());
