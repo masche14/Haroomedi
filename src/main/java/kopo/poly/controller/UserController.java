@@ -7,6 +7,7 @@ import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
+import kopo.poly.util.DateUtil;
 import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Date;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -263,7 +266,8 @@ public class UserController {
         pDTO.setPassword(encPassword);
         log.info("After Encoding pDTO : {}", pDTO.toString());
 
-        log.info("{}.signupDetail End", this.getClass().getSimpleName());
+        pDTO.setRegId(pDTO.getUserId());
+        pDTO.setRegDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
 
         MsgDTO dto = new MsgDTO();
         int res=0;
@@ -280,6 +284,8 @@ public class UserController {
 
         dto.setResult(res);
         dto.setMsg(msg);
+
+        log.info("{}.signupDetail End", this.getClass().getSimpleName());
 
         return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto));
     }
@@ -350,6 +356,9 @@ public class UserController {
         String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
         pDTO.setPassword(encPassword);
 
+        pDTO.setChgId(pDTO.getOrgId());
+        pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
+
         log.info("encPassword : {}", encPassword);
 
         MsgDTO dto = new MsgDTO();
@@ -359,7 +368,7 @@ public class UserController {
         res = userInfoService.updateUserInfo(pDTO);
         log.info("res : {}", res);
 
-        if (res > 0) {
+        if (res == 1) {
             msg = "비밀번호가 변경되었습니다.";
         } else {
             msg = "비밀번호 변경에 실패하였습니다.";
@@ -538,6 +547,9 @@ public class UserController {
 
             log.info("encUserEmail : {}", encUserEmail);
         }
+        
+        pDTO.setChgId(pDTO.getOrgId());
+        pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
 
         MsgDTO dto = new MsgDTO();
         int res = 0;
