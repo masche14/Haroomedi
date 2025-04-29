@@ -36,31 +36,14 @@
                 document.getElementById('input_id').value = userId;
             }
 
-            // const deferentId = "<%= (String) session.getAttribute("deferentId") %>"
-            //
-            // if (deferentId && deferentId.trim() !== "null") {
-            //     alert(deferentId)
-            // }
-
-
-            // 폼 제출 전 확인하는 함수
-            // function validateForm(event) {
-            //     // 중복 확인이 완료되었으면 폼을 제출
-            //     const pwd = document.getElementById("input_pwd").value;
-            //     const pwd2 = document.getElementById("chk_pwd").value;
-            //
-            //     if (pwd !== pwd2){
-            //         event.preventDefault();
-            //         alert("비밀번호와 비밀번호 확인에 입력된 값이\n일치하지 않습니다.");
-            //         return false;
-            //     }
-            //     return true;
-            // }
-            //
-            // // 회원가입 버튼 클릭 시 validateForm 실행
-            // document.getElementById('goToLogin').addEventListener('click', validateForm);
-
             $("#goToReset").on("click", function (){
+
+                const input_id = $("#input_id").val();
+
+                if (userId != input_id){
+                    alert("해당 이메일로 가입된 이이디가 아닙니다.");
+                    return;
+                }
 
                 const pwd = $("#input_pwd").val();
                 const pwd2 = $("#chk_pwd").val();
