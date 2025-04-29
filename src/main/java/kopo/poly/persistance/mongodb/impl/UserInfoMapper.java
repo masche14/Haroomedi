@@ -181,28 +181,28 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         int res = 0;
 
         // null 체크 후 업데이트 대상에 추가
-        if (pDTO.getUserId() != null && !pDTO.getUserId().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getUserId()).isBlank()) {
             updateFields.set("userId", pDTO.getUserId());
         }
-        if (pDTO.getPassword() != null && !pDTO.getPassword().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getPassword()).isBlank()) {
             updateFields.set("password", pDTO.getPassword());
         }
-        if (pDTO.getUserName() != null && !pDTO.getUserName().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getUserName()).isBlank()) {
             updateFields.set("userName", pDTO.getUserName());
         }
-        if (pDTO.getUserEmail() != null && !pDTO.getUserEmail().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getUserEmail()).isBlank()) {
             updateFields.set("userEmail", pDTO.getUserEmail());
         }
-        if (pDTO.getUserNickname() != null && !pDTO.getUserNickname().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getUserNickname()).isBlank()) {
             updateFields.set("userNickname", pDTO.getUserNickname());
         }
-        if (pDTO.getGender() != null && !pDTO.getGender().isBlank()) {
+        if (!CmmUtil.nvl(pDTO.getGender()).isBlank()) {
             updateFields.set("gender", pDTO.getGender());
         }
-        if (pDTO.getChgId() != null) {
+        if (!CmmUtil.nvl(pDTO.getChgId()).isBlank()) {
             updateFields.set("chgId", pDTO.getChgId());
         }
-        if (pDTO.getChgDt() != null) {
+        if (!CmmUtil.nvl(pDTO.getChgDt()).isBlank()) {
             updateFields.set("chgDt", pDTO.getChgDt());
         }
 

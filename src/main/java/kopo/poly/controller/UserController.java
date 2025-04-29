@@ -534,14 +534,14 @@ public class UserController {
 
         log.info("password : {}", pDTO.getPassword());
 
-        if (pDTO.getPassword() != null && !pDTO.getPassword().isBlank()){
+        if (!CmmUtil.nvl(pDTO.getPassword()).isBlank()){
             String encPassword = EncryptUtil.encHashSHA256(pDTO.getPassword());
             pDTO.setPassword(encPassword);
 
             log.info("encPassword : {}", encPassword);
         }
 
-        if (pDTO.getUserEmail() != null && !pDTO.getUserEmail().isBlank()){
+        if (!CmmUtil.nvl(pDTO.getUserEmail()).isBlank()){
             String encUserEmail = EncryptUtil.encAES128CBC(pDTO.getUserEmail());
             pDTO.setUserEmail(encUserEmail);
 
@@ -564,7 +564,7 @@ public class UserController {
         }
 
 
-        if (!(pDTO.getUserId() != null && !pDTO.getUserId().isBlank())){
+        if (CmmUtil.nvl(pDTO.getUserId()).isBlank()){
             pDTO.setUserId(pDTO.getOrgId());
         }
 
