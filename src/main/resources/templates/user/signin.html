@@ -10,10 +10,8 @@
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
-
     <script th:inline="javascript">
         let userId = /*[[${userId}]]*/ null;
-        let SS_USER = /*[[${session.SS_USER}]]*/ null;
         let ref = /*[[${ref}]]*/ null;
 
         $(document).ready(function () {
