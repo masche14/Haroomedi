@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 //import kopo.poly.dto.HRecordDTO;
 //import kopo.poly.service.IHealthService;
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,9 @@ public class HealthController {
 
     @GetMapping("/auth")
     public String authPage(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        log.info("SS_USER_ID: {}", SS_USER_ID);
+        log.info("SS_USER: {}", SS_USER);
         return "/health/auth"; // templates/health/auth.html 로 매핑됨
     }
 
@@ -69,7 +70,7 @@ public class HealthController {
     @PostMapping("/resultProcess")
     public String resultProcess(HttpSession session) throws Exception {
 
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         Map<String, Object> certificateResult = (Map<String, Object>) session.getAttribute("certificateResult");
 
@@ -83,7 +84,7 @@ public class HealthController {
         }
 
         HRecordDTO pDTO = new HRecordDTO();
-        pDTO.setUserId(SS_USER_ID);
+        pDTO.setUserId(SS_USER.getUserId());
 
 //        long startTime = System.currentTimeMillis();
 

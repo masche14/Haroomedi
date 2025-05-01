@@ -47,11 +47,8 @@ public class UserController {
 
     @GetMapping("/signin")
     public String showSigninPage(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
-            return "redirect:/user/index";
-        }
 
         String referrer = (String) session.getAttribute("referrer");
         String ref = "";
@@ -108,11 +105,11 @@ public class UserController {
                     res = 1;
 
                     msg = "로그인에 성공하였습니다.";
-                    session.setAttribute("SS_USER_ID", rDTO.getUserId());
-                    session.setAttribute("SS_USER_NAME", rDTO.getUserName());
-                    session.setAttribute("SS_USER_NICKNAME", rDTO.getUserNickname());
-                    session.setAttribute("SS_USER_EMAIL", EncryptUtil.decAES128CBC(rDTO.getUserEmail()));
-                    session.setAttribute("SS_USER_GENDER", rDTO.getGender());
+
+                    String decUserEmail = EncryptUtil.decAES128CBC(rDTO.getUserEmail());
+                    rDTO.setUserEmail(decUserEmail);
+
+                    session.setAttribute("SS_USER", rDTO);
                 } else {
                     msg = "비밀번호가 올바르지 않습니다.";
                 }
@@ -150,9 +147,9 @@ public class UserController {
 
     @GetMapping("/email_verification")
     public String showEmailVerificationPage(HttpSession session) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
+        if (SS_USER != null){
             return "redirect:/user/index";
         }
         return "/user/email_verification";
@@ -223,9 +220,9 @@ public class UserController {
 
     @GetMapping("/signup_detail")
     public String showSignupPage(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
+        if (SS_USER != null){
             return "redirect:/user/index";
         }
 
@@ -329,9 +326,9 @@ public class UserController {
 
     @GetMapping("/reset_pwd")
     public String showResetPwdPage(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
+        if (SS_USER != null){
             return "redirect:/user/index";
         }
 
@@ -384,9 +381,9 @@ public class UserController {
 
     @GetMapping("/find_id")
     public String showFindIdPage(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
+        if (SS_USER != null){
             return "redirect:/user/index";
         }
 
@@ -414,17 +411,20 @@ public class UserController {
 
     @GetMapping("/index")
     public String showHomePage(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
-        log.info("SS_USER_ID : {}", SS_USER_ID);
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+        if (SS_USER != null){
+            log.info("SS_USER : {}", SS_USER.toString());
+        }
 
         return "/user/index"; // /WEB-INF/views/index.jsp
     }
 
     @GetMapping("/pwd_verification")
     public String showPwdVerificationPage(HttpSession session){
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        if (SS_USER_ID != null){
+        if (SS_USER != null){
             return "/user/pwd_verification";
         } else {
             return "redirect:/user/index";
@@ -436,7 +436,9 @@ public class UserController {
         log.info("{}.verifyPwdVerification Start", this.getClass().getSimpleName());
         log.info("password : {}", pDTO.getPassword());
 
-        String userId = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+        String userId = SS_USER.getUserId();
         pDTO.setUserId(userId);
 
         MsgDTO dto = new MsgDTO();
@@ -483,12 +485,12 @@ public class UserController {
 
     @GetMapping("/delOrUpdate")
     public String showDelOrUpdate(HttpSession session, Model model) {
-        String SS_USER_ID = (String) session.getAttribute("SS_USER_ID");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
         String pwdVerifyResult = (String) session.getAttribute("pwdVerifyResult");
         model.addAttribute("pwdVerifyResult", pwdVerifyResult);
         session.removeAttribute("pwdVerifyResult");
 
-        if (SS_USER_ID == null){
+        if (SS_USER == null){
             return "redirect:/user/index";
         }
 
@@ -498,6 +500,10 @@ public class UserController {
     @PostMapping("/delInfo")
     public ResponseEntity<CommonResponse<MsgDTO>> delInfo(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
         log.info("{}.delInfo Start", this.getClass().getSimpleName());
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        pDTO.setUserId(SS_USER.getUserId());
+
         log.info("userId : {}", pDTO.getUserId());
 
         MsgDTO dto = new MsgDTO();
@@ -529,7 +535,9 @@ public class UserController {
     public ResponseEntity<CommonResponse<MsgDTO>> myPage(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
         log.info("{}.updateInfo Start", this.getClass().getSimpleName());
         log.info("pDTO : {}", pDTO.toString());
-        String userId = (String) session.getAttribute("SS_USER_ID");
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        String userId = SS_USER.getUserId();
         pDTO.setOrgId(userId);
 
         log.info("password : {}", pDTO.getPassword());
@@ -572,11 +580,10 @@ public class UserController {
 
         log.info("rDTO : {}", rDTO.toString());
 
-        session.setAttribute("SS_USER_ID", rDTO.getUserId());
-        session.setAttribute("SS_USER_NAME", rDTO.getUserName());
-        session.setAttribute("SS_USER_NICKNAME", rDTO.getUserNickname());
-        session.setAttribute("SS_USER_EMAIL", EncryptUtil.decAES128CBC(rDTO.getUserEmail()));
-        session.setAttribute("SS_USER_GENDER", rDTO.getGender());
+        String decUserEmail = EncryptUtil.decAES128CBC(rDTO.getUserEmail());
+        rDTO.setUserEmail(decUserEmail);
+
+        session.setAttribute("SS_USER", rDTO);
 
         dto.setResult(res);
         dto.setMsg(msg);

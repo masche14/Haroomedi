@@ -11,11 +11,11 @@
     <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
     <script src="/js/setReferrer.js" defer></script>
     <script src="/js/checkDuplicate.js" defer></script>
-    <script src="/js/nav.js" defer></script>
+
     <!-- Thymeleaf session 값 JS에 전달 -->
     <script th:inline="javascript">
         const error = /*[[${error}]]*/ null;
-        const SS_USER_ID = /*[[${session.SS_USER_ID}]]*/ null;
+        const SS_USER = /*[[${session.SS_USER}]]*/ null;
     </script>
 
     <script>
@@ -264,10 +264,10 @@
             <a href="#">AI 챗봇 상담</a>
             <a href="#">주변 약국 찾기</a>
         </div>
-        <div class="nav-group same_width justify-right" id="beforeLoginNav">
+        <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="#" class="login" onclick="setReferrer()">로그인</a>
         </div>
-        <div class="nav-group after_login same_width justify-right" id="afterLoginNav">
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav" th:if="${session.SS_USER != null}">
             <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>
