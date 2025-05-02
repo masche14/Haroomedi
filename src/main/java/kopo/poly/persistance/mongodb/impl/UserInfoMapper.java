@@ -11,6 +11,7 @@ import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IMelonMapper;
 import kopo.poly.persistance.mongodb.IUserInfoMapper;
 import kopo.poly.util.CmmUtil;
+import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -20,6 +21,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -145,6 +147,9 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         projection.append("userEmail", "$userEmail");
         projection.append("userNickname", "$userNickname");
         projection.append("gender", "$gender");
+        projection.append("birthDate", "$birthDate");
+        projection.append("mealTime", "$mealTime");
+        projection.append("phoneNumber", "$phoneNumber");
         projection.append("_id", 0);
 
         FindIterable<Document> rs = col.find(query).projection(projection);
@@ -154,9 +159,13 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 String userId = CmmUtil.nvl(doc.getString("userId"));
                 String password = CmmUtil.nvl(doc.getString("password"));
                 String userName = CmmUtil.nvl(doc.getString("userName"));
-                String userEmail = CmmUtil.nvl(doc.getString("userEmail"));
+                String userEmail = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("userEmail")));
                 String userNickname = CmmUtil.nvl(doc.getString("userNickname"));
                 String gender = CmmUtil.nvl(doc.getString("gender"));
+                String birthDate = CmmUtil.nvl(doc.getString("birthDate"));
+                List<String> mealTime = doc.getList("mealTime", String.class);
+                String phoneNumber = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("phoneNumber")));
+
 
                 rDTO.setUserId(userId);
                 rDTO.setUserName(userName);
@@ -164,6 +173,9 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 rDTO.setUserNickname(userNickname);
                 rDTO.setPassword(password);
                 rDTO.setGender(gender);
+                rDTO.setBirthDate(birthDate);
+                rDTO.setMealTime(mealTime);
+                rDTO.setPhoneNumber(phoneNumber);
 
                 break; // 어차피 하나만 찾을 거니까 첫 번째에서 바로 종료
             }
@@ -204,6 +216,15 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         }
         if (!CmmUtil.nvl(pDTO.getChgDt()).isBlank()) {
             updateFields.set("chgDt", pDTO.getChgDt());
+        }
+        if (!pDTO.getMealTime().isEmpty()) {
+            updateFields.set("mealTime", pDTO.getMealTime());
+        }
+        if (pDTO.getMealCnt() != 0) {
+            updateFields.set("mealCnt", pDTO.getMealCnt());
+        }
+        if (!CmmUtil.nvl(pDTO.getPhoneNumber()).isBlank()) {
+            updateFields.set("phoneNumber", pDTO.getPhoneNumber());
         }
 
         if (updateFields.getUpdateObject().isEmpty()) {

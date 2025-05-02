@@ -49,6 +49,10 @@ public class UserController {
     public String showSigninPage(HttpSession session, Model model) {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
+        if (SS_USER != null) {
+            return "redirect:/user/index";
+        }
+
 
         String referrer = (String) session.getAttribute("referrer");
         String ref = "";
@@ -105,9 +109,6 @@ public class UserController {
                     res = 1;
 
                     msg = "로그인에 성공하였습니다.";
-
-                    String decUserEmail = EncryptUtil.decAES128CBC(rDTO.getUserEmail());
-                    rDTO.setUserEmail(decUserEmail);
 
                     session.setAttribute("SS_USER", rDTO);
                 } else {
@@ -528,6 +529,10 @@ public class UserController {
 
     @GetMapping("/myPage")
     public String showMyPage(HttpSession session, Model model) {
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        if (SS_USER == null){
+            return "redirect:/user/index";
+        }
         return "/user/myPage";
     }
 
@@ -555,6 +560,11 @@ public class UserController {
 
             log.info("encUserEmail : {}", encUserEmail);
         }
+
+        if (!CmmUtil.nvl(pDTO.getPhoneNumber()).isBlank()){
+            String encPhoneNumber = EncryptUtil.encAES128CBC(pDTO.getPhoneNumber());
+            pDTO.setPhoneNumber(encPhoneNumber);
+        }
         
         pDTO.setChgId(pDTO.getOrgId());
         pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
@@ -579,9 +589,6 @@ public class UserController {
         UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
 
         log.info("rDTO : {}", rDTO.toString());
-
-        String decUserEmail = EncryptUtil.decAES128CBC(rDTO.getUserEmail());
-        rDTO.setUserEmail(decUserEmail);
 
         session.setAttribute("SS_USER", rDTO);
 

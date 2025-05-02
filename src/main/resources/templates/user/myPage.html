@@ -20,6 +20,7 @@
   <script th:inline="javascript">
     let userId = /*[[${userId}]]*/ null;
     let existYN = /*[[${existYN}]]*/ null;
+    let SS_USER = /*[[${session.SS_USER}]]*/ null;
 
     $(document).ready(function () {
 
@@ -28,7 +29,7 @@
 
       console.log("referrer : "+referrer_page)
 
-      if (referrer_page!=="delOrUpdate"){
+      if (SS_USER == null ||referrer_page!=="delOrUpdate"){
         alert("올바르지 않은 접근입니다.")
         window.location.href="/user/index";
       }
@@ -141,11 +142,6 @@
       $('#set_mealCnt').on('click', function () {
         const count = parseInt($('#input_mealCnt').val());
 
-        if (isNaN(count) || count <= 0) {
-          alert("1 이상의 식사량을 입력해주세요.");
-          return;
-        }
-
         const $container = $('#mealTimeInputs');
         $container.empty();
 
@@ -195,32 +191,52 @@
       <div class="info_box_container">
         <div class="info_box">
           <div><span>이름</span></div>
-          <div>
+          <div class="text-display">
             <span id="nameDisplay" th:text="${session.SS_USER.userName}"></span>
           </div>
         </div>
         <div class="info_box">
           <div><span>성별</span></div>
-          <div>
+          <div class="text-display">
             <span id="genderDisplay" th:text="${session.SS_USER.gender}"></span>
           </div>
         </div>
         <div class="info_box">
           <div><span>아이디</span></div>
-          <div>
+          <div class="text-display">
             <span id="userIdDisplay" th:text="${session.SS_USER.userId}"></span>
           </div>
         </div>
         <div class="info_box">
           <div><span>닉네임</span></div>
-          <div>
+          <div class="text-display">
             <span id="nicknameDisplay" th:text="${session.SS_USER.userNickname}"></span>
           </div>
         </div>
         <div class="info_box">
           <div><span>이메일</span></div>
-          <div>
+          <div class="text-display">
             <span id="emailDisplay" th:text="${session.SS_USER.userEmail}"></span>
+          </div>
+        </div>
+        <div class="info_box">
+          <div><span>생년월일</span></div>
+          <div class="text-display">
+            <span id="birthDateDisplay" th:text="${session.SS_USER.birthDate}"></span>
+          </div>
+        </div>
+        <div class="info_box">
+          <div><span>휴대폰 번호</span></div>
+          <div class="text-display">
+            <span id="phoneNumberDisplay" th:text="${session.SS_USER.phoneNumber}"></span>
+          </div>
+        </div>
+        <div class="info_box">
+          <div><span>식사시간</span></div>
+          <div class="text-display">
+            <span th:each="time, iterStat : ${session.SS_USER.mealTime}">
+              <span th:text="${time}"></span><span th:if="${!iterStat.last}"> /</span>
+            </span>
           </div>
         </div>
       </div>
