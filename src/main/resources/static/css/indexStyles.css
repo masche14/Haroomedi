@@ -267,3 +267,7 @@ p {
     background-color: #f72044;
     color : white;
 }
+
+#agreeButton:hover, #disagreeButton:hover{
+    border: 3px solid black;
+}
