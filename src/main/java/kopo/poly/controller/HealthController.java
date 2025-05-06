@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 //import kopo.poly.dto.HRecordDTO;
 //import kopo.poly.service.IHealthService;
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.TilkoDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -34,30 +36,27 @@ public class HealthController {
     }
 
     @PostMapping("/certificate")
-    public String postCertificate(HttpServletRequest request, HttpSession session) throws Exception {
+    public String postCertificate(HttpServletRequest request, HttpSession session, @RequestBody TilkoDTO pDTO) throws Exception {
 
-        String PrivateAuthType = request.getParameter("PrivateAuthType");
-        log.info(PrivateAuthType);
-        String UserName = request.getParameter("UserName");
-        String BirthDate = request.getParameter("BirthDate");
-        String UserCellphoneNumber = request.getParameter("UserCellphoneNumber");
-        String selectedImageSrc = request.getParameter("selectedImageSrc");
-        String selectedImageAlt =  request.getParameter("selectedImageAlt");
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        String userId = SS_USER.getUserId();
 
-        log.info("PrivateAuthType: {}", PrivateAuthType);
-        log.info("UserName: {}", UserName);
-        log.info("BirthDate: {}", BirthDate);
-        log.info("UserCellphoneNumber: {}", UserCellphoneNumber);
-        log.info("selectedImageSrc: {}", selectedImageSrc);
-        log.info("selectedImageAlt: {}", selectedImageAlt);
+        log.info("pDTO: {}", pDTO.toString());
+
+        String selectedImageSrc = pDTO.getSelectedImageSrc();
+        String selectedImageAlt =  pDTO.getSelectedImageAlt();
 
         session.setAttribute("selectedImageSrc", selectedImageSrc);
         session.setAttribute("selectedImageAlt", selectedImageAlt);
 
-        Map<String, Object> certificateResult = healthService.getCertificateResult(PrivateAuthType, UserName, BirthDate, UserCellphoneNumber);
+        TilkoDTO certificateResult = healthService.getCertificateResult(pDTO);
+        certificateResult.setUserId(userId);
+
+        log.info("certificateResult: {}", certificateResult.toString());
+
         session.setAttribute("certificateResult", certificateResult);
 
-        return "redirect:/health/result";
+        return "redirect:/health/auth";
     }
 
     @GetMapping("/result")
@@ -72,7 +71,7 @@ public class HealthController {
 
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        Map<String, Object> certificateResult = (Map<String, Object>) session.getAttribute("certificateResult");
+        TilkoDTO certificateResult = (TilkoDTO) session.getAttribute("certificateResult");
 
         // 인증결과 확인
         Boolean result = healthService.loginCheck(certificateResult);

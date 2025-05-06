@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb.impl;
 
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.TilkoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IHealthMapper;
 import lombok.RequiredArgsConstructor;

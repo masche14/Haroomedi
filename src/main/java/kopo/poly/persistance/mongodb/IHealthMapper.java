@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb;
 
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.TilkoDTO;
 
 public interface IHealthMapper {
 

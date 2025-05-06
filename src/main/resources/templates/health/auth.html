@@ -16,189 +16,126 @@
         let SS_USER = /*[[${session.SS_USER}]]*/ null;
         let ref = /*[[${ref}]]*/ null;
 
-        function showModal(modalId, checkboxId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('show');
-            }
-
-            // 체크박스 체크 처리
-            const checkbox = document.getElementById(checkboxId);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
-        }
-
-        // 모달 닫기 함수
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('show');
-            }
-        }
-
         $(document).ready(function () {
-
-            if (SS_USER==null){
-                alert("로그인 후 이용 가능힙니다.");
+            if (SS_USER == null) {
+                alert("로그인 후 이용 가능합니다.");
                 setReferrer();
+                return;
             }
 
-            // 전체동의 체크박스
-            const checkAll = document.getElementById("checkAll");
-            // 개별동의 체크박스들
-            const checkboxes = document.querySelectorAll(".agree");
-
-            // 전체동의 클릭 시
-            checkAll.addEventListener("change", function() {
-                checkboxes.forEach((checkbox) => {
-                    checkbox.checked = this.checked;
-                });
+            // 전체 동의
+            $("#checkAll").on("change", function () {
+                $(".agree").prop("checked", $(this).is(":checked"));
             });
 
-            // 개별 체크박스 클릭 시 전체동의 상태 업데이트
-            checkboxes.forEach((checkbox) => {
-                checkbox.addEventListener("change", function() {
-                    checkAll.checked = Array.from(checkboxes).every((cb) => cb.checked);
-                });
+            // 개별 체크 → 전체동의 체크박스 갱신
+            $(".agree").on("change", function () {
+                const allChecked = $(".agree").length === $(".agree:checked").length;
+                $("#checkAll").prop("checked", allChecked);
             });
 
-            // 모달 관련 이벤트 설정
-            document.querySelectorAll('.modal button').forEach((button) => {
-                button.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal-id');
-                    closeModal(modalId);
-                });
+            // 모달 닫기 버튼 클릭
+            $(".modal button").on("click", function () {
+                $(this).closest(".modal").removeClass("show");
             });
 
-            // 레이블 클릭 이벤트 설정
-            document.querySelectorAll('.label-button').forEach((labelButton) => {
-                labelButton.addEventListener("click", function(event) {
-                    // 체크박스를 직접 클릭한 경우 모달을 띄우지 않음
-                    if (event.target.tagName === 'INPUT') {
-                        return;
-                    }
+            // 레이블 버튼 클릭 시 모달 열기
+            $(".label-button").on("click", function (e) {
+                if (e.target.tagName === 'INPUT') return;
 
-                    // 체크박스와 모달 ID 매핑
-                    const checkbox = labelButton.querySelector('input[type="checkbox"]');
-                    const checkboxId = checkbox.id;
-                    let modalId = "";
-                    if (checkboxId === "checkbox1") modalId = "modal1";
-                    if (checkboxId === "checkbox2") modalId = "modal2";
-                    if (checkboxId === "checkbox3") modalId = "modal3";
+                const checkbox = $(this).find("input[type='checkbox']");
+                const checkboxId = checkbox.attr("id");
 
-                    // 클릭 후 모달 띄우기 (순서 보장)
+                let modalId = "";
+                if (checkboxId === "checkbox1") modalId = "modal1";
+                else if (checkboxId === "checkbox2") modalId = "modal2";
+                else if (checkboxId === "checkbox3") modalId = "modal3";
+
+                if (modalId) {
                     setTimeout(() => {
-                        // if (checkbox.checked) {
-                        //     showModal(modalId);
-                        // }
-                        showModal(modalId);
+                        $("#" + modalId).addClass("show");
+                        checkbox.prop("checked", true);
                     }, 50);
-                });
+                }
             });
 
-            // 입력 필드 유효성 검사 함수
+            // 입력 유효성 검사
             function validateInputFields() {
-                const inputFields = document.querySelectorAll(".input-box input, .input-box select");
+                let isValid = true;
 
-                for (const field of inputFields) {
-                    if (!field.value.trim()) {
-                        const label = field.closest(".input-box").querySelector("label").innerText;
-                        alert(label + '을(를) 입력해주세요.');
-                        field.focus(); // 해당 필드로 포커스 이동
-                        return false;
+                $(".input-box input, .input-box select").each(function () {
+                    if (!$(this).val().trim()) {
+                        const label = $(this).closest(".input-box").find("label").text();
+                        alert(label + "을(를) 입력해주세요.");
+                        $(this).focus();
+                        isValid = false;
+                        return false; // break
                     }
-                }
-                return true;
+                });
+
+                return isValid;
             }
 
-            // 민간 인증서 유효성 검사 함수
+            // 전체 유효성 검사
             function validateForm() {
-                const radios = document.getElementsByName('PrivateAuthType');
-                let isChecked = false;
-                let selectedImageSrc = "";
-                let selectedImageAlt = "";
-
-                for (const radio of radios) {
-                    if (radio.checked) {
-                        isChecked = true;
-                        // 선택된 이미지의 src 가져오기
-                        const selectedImage = radio.parentElement.querySelector("img");
-                        if (selectedImage) {
-                            selectedImageSrc = selectedImage.src;
-                            selectedImageAlt = selectedImage.alt;
-                        }
-                        break;
-                    }
-                }
-
-                if (!isChecked) {
-                    alert('민간 인증서를 선택해주세요.');
+                const selectedRadio = $("input[name='PrivateAuthType']:checked");
+                if (selectedRadio.length === 0) {
+                    alert("민간 인증서를 선택해주세요.");
                     return false;
                 }
 
-                // 입력 필드 유효성 검사 호출
                 if (!validateInputFields()) {
                     return false;
                 }
 
-                // hidden input에 이미지 경로 넣기
-                let hiddenImageInput = document.getElementById("selectedImageSrc");
-                if (!hiddenImageInput) {
-                    hiddenImageInput = document.createElement("input");
-                    hiddenImageInput.type = "hidden";
-                    hiddenImageInput.name = "selectedImageSrc";
-                    hiddenImageInput.id = "selectedImageSrc";
-                    document.getElementById("health").appendChild(hiddenImageInput);
-                }
-                hiddenImageInput.value = selectedImageSrc;
-
-                let hiddenAltInput = document.getElementById("selectedImageAlt");
-                if (!hiddenAltInput) {
-                    hiddenAltInput = document.createElement("input");
-                    hiddenAltInput.type = "hidden";
-                    hiddenAltInput.name = "selectedImageAlt";
-                    hiddenAltInput.id = "selectedImageAlt";
-                    document.getElementById("health").appendChild(hiddenAltInput);
-                }
-                hiddenAltInput.value = selectedImageAlt;
-
                 return true;
             }
 
-            // 폼 제출 이벤트
-            document.getElementById("health").addEventListener("submit", function (event) {
-                event.preventDefault(); // 기본 전송 막기
+            // 폼 전송
+            $("#health").on("submit", function (e) {
+                e.preventDefault();
 
-                // 유효성 검사 수행
-                if (!validateForm()) {
-                    return;
-                }
+                if (!validateForm()) return;
+
+                // 이미지 정보
+                const selectedRadio = $("input[name='PrivateAuthType']:checked");
+                const selectedImage = selectedRadio.closest("label").find("img");
+                const selectedImageSrc = selectedImage.attr("src") || "";
+                const selectedImageAlt = selectedImage.attr("alt") || "";
 
                 // 번호 합치기
-                const prefix = document.querySelector("select[name='phonePrefix']").value.trim();
-                const number = document.querySelector("input[name='number']").value.trim();
+                const prefix = $("select[name='phonePrefix']").val().trim();
+                const number = $("input[name='number']").val().trim();
                 const fullNumber = prefix + number;
 
-                console.log("Full number:", fullNumber);
+                // 데이터 준비
+                const requestData = {
+                    PrivateAuthType: selectedRadio.val(),
+                    UserName: $("#UserName").val().trim(),
+                    BirthDate: $("#BirthDate").val().trim(),
+                    UserCellphoneNumber: fullNumber,
+                    selectedImageSrc: selectedImageSrc,
+                    selectedImageAlt: selectedImageAlt
+                };
 
-                // hidden input에 합친 번호 넣기
-                let hiddenInput = document.getElementById("fullPhoneNumber");
-                if (!hiddenInput) {
-                    hiddenInput = document.createElement("input");
-                    hiddenInput.type = "hidden";
-                    hiddenInput.name = "UserCellphoneNumber";
-                    hiddenInput.id = "fullPhoneNumber";
-                    this.appendChild(hiddenInput);
-                }
-                hiddenInput.value = fullNumber;
+                console.log("전송 데이터:", requestData);
 
-                // 폼 전송
-                this.submit();
+                $.ajax({
+                    type: "POST",
+                    url: "/health/certificate",
+                    contentType: "application/json",
+                    data: JSON.stringify(requestData),
+                    success: function () {
+                        location.href = "/health/result";
+                    },
+                    error: function (xhr) {
+                        alert("에러: " + xhr.responseText);
+                    }
+                });
             });
         });
-
     </script>
+
 </head>
 <body>
 <!-- 모달 창 -->

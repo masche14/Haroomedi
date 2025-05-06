@@ -1,8 +1,10 @@
 package kopo.poly.service.impl;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.TilkoDTO;
 import kopo.poly.persistance.mongodb.IHealthMapper;
 import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +77,7 @@ public class HealthService implements IHealthService {
     }
 
     @Override
-    public Map<String, Object> getCertificateResult(String PrivateAuthType, String UserName, String BirthDate, String UserCellphoneNumber) throws Exception {
+    public TilkoDTO getCertificateResult(TilkoDTO pDTO) throws Exception {
         log.info("{}.getCertificateResult start!", this.getClass().getName());
         String rsaPublicKey = getPublicKey();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
@@ -86,10 +88,10 @@ public class HealthService implements IHealthService {
         String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
         Map<String, Object> jsonBody = new HashMap<>();
-        jsonBody.put("PrivateAuthType", PrivateAuthType);
-        jsonBody.put("UserName", encryptAES(aesKey, iv, UserName));
-        jsonBody.put("BirthDate", encryptAES(aesKey, iv, BirthDate));
-        jsonBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, UserCellphoneNumber));
+        jsonBody.put("PrivateAuthType", pDTO.getPrivateAuthType());
+        jsonBody.put("UserName", encryptAES(aesKey, iv, pDTO.getUserName()));
+        jsonBody.put("BirthDate", encryptAES(aesKey, iv, pDTO.getBirthDate()));
+        jsonBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, pDTO.getUserCellphoneNumber()));
 
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(jsonBody));
         Request request = new Request.Builder()
@@ -101,19 +103,19 @@ public class HealthService implements IHealthService {
                 .build();
 
         Response response = client.newCall(request).execute();
-        Map<String, Object> responseMap = objectMapper.readValue(response.body().string(), Map.class);
-        log.info("Response: " + responseMap);
 
-        Scanner s = new Scanner(System.in);
+        JsonNode rootNode = objectMapper.readTree(response.body().string());
+        JsonNode resultDataNode = rootNode.get("ResultData");
 
-        Map<String, Object> certificateResult = (Map<String, Object>) responseMap.get("ResultData");
+        TilkoDTO certificateResult = objectMapper.treeToValue(resultDataNode, TilkoDTO.class);
 
         log.info("{}.getCertificateResult End!", this.getClass().getName());
+
         return certificateResult;
     }
 
     @Override
-    public Boolean loginCheck(Map<String, Object> certificateResult) throws Exception {
+    public Boolean loginCheck(TilkoDTO pDTO) throws Exception {
 
         String rsaPublicKey = getPublicKey();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
@@ -123,31 +125,19 @@ public class HealthService implements IHealthService {
 
         String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
-
-        Map<String, Object> resultData = certificateResult;
-
-        String CxId = (String) resultData.get("CxId");
-        String PrivateAuthType = (String) resultData.get("PrivateAuthType");
-        String ReqTxId = (String) resultData.get("ReqTxId");
-        String Token = (String) resultData.get("Token");
-        String TxId = (String) resultData.get("TxId");
-        String UserName = (String) resultData.get("UserName");
-        String BirthDate = (String) resultData.get("BirthDate");
-        String UserCellphoneNumber = (String) resultData.get("UserCellphoneNumber");
-
         String url = API_HOST + "api/v2.0/nhissimpleauth/LoginCheck";
 
         Map<String, Object> loginCheckRequestBody = new HashMap<>();
         Map<String, Object> Auth = new HashMap<>();
 
-        Auth.put("CxId", CxId);
-        Auth.put("PrivateAuthType", PrivateAuthType);
-        Auth.put("ReqTxId", ReqTxId);
-        Auth.put("Token", Token);
-        Auth.put("TxId", TxId);
-        Auth.put("UserName", encryptAES(aesKey, iv, UserName));
-        Auth.put("BirthDate", encryptAES(aesKey, iv, BirthDate));
-        Auth.put("UserCellphoneNumber", encryptAES(aesKey, iv, UserCellphoneNumber));
+        Auth.put("CxId", pDTO.getCxId());
+        Auth.put("PrivateAuthType", pDTO.getPrivateAuthType());
+        Auth.put("ReqTxId", pDTO.getReqTxId());
+        Auth.put("Token", pDTO.getToken());
+        Auth.put("TxId", pDTO.getTxId());
+        Auth.put("UserName", encryptAES(aesKey, iv, pDTO.getUserName()));
+        Auth.put("BirthDate", encryptAES(aesKey, iv, pDTO.getBirthDate()));
+        Auth.put("UserCellphoneNumber", encryptAES(aesKey, iv, pDTO.getUserCellphoneNumber()));
 
         loginCheckRequestBody.put("Auth", Auth);
 
@@ -177,7 +167,7 @@ public class HealthService implements IHealthService {
 
     @Transactional
     @Override
-    public List<Map<String, Object>> getTestResult(Map<String, Object> certificateResult, HRecordDTO pDTO) throws Exception {
+    public List<Map<String, Object>> getTestResult(TilkoDTO certificateResult, HRecordDTO pDTO) throws Exception {
         log.info("{}.getTestResult start!", this.getClass().getName());
 
         String rsaPublicKey = getPublicKey();
@@ -188,30 +178,18 @@ public class HealthService implements IHealthService {
 
         String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
-        Map<String, Object> resultData = certificateResult;
-
-        String CxId = (String) resultData.get("CxId");
-        String PrivateAuthType = (String) resultData.get("PrivateAuthType");
-        String ReqTxId = (String) resultData.get("ReqTxId");
-        String Token = (String) resultData.get("Token");
-        String TxId = (String) resultData.get("TxId");
-        String UserName = (String) resultData.get("UserName");
-        String BirthDate = (String) resultData.get("BirthDate");
-        String UserCellphoneNumber = (String) resultData.get("UserCellphoneNumber");
-
-
         // 두 번째 API 요청 처리
         String url = API_HOST + "api/v1.0/NhisSimpleAuth/Ggpab003M0105";
 
         Map<String, Object> secondRequestBody = new HashMap<>();
-        secondRequestBody.put("CxId", CxId);
-        secondRequestBody.put("PrivateAuthType", PrivateAuthType);
-        secondRequestBody.put("ReqTxId", ReqTxId);
-        secondRequestBody.put("Token", Token);
-        secondRequestBody.put("TxId", TxId);
-        secondRequestBody.put("UserName", encryptAES(aesKey, iv, UserName));
-        secondRequestBody.put("BirthDate", encryptAES(aesKey, iv, BirthDate));
-        secondRequestBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, UserCellphoneNumber));
+        secondRequestBody.put("CxId", certificateResult.getCxId());
+        secondRequestBody.put("PrivateAuthType", certificateResult.getPrivateAuthType());
+        secondRequestBody.put("ReqTxId", certificateResult.getReqTxId());
+        secondRequestBody.put("Token", certificateResult.getToken());
+        secondRequestBody.put("TxId", certificateResult.getTxId());
+        secondRequestBody.put("UserName", encryptAES(aesKey, iv, certificateResult.getUserName()));
+        secondRequestBody.put("BirthDate", encryptAES(aesKey, iv, certificateResult.getBirthDate()));
+        secondRequestBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, certificateResult.getUserCellphoneNumber()));
         secondRequestBody.put("기타필요한파라미터", "");
 
         RequestBody secondBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(secondRequestBody));
