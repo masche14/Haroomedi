@@ -9,7 +9,7 @@ import java.util.*;
 public class PrescriptionDTO {
 
     private String userId;
-    private Date prescriptionDate;
+    private LocalDate prescriptionDate;
     private String storeName;
     private int prescriptionPeriod;
     private List<Map<String, Object>> drugList;
