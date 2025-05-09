@@ -1,6 +1,7 @@
 package kopo.poly.persistance.mongodb.impl;
 
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.PrescriptionDTO;
 import kopo.poly.dto.TilkoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IHealthMapper;
@@ -13,12 +14,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class HealthMapper extends AbstractMongoDBComon implements IHealthMapper {
     @Override
-    public HRecordDTO getLatestRecord(HRecordDTO pDTO) throws Exception {
+    public PrescriptionDTO getLatestRecord(TilkoDTO pDTO) throws Exception {
         return null;
     }
 
     @Override
-    public int insertRecord(HRecordDTO pDTO) throws Exception {
+    public int insertRecord(PrescriptionDTO pDTO) throws Exception {
         return 0;
     }
 }

@@ -4,6 +4,7 @@ package kopo.poly.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.HRecordDTO;
+import kopo.poly.dto.PrescriptionDTO;
 import kopo.poly.dto.TilkoDTO;
 import kopo.poly.persistance.mongodb.IHealthMapper;
 import kopo.poly.service.IHealthService;
@@ -167,7 +168,7 @@ public class HealthService implements IHealthService {
 
     @Transactional
     @Override
-    public List<Map<String, Object>> getTestResult(TilkoDTO certificateResult, HRecordDTO pDTO) throws Exception {
+    public List<PrescriptionDTO> getTestResult(TilkoDTO certificateResult) throws Exception {
         log.info("{}.getTestResult start!", this.getClass().getName());
 
         String rsaPublicKey = getPublicKey();
@@ -206,11 +207,13 @@ public class HealthService implements IHealthService {
         List<Map<String, Object>> ResultList = (List<Map<String, Object>>) secondResponseMap.get("ResultList");
         log.info("ResultList : {}", ResultList);
 
-        HRecordDTO rDTO = healthMapper.getLatestRecord(pDTO);
+        PrescriptionDTO dDTO = healthMapper.getLatestRecord(certificateResult);
+        PrescriptionDTO rDTO = new PrescriptionDTO();
 
         List<Map<String, Object>> testResultList = new ArrayList<>();
+        List<PrescriptionDTO> rList = new ArrayList<>();
 
-        if (rDTO==null){
+        if (dDTO==null){
 
             for (Map<String, Object> resultMap : ResultList) {
                 Map<String, Object> healthMap = new HashMap<>();
@@ -228,21 +231,13 @@ public class HealthService implements IHealthService {
 
                 LocalDate date = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
                 log.info("date: {}", date);
-                pDTO.setDate(date);
+                rDTO.setPrescriptionDate(date);
 
                 String location = (String) resultMap.get("Location");
                 log.info("location: {}", location);
-                pDTO.setLocation(location);
+                rDTO.setStoreName(location);
 
-                String code = (String) resultMap.get("Code");
-                log.info("code: {}", code);
-                pDTO.setCode(code);
-
-                String description = (String) resultMap.get("Description");
-                log.info("description: {}", description);
-                pDTO.setDescription(description);
-
-                int success = healthMapper.insertRecord(pDTO);
+                int success = healthMapper.insertRecord(rDTO);
 
                 if (success == 1){
                     log.info("레코드 데이터를 성공적으로 저장하였습니다.");
@@ -273,7 +268,7 @@ public class HealthService implements IHealthService {
 
         } else {
 
-            LocalDate latestDate = rDTO.getDate();
+            LocalDate latestDate = rDTO.getPrescriptionDate();
 
             log.info("latestDate: {}", latestDate);
 
@@ -296,21 +291,13 @@ public class HealthService implements IHealthService {
 
                 String location = (String) resultMap.get("Location");
                 log.info("location: {}", location);
-                pDTO.setLocation(location);
-
-                String code = (String) resultMap.get("Code");
-                log.info("code: {}", code);
-                pDTO.setCode(code);
-
-                String description = (String) resultMap.get("Description");
-                log.info("description: {}", description);
-                pDTO.setDescription(description);
+                rDTO.setStoreName(location);
 
                 if (date.isAfter(latestDate)) {
 
-                    pDTO.setDate(date);
+                    rDTO.setPrescriptionDate(date);
 
-                    int success = healthMapper.insertRecord(pDTO);
+                    int success = healthMapper.insertRecord(rDTO);
 
                     if (success == 1){
                         log.info("레코드 데이터를 성공적으로 저장하였습니다.");
@@ -345,7 +332,7 @@ public class HealthService implements IHealthService {
         }
 
         log.info("{}.getTestResult end!", this.getClass().getName());
-        return testResultList;
+        return rList;
     }
 
     @Override

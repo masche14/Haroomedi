@@ -82,9 +82,6 @@ public class HealthController {
             return "redirect:/health/certificateError";
         }
 
-        HRecordDTO pDTO = new HRecordDTO();
-        pDTO.setUserId(SS_USER.getUserId());
-
 //        long startTime = System.currentTimeMillis();
 
 //        // 인증 성공 후 건강검진 데이터 조회
