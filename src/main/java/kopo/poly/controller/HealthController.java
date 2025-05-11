@@ -4,12 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 //import kopo.poly.dto.HRecordDTO;
 //import kopo.poly.service.IHealthService;
-import kopo.poly.dto.HRecordDTO;
-import kopo.poly.dto.TilkoDTO;
-import kopo.poly.dto.UserInfoDTO;
+import kopo.poly.controller.response.CommonResponse;
+import kopo.poly.dto.*;
 import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,7 +68,9 @@ public class HealthController {
     }
 
     @PostMapping("/resultProcess")
-    public String resultProcess(HttpSession session) throws Exception {
+    public ResponseEntity<CommonResponse<MsgDTO>> resultProcess(HttpSession session) throws Exception {
+
+        log.info("{}.resultProcess Start", this.getClass().getSimpleName());
 
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
@@ -78,41 +81,43 @@ public class HealthController {
 
         log.info("result: {}", result);
 
+        MsgDTO dto = new MsgDTO();
+
+        int res;
+        String msg = "";
+
         if(!result){
-            return "redirect:/health/certificateError";
+            res = -1;
+            msg = "인증에 실패하였습니다. 다시 진행해주세요.";
+
+            dto.setMsg(msg);
+            dto.setResult(res);
+
+            return ResponseEntity.ok(
+                    CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
+            );
         }
 
-//        long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
-//        // 인증 성공 후 건강검진 데이터 조회
-//        List<Map<String, Object>> health = healthService.getTestResult(certificateResult, pDTO);
-//
-//        if (health.isEmpty()) {
-//
-//            log.info("이미 최신상태입니다.");
-//
-//            return "redirect:/health/analyzeResult";
-//        }
-//
-//        log.info("건강검진 데이터 : {}",health.toString());
-//
-//        session.setAttribute("healthResult", health);
-//
-//        String analyzeResult = "";
-//
-//        for (Map<String, Object> healthMap : health) {
-//
-//            log.info("분석 검사결과 : {}",healthMap.toString());
-//
-//            analyzeResult = healthService.getAnalyzeResult(healthMap);
-//            session.setAttribute("analyzeResult", analyzeResult);
-//
-//        }
-//
-//        long endTime = System.currentTimeMillis();
-//        log.info("걸린 시간 : {}", endTime - startTime);
+        // 인증 성공 후 건강검진 데이터 조회
+        res = healthService.synchronizePrescriptions(certificateResult);
 
-        return "redirect:/health/analyzeResult";
+        if (res == 1){
+            msg = "최신 처방 데이터를 추가하였습니다.";
+        } else {
+            msg = "이미 최신 상태입니다.";
+        }
+
+        dto.setMsg(msg);
+        dto.setResult(res);
+
+        long endTime = System.currentTimeMillis();
+        log.info("걸린 시간 : {}", endTime - startTime);
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
+        );
     }
 
     @GetMapping("/certificateError")
@@ -130,5 +135,18 @@ public class HealthController {
         }else {
             return "/health/auth";
         }
+    }
+
+    @GetMapping("/prescriptionList")
+    public String prescriptionList(HttpSession session, Model model) throws Exception {
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+        List<PrescriptionDTO> prescriptionList = healthService.getPrescriptionList(SS_USER);
+
+        log.info("prescriptionList: {}", prescriptionList);
+
+        session.setAttribute("prescriptionList", prescriptionList);
+
+        return "/health/prescriptionList";
     }
 }

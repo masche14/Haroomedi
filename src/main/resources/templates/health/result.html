@@ -7,14 +7,61 @@
     <link rel="stylesheet" th:href="@{/css/authStyles.css}">
     <link rel="stylesheet" th:href="@{/css/navStyles.css}">
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/nav.js}" defer></script>
     <script src="/js/setReferrer.js" defer></script>
     <script th:inline="javascript">
         const error = /*[[${error}]]*/ null;
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
+
+        $(document).ready(function (){
+            $("#complete").on("click", function () {
+
+                $("#modal1").addClass("show");
+
+                // 데이터 준비
+                const requestData = {
+                };
+
+                console.log("전송 데이터:", requestData);
+
+                $.ajax({
+                    type: "POST",
+                    url: "/health/resultProcess",
+                    contentType: "application/json",
+                    data: JSON.stringify(requestData),
+                }).then(
+                    function (json){
+                        $("#modal1").removeClass("show");
+
+                        const result = json.data.result;
+                        const msg = json.data.msg;
+
+                        alert(msg);
+
+                        if (result < 0){
+                            location.href = "/health/auth";
+                        } else {
+                            location.href = "/health/prescriptionList";
+                        }
+
+                    }
+                );
+            });
+        })
+
     </script>
 </head>
 <body>
+
+<!-- 모달 창 -->
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h3>처방 내역 동기화</h3>
+        <p>처방내역을 동기화 중입니다.<br>
+            약 5분 정도 소요될 수 있습니다.
+        </p>
+        <button onclick="closeModal('modal1')">확인</button>
+    </div>
+</div>
 
 <!-- 네비게이션 바 -->
 <nav>
@@ -67,7 +114,7 @@
         <form id="health" th:action="@{/health/resultProcess}" method="post">
             <div class="button-group direction-row">
                 <button type="button" class="cancel" onclick="location.href='/user/index'">인증 취소</button>
-                <button type="submit" class="complete">인증 완료</button>
+                <button type="button" class="complete" id="complete">인증 완료</button>
             </div>
         </form>
     </div>
