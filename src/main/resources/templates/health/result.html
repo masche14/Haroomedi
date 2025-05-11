@@ -13,6 +13,13 @@
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
 
         $(document).ready(function (){
+
+            if (SS_USER == null) {
+                alert("로그인 후 이용 가능합니다.");
+                setReferrer();
+                return;
+            }
+
             $("#complete").on("click", function () {
 
                 $("#modal1").addClass("show");
@@ -71,7 +78,7 @@
         </div>
         <div class="nav-group" id="serviceNav">
             <a href="/health/auth">처방 내역 조회</a>
-            <a href="#">처방 내역 동기화</a>
+            <a href="/health/auth">처방 내역 동기화</a>
             <a href="#">AI 챗봇 상담</a>
             <a href="#">주변 약국 찾기</a>
         </div>

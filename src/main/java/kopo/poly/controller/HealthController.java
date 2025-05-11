@@ -141,7 +141,11 @@ public class HealthController {
     public String prescriptionList(HttpSession session, Model model) throws Exception {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
-        List<PrescriptionDTO> prescriptionList = healthService.getPrescriptionList(SS_USER);
+        List<PrescriptionDTO> prescriptionList = null;
+
+        if (SS_USER != null){
+            prescriptionList = healthService.getPrescriptionList(SS_USER);
+        }
 
         log.info("prescriptionList: {}", prescriptionList);
 
