@@ -9,7 +9,7 @@
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
     <script src="/js/setReferrer.js" defer></script>
     <script th:inline="javascript">
-        const prescriptionList = /*[[${session.prescriptionList}]]*/ null;
+        const prescriptionList = /*[[${prescriptionList}]]*/ null;
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
 
         $(document).ready(function (){
@@ -23,6 +23,67 @@
             if (!prescriptionList || prescriptionList.length === 0) {
                 alert("처방내역DB에 데이터가 없습니다. 동기화를 진행해주세요.");
                 location.href="/health/auth";
+            }
+
+            console.log(prescriptionList);
+
+            $(document).on("click", ".remind-btn", function() {
+                const $btn = $(this);
+                const prescriptionId = $btn.data("id");
+                const currentRemindYn = $btn.data("remind");
+                const newRemindYn = currentRemindYn === "y" ? "n" : "y";
+
+                const updateData = {
+                    prescriptionId: prescriptionId,
+                    remindYn: newRemindYn
+                };
+
+                $.ajax({
+                    url: "/updatePrescription",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(updateData),
+                    success: function(updatedList) {
+                        console.log("업데이트된 리스트:", updatedList);
+
+                        // 최신 리스트 렌더링
+                        renderPrescriptionList(updatedList);
+                    },
+                    error: function(xhr) {
+                        console.error("업데이트 실패:", xhr);
+                    }
+                });
+            });
+
+            function renderPrescriptionList(prescriptionList) {
+                const container = $("#prescription-list");
+                container.empty();
+
+                prescriptionList.forEach(item => {
+                    const remindYn = item.remindYn;
+                    const remindText = remindYn === "Y" ? "알림 해제" : "알림 설정";
+
+                    // Date 객체로 변환
+                    const date = new Date(item.prescriptionDate);
+                    const formattedDate = date.toISOString().split('T')[0]; // yyyy-MM-dd 형식
+
+                    const itemHtml = `
+                        <div id="prescription-${item.prescriptionId}" class="prescription-item">
+                            <span>${formattedDate}</span>
+                            <span>${item.storeName}</span>
+
+                            <!-- 알림 설정 / 해제 버튼 -->
+                            <button class="remind-btn" data-id="${item.prescriptionId}" data-remind="${remindYn}">
+                                ${remindText}
+                            </button>
+
+                            <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
+                            ${remindYn === "Y" ? `<button class="manage-btn" data-id="${item.prescriptionId}">복약 관리</button>` : ""}
+                        </div>
+                    `;
+
+                    container.append(itemHtml);
+                });
             }
 
         });
@@ -49,5 +110,29 @@
         </div>
     </div>
 </nav>
+<div class="auth-container">
+    <div id="prescription-container">
+        <div id="prescription-list">
+            <div th:each="item : ${prescriptionList}" id="prescription-${item.prescriptionId}" class="prescription-item">
+                <span th:text="${#dates.format(item.prescriptionDate, 'yyyy-MM-dd')}"></span>
+                <span th:text="${item.storeName}"></span>
+
+                <!-- 알림 설정 / 해제 버튼 -->
+                <button class="remind-btn"
+                        th:data-id="${item.prescriptionId}"
+                        th:data-remind="${item.remindYn}"
+                        th:text="${item.remindYn == 'Y' ? '알림 해제' : '알림 설정'}">
+                </button>
+
+                <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
+                <button class="manage-btn"
+                        th:data-id="${item.prescriptionId}"
+                        th:if="${item.remindYn == 'Y'}">
+                    복약 관리
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

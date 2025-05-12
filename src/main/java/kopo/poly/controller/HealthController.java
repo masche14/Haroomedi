@@ -149,7 +149,7 @@ public class HealthController {
 
         log.info("prescriptionList: {}", prescriptionList);
 
-        session.setAttribute("prescriptionList", prescriptionList);
+        model.addAttribute("prescriptionList", prescriptionList);
 
         return "/health/prescriptionList";
     }
