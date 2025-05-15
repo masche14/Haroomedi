@@ -4,13 +4,16 @@
     border-radius: 12px;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
     overflow: hidden; /* 좌측 인디케이터의 둥근 모서리를 위해 필요 */
-    width: 600px;
-    margin: 10px 0;
+    width: 99%;
+    /*padding: 20px;*/
+    /*padding-left: 0 !important;*/
+    height: 300px !important;
 }
 
 /* 좌측 색상 인디케이터 */
 .indicator {
     width: 8px;
+    height: 100%;
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
 }
@@ -25,7 +28,6 @@
     justify-content: space-between;
     align-items: center;
     flex: 1;
-    padding: 20px;
 }
 
 .content span {

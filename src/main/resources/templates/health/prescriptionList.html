@@ -115,24 +115,26 @@
     <div class="auth-box">
         <div id="prescription-container">
             <div style="gap:10px; display: flex; flex-direction: column; height: 500px; width: 500px; overflow-y: scroll" id="prescription-list">
-                <div style="width: 99%; display: flex; flex-direction: row; justify-content: space-between; align-items: center !important;" th:each="item : ${prescriptionList}" id="prescription-${item.prescriptionId}" class="auth-box">
+                <div th:each="item : ${prescriptionList}" id="prescription-${item.prescriptionId}" class="status-card">
                     <div class="indicator" th:classappend="${item.remindYn} == 'Y' ? ' green' : ' red'"></div>
-                    <div style="height: 24px; display: flex; align-items: center;" th:text="${#dates.format(item.prescriptionDate, 'yyyy-MM-dd')}"></div>
-                    <div style="height: 24px" th:text="${item.storeName}"></div>
+                    <div class="content">
+                        <div style="height: 24px; display: flex; align-items: center;" th:text="${#dates.format(item.prescriptionDate, 'yyyy-MM-dd')}"></div>
+                        <div style="height: 24px" th:text="${item.storeName}"></div>
 
-                    <!-- 알림 설정 / 해제 버튼 -->
-                    <button class="remind-btn"
-                            th:data-id="${item.prescriptionId}"
-                            th:data-remind="${item.remindYn}"
-                            th:text="${item.remindYn == 'Y' ? '알림 해제' : '알림 설정'}">
-                    </button>
+                        <!-- 알림 설정 / 해제 버튼 -->
+                        <button class="remind-btn"
+                                th:data-id="${item.prescriptionId}"
+                                th:data-remind="${item.remindYn}"
+                                th:text="${item.remindYn == 'Y' ? '알림 해제' : '알림 설정'}">
+                        </button>
 
-                    <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
-                    <button class="manage-btn"
-                            th:data-id="${item.prescriptionId}"
-                            th:if="${item.remindYn == 'Y'}">
-                        복약 관리
-                    </button>
+                        <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
+                        <button class="manage-btn"
+                                th:data-id="${item.prescriptionId}"
+                                th:if="${item.remindYn == 'Y'}">
+                            복약 관리
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
