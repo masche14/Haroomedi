@@ -1,0 +1,35 @@
+.status-card {
+    display: flex;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
+    overflow: hidden; /* 좌측 인디케이터의 둥근 모서리를 위해 필요 */
+    width: 600px;
+    margin: 10px 0;
+}
+
+/* 좌측 색상 인디케이터 */
+.indicator {
+    width: 8px;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+/* 예: 상태에 따라 색상 클래스 변경 */
+.indicator.green { background-color: #4CAF50; }
+.indicator.red { background-color: #f44336; }
+.indicator.blue { background-color: #2196F3; }
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    padding: 20px;
+}
+
+.content span {
+    flex: 1;
+    text-align: center;
+    font-weight: 500;
+}
