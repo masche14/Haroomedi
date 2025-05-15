@@ -5,7 +5,7 @@
     border-radius: 12px;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
     overflow: hidden;
-    width: 100%; /* 100%로 설정해 여백 없이 카드 꽉 차게 */
+    width: 99%; /* 100%로 설정해 여백 없이 카드 꽉 차게 */
     height: 60px; /* 카드 높이 적절히 조절 */
     flex-shrink: 0; /* 카드가 줄어들지 않게 */
     /*padding: 20px;*/
@@ -24,6 +24,8 @@
 /* 예: 상태에 따라 색상 클래스 변경 */
 .indicator.green { background-color: #4CAF50; }
 .indicator.red { background-color: #f44336; }
+.indicator.grey{background-color: #9e9b9b
+}
 .indicator.blue { background-color: #2196F3; }
 
 .content {
@@ -52,3 +54,5 @@
     cursor: pointer;
     font-weight: 500;
 }
+
+.remind-btn, .manage-btn
