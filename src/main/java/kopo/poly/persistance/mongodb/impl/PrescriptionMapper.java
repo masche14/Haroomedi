@@ -75,7 +75,6 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         projection.append("storeName", "$storeName");
         projection.append("prescriptionPeriod", "$prescriptionPeriod");
         projection.append("drugList", "$drugList");
-        projection.append("dailyIntakeCnt", "$dailyIntakeCnt");
         projection.append("remindYn", "$remindYn");
         projection.append("_id", 1);
 
@@ -112,7 +111,6 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
                     drugList.add(drugDoc);
                 }
 
-                int dailyIntakeCnt = doc.getInteger("dailyIntakeCnt");
                 ObjectId id = doc.getObjectId("_id");
 
                 rDTO.setUserId(userId);
@@ -120,7 +118,6 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
                 rDTO.setStoreName(storeName);
                 rDTO.setPrescriptionPeriod(prescriptionPeriod);
                 rDTO.setDrugList(drugList);
-                rDTO.setDailyIntakeCnt(dailyIntakeCnt);
                 rDTO.setRemindYn(doc.getString("remindYn"));
                 if (id != null) {
                     rDTO.setPrescriptionId(id.toHexString());

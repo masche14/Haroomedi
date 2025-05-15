@@ -1,13 +1,15 @@
 .status-card {
     display: flex;
+    flex-direction: row;
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
-    overflow: hidden; /* 좌측 인디케이터의 둥근 모서리를 위해 필요 */
-    width: 99%;
+    overflow: hidden;
+    width: 100%; /* 100%로 설정해 여백 없이 카드 꽉 차게 */
+    height: 60px; /* 카드 높이 적절히 조절 */
+    flex-shrink: 0; /* 카드가 줄어들지 않게 */
     /*padding: 20px;*/
-    /*padding-left: 0 !important;*/
-    height: 300px !important;
+    box-sizing: border-box;
 }
 
 /* 좌측 색상 인디케이터 */
@@ -16,6 +18,7 @@
     height: 100%;
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
+    flex-shrink: 0;
 }
 
 /* 예: 상태에 따라 색상 클래스 변경 */
@@ -25,13 +28,27 @@
 
 .content {
     display: flex;
+    flex-direction: row; /* 세로 정렬로 변경 */
     justify-content: space-between;
     align-items: center;
-    flex: 1;
+    padding-left: 16px;
+    gap: 8px;
+    width: 100%;
+    height: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
 }
 
-.content span {
-    flex: 1;
-    text-align: center;
+.content > div {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.remind-btn, .manage-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
     font-weight: 500;
 }
