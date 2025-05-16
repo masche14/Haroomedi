@@ -6,15 +6,14 @@
     box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
     overflow: hidden;
     width: 99%; /* 100%로 설정해 여백 없이 카드 꽉 차게 */
-    height: 60px; /* 카드 높이 적절히 조절 */
+    height: 65px; /* 카드 높이 적절히 조절 */
     flex-shrink: 0; /* 카드가 줄어들지 않게 */
-    /*padding: 20px;*/
     box-sizing: border-box;
 }
 
 /* 좌측 색상 인디케이터 */
 .indicator {
-    width: 8px;
+    width: 10px;
     height: 100%;
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
@@ -24,8 +23,7 @@
 /* 예: 상태에 따라 색상 클래스 변경 */
 .indicator.green { background-color: #4CAF50; }
 .indicator.red { background-color: #f44336; }
-.indicator.grey{background-color: #9e9b9b
-}
+.indicator.grey{background-color: #9e9b9b }
 .indicator.blue { background-color: #2196F3; }
 
 .content {
@@ -47,12 +45,46 @@
 }
 
 .remind-btn, .manage-btn {
+    position: relative;
     padding: 6px 12px;
     border-radius: 6px;
     border: none;
     background-color: #f0f0f0;
     cursor: pointer;
+    transition: background 0.2s ease-in-out;
     font-weight: 500;
+    overflow: hidden;
+    z-index: 0;
 }
 
-.remind-btn, .manage-btn
+/* 내부 중앙에서 회색 그림자가 퍼지는 효과 */
+.remind-btn::before, .manage-btn::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, transparent 80%);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    transition: width 0.3s ease, height 0.3s ease;
+    z-index: -1;
+}
+
+.remind-btn:hover::before, .manage-btn:hover::before {
+    width: 250%;
+    height: 250%;
+}
+
+/* 텍스트가 위에 있도록 설정 */
+/*.remind-btn > *, .manage-btn > * {*/
+/*    position: relative;*/
+/*    z-index: 1;*/
+/*}*/
+
+
+/* 클릭(활성화) 시: 더 진하게 퍼짐 */
+.remind-btn:active::before, .manage-btn:active::before {
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 80%);
+}
