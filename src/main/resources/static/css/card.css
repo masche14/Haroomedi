@@ -77,14 +77,8 @@
     height: 250%;
 }
 
-/* 텍스트가 위에 있도록 설정 */
-/*.remind-btn > *, .manage-btn > * {*/
-/*    position: relative;*/
-/*    z-index: 1;*/
-/*}*/
-
-
 /* 클릭(활성화) 시: 더 진하게 퍼짐 */
 .remind-btn:active::before, .manage-btn:active::before {
     background: radial-gradient(circle, rgba(0, 0, 0, 0.2) 0%, transparent 80%);
 }
+

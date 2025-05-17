@@ -1,103 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>처방내역 조회</title>
+
+    <!-- 공통 스타일 -->
     <link rel="stylesheet" th:href="@{/css/authStyles.css}">
     <link rel="stylesheet" th:href="@{/css/navStyles.css}">
     <link rel="stylesheet" href="/css/card.css">
+
+    <!-- 이 페이지 전용 스타일 -->
+    <link rel="stylesheet" href="/css/prescriptionListStyles.css">
+
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
     <script src="/js/setReferrer.js" defer></script>
+
     <script th:inline="javascript">
         const prescriptionList = /*[[${prescriptionList}]]*/ null;
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
 
-        $(document).ready(function (){
+        let selectedPrescriptionId = null;
+
+        $(document).ready(function () {
             if (SS_USER == null) {
                 alert("로그인 후 이용 가능합니다.");
                 setReferrer();
                 return;
             }
 
-            // prescriptionList가 비어있는지 확인
             if (!prescriptionList || prescriptionList.length === 0) {
                 alert("처방내역DB에 데이터가 없습니다. 동기화를 진행해주세요.");
-                location.href="/health/auth";
+                location.href = "/health/auth";
             }
 
-            console.log(prescriptionList);
+            renderPrescriptionList(prescriptionList);
 
-            $(document).on("click", ".remind-btn", function() {
-                const $btn = $(this);
-                const prescriptionId = $btn.data("id");
-                const currentRemindYn = $btn.data("remind");
-                const newRemindYn = currentRemindYn === "y" ? "n" : "y";
+            // 알림 버튼 클릭
+            $(document).on("click", ".remind-btn", function () {
+                selectedPrescriptionId = $(this).data("id");
 
-                const updateData = {
-                    prescriptionId: prescriptionId,
-                    remindYn: newRemindYn
-                };
+                const remindYn = $(this).data("remind");
+                if (remindYn === 'Y') {
+                    $.ajax({
+                        url: "/updatePrescription",
+                        type: "POST",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            prescriptionId: selectedPrescriptionId,
+                            remindYn: "N"
+                        }),
+                        success: function (updatedList) {
+                            renderPrescriptionList(updatedList);
+                        },
+                        error: function () {
+                            alert("알림 해제 실패");
+                        }
+                    });
+                } else {
+                    $("#reminderModal").addClass("show");
+                }
+            });
+
+            // 복용 시기 선택
+            $(".meal-btn").on("click", function () {
+                $(this).toggleClass("selected");
+            });
+
+            // 알림 설정 확인
+            $("#confirmReminderBtn").on("click", function () {
+                const selectedMeals = [];
+                $(".meal-btn.selected").each(function () {
+                    selectedMeals.push($(this).data("value"));
+                });
+
+                if (selectedMeals.length === 0) {
+                    alert("복용 시기를 1개 이상 선택해주세요.");
+                    return;
+                }
 
                 $.ajax({
-                    url: "/updatePrescription",
                     type: "POST",
+                    url: "/prescription/setReminder",
                     contentType: "application/json",
-                    data: JSON.stringify(updateData),
-                    success: function(updatedList) {
-                        console.log("업데이트된 리스트:", updatedList);
-
-                        // 최신 리스트 렌더링
+                    data: JSON.stringify({
+                        prescriptionId: selectedPrescriptionId,
+                        reminderYn: "Y",
+                        dailyIntakeCnt: selectedMeals.length
+                    }),
+                    success: function (updatedList) {
+                        $("#reminderModal").removeClass("show");
+                        $(".meal-btn").removeClass("selected");
                         renderPrescriptionList(updatedList);
                     },
-                    error: function(xhr) {
-                        console.error("업데이트 실패:", xhr);
+                    error: function () {
+                        alert("알림 설정 실패");
                     }
                 });
             });
 
-            function renderPrescriptionList(prescriptionList) {
-                const container = $("#prescription-list");
-                container.empty();
-
-                prescriptionList.forEach(item => {
-                    const remindYn = item.remindYn;
-                    const remindText = remindYn === "Y" ? "알림 해제" : "알림 설정";
-
-                    // Date 객체로 변환
-                    const date = new Date(item.prescriptionDate);
-                    const formattedDate = date.toISOString().split('T')[0]; // yyyy-MM-dd 형식
-
-                    const itemHtml = `
-                        <div id="prescription-\${item.prescriptionId}" class="status-card">
-                            <div class="indicator \${item.remindYn === 'Y' ? 'green' : 'grey'}"></div>
-                            <div class="content">
-                                <div style="height: 24px; display: flex; align-items: center;">\${item.prescriptionDate.split('T')[0]}</div>
-                                <div style="height: 24px;">\${item.storeName}</div>
-
-                                <!-- 알림 설정 / 해제 버튼 -->
-                                <button class="remind-btn"
-                                        data-id="\${item.prescriptionId}"
-                                        data-remind="\${item.remindYn}">
-                                    \${item.remindYn === 'Y' ? '알림 해제' : '알림 설정'}
-                                </button>
-
-                                <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
-                                \${item.remindYn === 'Y'
-                                    ? \`<button class="manage-btn" data-id="\${item.prescriptionId}">복약 관리</button>\`
-                                    : ''}
-                            </div>
-                        </div>
-                    `;
-
-                    container.append(itemHtml);
-                });
-            }
-
+            // 모달 닫기
+            $("#closeReminderModal").on("click", function () {
+                $("#reminderModal").removeClass("show");
+                $(".meal-btn").removeClass("selected");
+            });
         });
+
+        function renderPrescriptionList(prescriptionList) {
+            const container = $("#prescription-list");
+            container.empty();
+
+            prescriptionList.forEach(item => {
+                const remindYn = item.remindYn;
+                const remindText = remindYn === "Y" ? "알림 해제" : "알림 설정";
+                const formattedDate = new Date(item.prescriptionDate).toISOString().split('T')[0];
+
+                const itemHtml = `
+                    <div id="prescription-${item.prescriptionId}" class="status-card">
+                        <div class="indicator ${remindYn === 'Y' ? 'green' : 'grey'}"></div>
+                        <div class="content">
+                            <div class="prescription-date">${formattedDate}</div>
+                            <div class="store-name">${item.storeName}</div>
+
+                            <button class="remind-btn"
+                                    data-id="${item.prescriptionId}"
+                                    data-remind="${remindYn}">
+                                ${remindText}
+                            </button>
+
+                            ${remindYn === "Y" ? `
+                            <button class="manage-btn" data-id="${item.prescriptionId}">
+                                복약 관리
+                            </button>` : ''}
+                        </div>
+                    </div>
+                `;
+
+                container.append(itemHtml);
+            });
+        }
     </script>
 </head>
 <body>
+<!-- 네비게이션 -->
 <nav>
     <div class="nav-content">
         <div class="nav-group same_width justify-left">
@@ -118,39 +162,34 @@
         </div>
     </div>
 </nav>
+
+<!-- 본문 -->
 <div class="auth-container">
     <div class="auth-box">
-        <div style="height: 600px; width: 500px; display: flex; align-items: center; flex-direction: column; gap:20px;" id="prescription-container">
-            <!-- 이미지 -->
-            <div style="width:200px;height: 200px">
-                <img src="/icons/medicine.png" style="width: 100%; height: 100%; object-fit: cover">
+        <div id="prescription-container">
+            <div class="prescription-image">
+                <img src="/icons/medicine.png" alt="약 이미지">
             </div>
-            <!-- 제목 -->
-            <div style="font-weight: bold; font-size: larger">처방내역</div>
-            <!-- 리스트 -->
-            <div style="gap:10px; display: flex; flex-direction: column; height: 350px; width: 100%; overflow-y: scroll" id="prescription-list">
-                <div th:each="item : ${prescriptionList}" id="prescription-${item.prescriptionId}" class="status-card">
-                    <div class="indicator" th:classappend="${item.remindYn} == 'Y' ? ' green' : ' grey'"></div>
-                    <div class="content">
-                        <div style="height: 24px; display: flex; align-items: center;" th:text="${#dates.format(item.prescriptionDate, 'yyyy-MM-dd')}"></div>
-                        <div style="height: 24px" th:text="${item.storeName}"></div>
+            <div class="title">처방내역</div>
+            <div id="prescription-list"></div>
+        </div>
+    </div>
+</div>
 
-                        <!-- 알림 설정 / 해제 버튼 -->
-                        <button class="remind-btn"
-                                th:data-id="${item.prescriptionId}"
-                                th:data-remind="${item.remindYn}"
-                                th:text="${item.remindYn == 'Y' ? '알림 해제' : '알림 설정'}">
-                        </button>
+<!-- 모달 -->
+<div class="modal" id="reminderModal">
+    <div class="modal-content">
+        <h3>처방받은 복용 시기</h3>
 
-                        <!-- 복약 관리 버튼 (알림이 설정된 경우에만 표시) -->
-                        <button class="manage-btn"
-                                th:data-id="${item.prescriptionId}"
-                                th:if="${item.remindYn == 'Y'}">
-                            복약 관리
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="meal-time-options" id="mealOptionWrapper">
+            <div class="meal-btn" data-value="아침">아침</div>
+            <div class="meal-btn" data-value="점심">점심</div>
+            <div class="meal-btn" data-value="저녁">저녁</div>
+        </div>
+
+        <div class="modal-buttons" id="modalBtnWrapper">
+            <button id="closeReminderModal">닫기</button>
+            <button id="confirmReminderBtn">확인</button>
         </div>
     </div>
 </div>

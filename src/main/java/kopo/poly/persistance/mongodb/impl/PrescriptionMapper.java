@@ -1,6 +1,5 @@
 package kopo.poly.persistance.mongodb.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import kopo.poly.dto.PrescriptionDTO;
@@ -8,7 +7,6 @@ import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IPrescriptionMapper;
 import kopo.poly.util.CmmUtil;
-import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -16,10 +14,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -42,9 +37,17 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 
         for (PrescriptionDTO pDTO : pList) {
-            col.insertOne(new Document(new ObjectMapper().convertValue(pDTO, Map.class)));
-        }
+            Document doc = new Document();
+            doc.append("userId", CmmUtil.nvl(pDTO.getUserId()));
+            doc.append("prescriptionDate", pDTO.getPrescriptionDate()); // Date 타입 직접 삽입
+            doc.append("storeName", CmmUtil.nvl(pDTO.getStoreName()));
+            doc.append("prescriptionPeriod", pDTO.getPrescriptionPeriod());
+            doc.append("drugList", pDTO.getDrugList()); // 이미 Map 구조이므로 바로 넣음
+            doc.append("dailyIntakeCnt", pDTO.getDailyIntakeCnt());
+            doc.append("remindYn", CmmUtil.nvl(pDTO.getRemindYn()));
 
+            col.insertOne(doc);
+        }
 
         res = 1;
 
@@ -70,55 +73,49 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         query.append("userId", CmmUtil.nvl(pDTO.getUserId()));
 
         Document projection = new Document();
-        projection.append("userId", "$userId");
-        projection.append("prescriptionDate", "$prescriptionDate");
-        projection.append("storeName", "$storeName");
-        projection.append("prescriptionPeriod", "$prescriptionPeriod");
-        projection.append("drugList", "$drugList");
-        projection.append("remindYn", "$remindYn");
+        projection.append("userId", 1);
+        projection.append("prescriptionDate", 1);
+        projection.append("storeName", 1);
+        projection.append("prescriptionPeriod", 1);
+        projection.append("drugList", 1);
+        projection.append("dailyIntakeCnt", 1);
+        projection.append("remindYn", 1);
         projection.append("_id", 1);
 
-        // 날짜 기준 내림차순 정렬
         Document sort = new Document("prescriptionDate", -1);
 
-        // 쿼리 실행
         FindIterable<Document> rs = col.find(query)
                 .projection(projection)
-                .sort(sort);  // 정렬 추가
+                .sort(sort);
 
         for (Document doc : rs) {
             if (doc != null) {
                 PrescriptionDTO rDTO = new PrescriptionDTO();
 
-                String userId = CmmUtil.nvl(doc.getString("userId"));
-                Object dateObj = doc.get("prescriptionDate");
+                rDTO.setUserId(CmmUtil.nvl(doc.getString("userId")));
 
-                Date prescriptionDate;
+                Object dateObj = doc.get("prescriptionDate");
                 if (dateObj instanceof Date) {
-                    prescriptionDate = (Date) dateObj;
+                    rDTO.setPrescriptionDate((Date) dateObj);
                 } else if (dateObj instanceof Long) {
-                    prescriptionDate = new Date((Long) dateObj);
-                } else {
-                    throw new IllegalArgumentException("Unsupported date format: " + dateObj.getClass().getName());
+                    rDTO.setPrescriptionDate(new Date((Long) dateObj));
                 }
 
-                String storeName = CmmUtil.nvl(doc.getString("storeName"));
-                int prescriptionPeriod = doc.getInteger("prescriptionPeriod");
+                rDTO.setStoreName(CmmUtil.nvl(doc.getString("storeName")));
+                rDTO.setPrescriptionPeriod(doc.getInteger("prescriptionPeriod", 0));
+                rDTO.setDailyIntakeCnt(doc.getInteger("dailyIntakeCnt", 0));
+                rDTO.setRemindYn(CmmUtil.nvl(doc.getString("remindYn")));
 
                 List<Document> drugListDocs = doc.getList("drugList", Document.class);
                 List<Map<String, Object>> drugList = new ArrayList<>();
-                for (Document drugDoc : drugListDocs) {
-                    drugList.add(drugDoc);
+                if (drugListDocs != null) {
+                    for (Document drugDoc : drugListDocs) {
+                        drugList.add(drugDoc);
+                    }
                 }
+                rDTO.setDrugList(drugList);
 
                 ObjectId id = doc.getObjectId("_id");
-
-                rDTO.setUserId(userId);
-                rDTO.setPrescriptionDate(prescriptionDate);
-                rDTO.setStoreName(storeName);
-                rDTO.setPrescriptionPeriod(prescriptionPeriod);
-                rDTO.setDrugList(drugList);
-                rDTO.setRemindYn(doc.getString("remindYn"));
                 if (id != null) {
                     rDTO.setPrescriptionId(id.toHexString());
                 }
@@ -147,9 +144,9 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         query.append("userId", CmmUtil.nvl(pDTO.getUserId()));
 
         Document projection = new Document();
-        projection.append("userId", "$userId");
-        projection.append("prescriptionDate", "$prescriptionDate");
-        projection.append("storeName", "$storeName");
+        projection.append("userId", 1);
+        projection.append("prescriptionDate", 1);
+        projection.append("storeName", 1);
 
         Document latestDoc = col.find(query)
                 .projection(projection)
@@ -158,19 +155,15 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
 
         if (latestDoc != null) {
             rDTO.setUserId(CmmUtil.nvl(latestDoc.getString("userId")));
-            Object dateObj = latestDoc.get("prescriptionDate");
 
-            Date prescriptionDate;
+            Object dateObj = latestDoc.get("prescriptionDate");
             if (dateObj instanceof Date) {
-                prescriptionDate = (Date) dateObj;
+                rDTO.setPrescriptionDate((Date) dateObj);
             } else if (dateObj instanceof Long) {
-                prescriptionDate = new Date((Long) dateObj);
-            } else {
-                throw new IllegalArgumentException("Unsupported date format: " + dateObj.getClass().getName());
+                rDTO.setPrescriptionDate(new Date((Long) dateObj));
             }
 
-            rDTO.setPrescriptionDate(prescriptionDate);
-            rDTO.setStoreName(latestDoc.getString("storeName"));
+            rDTO.setStoreName(CmmUtil.nvl(latestDoc.getString("storeName")));
 
             return rDTO;
         }
