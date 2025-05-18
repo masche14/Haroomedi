@@ -42,14 +42,15 @@
                 const remindYn = $(this).data("remind");
                 if (remindYn === 'Y') {
                     $.ajax({
-                        url: "/updatePrescription",
+                        url: "/health/removeReminder",
                         type: "POST",
                         contentType: "application/json",
                         data: JSON.stringify({
                             prescriptionId: selectedPrescriptionId,
                             remindYn: "N"
                         }),
-                        success: function (updatedList) {
+                        success: function (json) {
+                            const updatedList = json.data;
                             renderPrescriptionList(updatedList);
                         },
                         error: function () {
@@ -80,14 +81,16 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/prescription/setReminder",
+                    url: "/health/setReminder",
                     contentType: "application/json",
                     data: JSON.stringify({
                         prescriptionId: selectedPrescriptionId,
-                        reminderYn: "Y",
+                        remindYn: "Y",
                         dailyIntakeCnt: selectedMeals.length
                     }),
-                    success: function (updatedList) {
+                    success: function (json) {
+                        const updatedList = json.data;
+
                         $("#reminderModal").removeClass("show");
                         $(".meal-btn").removeClass("selected");
                         renderPrescriptionList(updatedList);
@@ -170,7 +173,7 @@
             <div class="prescription-image">
                 <img src="/icons/medicine.png" alt="약 이미지">
             </div>
-            <div class="title">처방내역</div>
+            <div class="title" style="font-weight: bold">처방내역</div>
             <div id="prescription-list"></div>
         </div>
     </div>

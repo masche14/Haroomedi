@@ -506,5 +506,22 @@ public class HealthService implements IHealthService {
 
         return prescriptionList;
     }
+
+    @Override
+    public PrescriptionDTO updatePrescriptionInfo(PrescriptionDTO pDTO) throws Exception {
+        log.info("{}.updatePrescriptionInfo Start!", this.getClass().getName());
+        String colNm = "Prescription";
+
+        PrescriptionDTO rDTO = null;
+
+        int res = prescriptionMapper.updatePrescriptionInfo(colNm, pDTO);
+        if (res>0){
+            rDTO = prescriptionMapper.getPrescriptionById(colNm, pDTO);
+        }
+
+        log.info("{}.updatePrescriptionInfo End!", this.getClass().getName());
+
+        return rDTO;
+    }
 }
 

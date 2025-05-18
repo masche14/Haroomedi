@@ -9,6 +9,7 @@ import kopo.poly.dto.*;
 import kopo.poly.service.IHealthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,8 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -152,5 +153,106 @@ public class HealthController {
         model.addAttribute("prescriptionList", prescriptionList);
 
         return "/health/prescriptionList";
+    }
+
+    @PostMapping("removeReminder")
+    public ResponseEntity<CommonResponse<List<PrescriptionDTO>>> removeReminder(HttpSession session, @RequestBody PrescriptionDTO pDTO) throws Exception {
+        log.info("{}.removeReminder Start", this.getClass().getSimpleName());
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        PrescriptionDTO updatedDTO = healthService.updatePrescriptionInfo(pDTO);
+        List<PrescriptionDTO> prescriptionList = new LinkedList<>();
+
+        if (updatedDTO != null) {
+            prescriptionList = healthService.getPrescriptionList(SS_USER);
+        }
+
+        log.info("{},removeReminder End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), prescriptionList)
+        );
+    }
+
+    @PostMapping("setReminder")
+    public ResponseEntity<CommonResponse<List<PrescriptionDTO>>> setReminder(HttpSession session, @RequestBody PrescriptionDTO pDTO) throws Exception {
+        log.info("{}.setReminder Start", this.getClass().getSimpleName());
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        String userId = SS_USER.getUserId();
+
+        log.info("pDTO: {}", pDTO.toString());
+
+        PrescriptionDTO updatedDTO = healthService.updatePrescriptionInfo(pDTO);
+        log.info("updatedDTO: {}", updatedDTO.toString());
+
+        if (updatedDTO != null) {
+            String prescriptionId = updatedDTO.getPrescriptionId();
+            int prescriptionPeriod = updatedDTO.getPrescriptionPeriod();
+            int dailyIntakeCnt = updatedDTO.getDailyIntakeCnt();
+            int toIntakeCnt = prescriptionPeriod * dailyIntakeCnt;
+            int dailyToIntakeCnt = updatedDTO.getDailyIntakeCnt();
+            int intakeCnt = 0;
+            int leftIntakeCnt = toIntakeCnt - intakeCnt;
+            List<String> mealTime = SS_USER.getMealTime();
+            List<Map<String, Object>> intakeLog = new ArrayList<Map<String, Object>>();
+
+            List<String> intakeTimes = new ArrayList<>();
+
+            if (mealTime.size() > dailyIntakeCnt){
+                String firstintakeTime = mealTime.get(0);
+                String lastintakeTime = mealTime.get(mealTime.size()-1);
+
+                intakeTimes.add(firstintakeTime);
+                intakeTimes.add(lastintakeTime);
+            } else {
+                intakeTimes = mealTime;
+            }
+
+            for (String timeStr : intakeTimes){
+                Map<String, Object> map = new HashMap<>();
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String todayStr = dateFormat.format(new Date()); // 예: "2025-05-18"
+
+                // 오늘 날짜 + 시간 문자열 조합
+                String dateTimeStr = todayStr + " " + timeStr; // 예: "2025-05-18 07:00"
+
+                // 최종 Date 객체로 파싱
+                SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                Date intakeTime = fullFormat.parse(dateTimeStr);
+
+                String intakeYn = "N";
+
+                map.put("intakeTime", intakeTime);
+                map.put("intakeYn", intakeYn);
+
+                intakeLog.add(map);
+
+                map = null;
+            }
+
+            ReminderDTO reminderDTO = new ReminderDTO();
+
+            reminderDTO.setPrescriptionId(prescriptionId);
+            reminderDTO.setUserId(userId);
+            reminderDTO.setMealTime(mealTime);
+            reminderDTO.setToIntakeCnt(toIntakeCnt);
+            reminderDTO.setDailyToIntakeCnt(dailyToIntakeCnt);
+            reminderDTO.setIntakeCnt(intakeCnt);
+            reminderDTO.setLeftIntakeCnt(leftIntakeCnt);
+            reminderDTO.setIntakeLog(intakeLog);
+
+            log.info("reminderDTO: {}", reminderDTO.toString());
+        }
+
+        List<PrescriptionDTO> prescriptionList = healthService.getPrescriptionList(SS_USER);
+        log.info("prescriptionList: {}", prescriptionList);
+
+        log.info("{}.setReminder End", this.getClass().getSimpleName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), prescriptionList)
+        );
     }
 }

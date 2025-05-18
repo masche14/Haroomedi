@@ -17,4 +17,5 @@ public interface IHealthService {
     Boolean loginCheck(TilkoDTO pDTO) throws Exception;
     int synchronizePrescriptions(TilkoDTO certificateResult) throws Exception;
     List<PrescriptionDTO> getPrescriptionList(UserInfoDTO pDTO) throws Exception;
+    PrescriptionDTO updatePrescriptionInfo(PrescriptionDTO pDTO) throws Exception;
 }

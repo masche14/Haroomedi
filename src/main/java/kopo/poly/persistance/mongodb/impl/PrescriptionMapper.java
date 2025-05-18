@@ -2,6 +2,8 @@ package kopo.poly.persistance.mongodb.impl;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 import kopo.poly.dto.PrescriptionDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
@@ -169,5 +171,65 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         }
 
         return null;
+    }
+
+    @Override
+    public int updatePrescriptionInfo(String colNm, PrescriptionDTO pDTO) throws Exception {
+
+        log.info("{}.updateReminderInfo Start", this.getClass().getName());
+
+        int res = 0;
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // ObjectId로 변환
+        ObjectId objectId = new ObjectId(CmmUtil.nvl(pDTO.getPrescriptionId()));
+
+        // Update 문서 구성
+        Document updateFields = new Document();
+        updateFields.append("remindYn", CmmUtil.nvl(pDTO.getRemindYn()));
+        updateFields.append("dailyIntakeCnt", pDTO.getDailyIntakeCnt());
+
+        Document updateDoc = new Document("$set", updateFields);
+
+        // 업데이트 실행
+        UpdateResult result = col.updateOne(Filters.eq("_id", objectId), updateDoc);
+
+        if (result.getModifiedCount() > 0) {
+            res = 1;
+        }
+
+        log.info("{}.updateReminderInfo End", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public PrescriptionDTO getPrescriptionById(String colNm, PrescriptionDTO pDTO) throws Exception {
+
+        log.info("{}.getPrescriptionById Start", this.getClass().getName());
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        ObjectId objectId = new ObjectId(CmmUtil.nvl(pDTO.getPrescriptionId()));
+
+        Document result = col.find(Filters.eq("_id", objectId)).first();
+
+        PrescriptionDTO rDTO = new PrescriptionDTO();
+
+        if (result != null) {
+            rDTO.setPrescriptionId(result.getObjectId("_id").toHexString());
+            rDTO.setUserId(result.getString("userId"));
+            rDTO.setPrescriptionDate(result.getDate("prescriptionDate"));
+            rDTO.setStoreName(result.getString("storeName"));
+            rDTO.setPrescriptionPeriod(result.getInteger("prescriptionPeriod", 0));
+            rDTO.setRemindYn(result.getString("remindYn"));
+            rDTO.setDailyIntakeCnt(result.getInteger("dailyIntakeCnt", 0));
+            // 필요한 경우 drugList 등 추가
+        }
+
+        log.info("{}.getPrescriptionById End", this.getClass().getName());
+
+        return rDTO;
     }
 }
