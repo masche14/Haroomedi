@@ -568,8 +568,6 @@ public class UserController {
             String encPhoneNumber = EncryptUtil.encAES128CBC(pDTO.getPhoneNumber());
             pDTO.setPhoneNumber(encPhoneNumber);
         }
-
-
         
         pDTO.setChgId(pDTO.getOrgId());
         pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
