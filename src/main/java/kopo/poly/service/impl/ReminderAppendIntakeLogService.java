@@ -29,26 +29,51 @@ public class ReminderAppendIntakeLogService {
 
         for (ReminderDTO rDTO : rList) {
             String prescriptionId = rDTO.getPrescriptionId();
-            List<String> mealTimes = rDTO.getMealTime(); // ["07:30", "12:30", "19:30"]
+            List<String> mealTime = rDTO.getMealTime(); // ["07:30", "12:30", "19:30"]
+            int dailyToIntakeCnt = rDTO.getDailyToIntakeCnt();
 
             List<Map<String, Object>> dailyLog = new ArrayList<>();
 
-            for (String timeStr : mealTimes) {
+            List<String> intakeTimes = new ArrayList<>();
+
+            if (mealTime.size() > dailyToIntakeCnt){
+                String firstintakeTime = "";
+                String lastintakeTime = "";
+                if (dailyToIntakeCnt == 1){
+                    firstintakeTime = mealTime.get(0);
+                    intakeTimes.add(firstintakeTime);
+                } else {
+                    firstintakeTime = mealTime.get(0);
+                    lastintakeTime = mealTime.get(mealTime.size() - 1);
+
+                    intakeTimes.add(firstintakeTime);
+                    intakeTimes.add(lastintakeTime);
+                }
+            } else {
+                intakeTimes = mealTime;
+            }
+
+            for (String timeStr : intakeTimes){
                 Map<String, Object> map = new HashMap<>();
 
-                // 오늘 날짜 + 시간 결합
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String todayStr = dateFormat.format(new Date()); // ex: "2025-05-18"
-                String dateTimeStr = todayStr + " " + timeStr;   // ex: "2025-05-18 07:30"
+                String todayStr = dateFormat.format(new Date()); // 예: "2025-05-18"
 
-                // Date 객체로 변환
+                // 오늘 날짜 + 시간 문자열 조합
+                String dateTimeStr = todayStr + " " + timeStr; // 예: "2025-05-18 07:00"
+
+                // 최종 Date 객체로 파싱
                 SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 Date intakeTime = fullFormat.parse(dateTimeStr);
 
+                String intakeYn = "N";
+
                 map.put("intakeTime", intakeTime);
-                map.put("intakeYn", "N");
+                map.put("intakeYn", intakeYn);
 
                 dailyLog.add(map);
+
+                map = null;
             }
 
             // DTO에 세팅

@@ -109,7 +109,8 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         // 필요한 필드만 조회하도록 projection 설정
         Document projection = new Document("prescriptionId", 1)
                 .append("userId", 1)
-                .append("mealTime", 1);
+                .append("mealTime", 1)
+                .append("dailyToIntakeCnt", 1);
 
         FindIterable<Document> docs = col.find(query).projection(projection);
 
