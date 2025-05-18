@@ -1,9 +1,6 @@
 package kopo.poly.service;
 
-import kopo.poly.dto.HRecordDTO;
-import kopo.poly.dto.PrescriptionDTO;
-import kopo.poly.dto.TilkoDTO;
-import kopo.poly.dto.UserInfoDTO;
+import kopo.poly.dto.*;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -18,4 +15,6 @@ public interface IHealthService {
     int synchronizePrescriptions(TilkoDTO certificateResult) throws Exception;
     List<PrescriptionDTO> getPrescriptionList(UserInfoDTO pDTO) throws Exception;
     PrescriptionDTO updatePrescriptionInfo(PrescriptionDTO pDTO) throws Exception;
+    int insertReminder(ReminderDTO pDTO) throws Exception;
+    int deleteReminder(PrescriptionDTO pDTO) throws Exception;
 }

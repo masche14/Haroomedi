@@ -165,6 +165,11 @@ public class HealthController {
 
         if (updatedDTO != null) {
             prescriptionList = healthService.getPrescriptionList(SS_USER);
+            int res = healthService.deleteReminder(pDTO);
+
+            if(res > 0){
+                log.info("reminder deleted");
+            }
         }
 
         log.info("{},removeReminder End", this.getClass().getSimpleName());
@@ -200,11 +205,18 @@ public class HealthController {
             List<String> intakeTimes = new ArrayList<>();
 
             if (mealTime.size() > dailyIntakeCnt){
-                String firstintakeTime = mealTime.get(0);
-                String lastintakeTime = mealTime.get(mealTime.size()-1);
+                String firstintakeTime = "";
+                String lastintakeTime = "";
+                if (dailyIntakeCnt == 1){
+                    firstintakeTime = mealTime.get(0);
+                    intakeTimes.add(firstintakeTime);
+                } else {
+                    firstintakeTime = mealTime.get(0);
+                    lastintakeTime = mealTime.get(mealTime.size() - 1);
 
-                intakeTimes.add(firstintakeTime);
-                intakeTimes.add(lastintakeTime);
+                    intakeTimes.add(firstintakeTime);
+                    intakeTimes.add(lastintakeTime);
+                }
             } else {
                 intakeTimes = mealTime;
             }
@@ -244,6 +256,12 @@ public class HealthController {
             reminderDTO.setIntakeLog(intakeLog);
 
             log.info("reminderDTO: {}", reminderDTO.toString());
+
+            int res = healthService.insertReminder(reminderDTO);
+
+            if (res > 0) {
+                log.info("reminder added");
+            }
         }
 
         List<PrescriptionDTO> prescriptionList = healthService.getPrescriptionList(SS_USER);

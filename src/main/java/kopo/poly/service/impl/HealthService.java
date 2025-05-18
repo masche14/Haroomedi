@@ -4,12 +4,10 @@ package kopo.poly.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kopo.poly.dto.HRecordDTO;
-import kopo.poly.dto.PrescriptionDTO;
-import kopo.poly.dto.TilkoDTO;
-import kopo.poly.dto.UserInfoDTO;
+import kopo.poly.dto.*;
 import kopo.poly.persistance.mongodb.IHealthMapper;
 import kopo.poly.persistance.mongodb.IPrescriptionMapper;
+import kopo.poly.persistance.mongodb.IReminderMapper;
 import kopo.poly.service.IHealthService;
 import kopo.poly.service.IOpenAIService;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +50,7 @@ public class HealthService implements IHealthService {
 
     private final IHealthMapper healthMapper;
     private final IPrescriptionMapper prescriptionMapper;
+    private final IReminderMapper reminderMapper;
 
     @Value("${tilko.apiKey}")
     public  String tilkoApiKey;
@@ -522,6 +521,36 @@ public class HealthService implements IHealthService {
         log.info("{}.updatePrescriptionInfo End!", this.getClass().getName());
 
         return rDTO;
+    }
+
+    @Override
+    public int insertReminder(ReminderDTO pDTO) throws Exception {
+
+        log.info("{}.insertReminder Start!", this.getClass().getName());
+
+        String colNm = "Reminder";
+
+        int res;
+
+        res = reminderMapper.insertReminder(colNm, pDTO);
+
+        log.info("{}.insertReminder End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public int deleteReminder(PrescriptionDTO pDTO) throws Exception {
+
+        log.info("{}.deleteReminder Start!", this.getClass().getName());
+
+        String colNm = "Reminder";
+
+        int res = reminderMapper.deleteReminder(colNm, pDTO);
+
+        log.info("{}.deleteReminder End!", this.getClass().getName());
+
+        return res;
     }
 }
 
