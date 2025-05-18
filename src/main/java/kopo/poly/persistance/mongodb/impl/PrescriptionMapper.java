@@ -232,4 +232,36 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
 
         return rDTO;
     }
+
+    @Override
+    public int updateUserId(String colNm, UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.updateMealTime Start", this.getClass().getSimpleName());
+
+        int res = 0;
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        String userId = pDTO.getOrgId();
+        String updateUserId = pDTO.getUserId();
+
+        Document query = new Document("userId", userId);
+        Document update = new Document("$set", new Document("userId", updateUserId));
+
+        UpdateResult result = col.updateMany(query, update);
+
+        int toUpdateCnt = (int) result.getMatchedCount();
+        int updatedCnt = (int) result.getModifiedCount();
+
+        log.info("업데이트 대상 문서 수 : {}", toUpdateCnt);
+        log.info("실제 업데이트된 문서 수 : {}", updatedCnt);
+
+        if(toUpdateCnt == updatedCnt) {
+            res = 1;
+        }
+
+        log.info("{}.updateMealTimeByUserId End", this.getClass().getSimpleName());
+
+        return res;
+    }
 }

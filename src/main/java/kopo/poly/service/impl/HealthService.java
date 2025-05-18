@@ -552,5 +552,40 @@ public class HealthService implements IHealthService {
 
         return res;
     }
+
+    @Override
+    public int updateReminderMealTime(UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.updateReminderMealTime Start!", this.getClass().getName());
+
+        String colNm = "Reminder";
+
+        int res = 0;
+
+        res = reminderMapper.updateMealTime(colNm, pDTO);
+
+        log.info("{}.updateReminderMealTime End!", this.getClass().getName());
+
+        return 0;
+    }
+
+    public int updatePrescriptionAndReminderUserId(UserInfoDTO pDTO) throws Exception {
+        log.info("{}.updatePrescriptionAndReminderUserId Start!", this.getClass().getName());
+        String colNm1 = "Prescription";
+
+        int res = 0;
+
+        int success1 = 0;
+        success1 = prescriptionMapper.updateUserId(colNm1, pDTO);
+
+        String colNm2 = "Reminder";
+        int success2 = reminderMapper.updateUserId(colNm2, pDTO);
+
+        if (success1 == 1 && success2 == 1){
+            res = 1;
+        }
+
+        return res;
+    }
 }
 

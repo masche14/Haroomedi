@@ -125,6 +125,46 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
     }
 
     @Override
+    public UserInfoDTO getUserInfoByUserId(String colNm, UserInfoDTO pDTO) throws Exception {
+        log.info("{}.getUserInfoByUserId Start", this.getClass().getSimpleName());
+
+        UserInfoDTO rDTO = new UserInfoDTO();
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        Document query = new Document();
+        query.append("userId", CmmUtil.nvl(pDTO.getUserId()));
+
+        Document projection = new Document();
+        projection.append("userId", "$userId");
+        projection.append("userName", "$userName");
+        projection.append("phoneNumber", "$phoneNumber");
+        projection.append("userEmail", "$userEmail");
+        projection.append("_id", 0);
+
+        FindIterable<Document> rs = col.find(query).projection(projection);
+
+        for (Document doc : rs) {
+            if (doc != null) {
+                String userId = CmmUtil.nvl(doc.getString("userId"));
+                String userName = CmmUtil.nvl(doc.getString("userName"));
+                String phoneNumber = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("phoneNumber")));
+                String userEmail = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("userEmail")));
+
+                rDTO.setUserId(userId);
+                rDTO.setUserName(userName);
+                rDTO.setPhoneNumber(phoneNumber);
+                rDTO.setUserEmail(userEmail);
+                break;
+            }
+        }
+
+        log.info("{}.getUserInfoByUserId End", this.getClass().getSimpleName());
+
+        return rDTO;
+    }
+
+    @Override
     public UserInfoDTO getLogin(String colNm, UserInfoDTO pDTO) throws Exception {
 
         log.info("{}.getLogin Start", this.getClass().getSimpleName());

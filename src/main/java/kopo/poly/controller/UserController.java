@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
+import kopo.poly.persistance.mongodb.IReminderMapper;
+import kopo.poly.service.IHealthService;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
@@ -31,6 +33,7 @@ import java.util.Date;
 public class UserController {
 
     private final IUserInfoService userInfoService;
+    private final IHealthService healthService;
 
     @PostMapping("/setReferrer")
     public String setReferrer(HttpSession session, HttpServletRequest request, Model model) {
@@ -565,6 +568,8 @@ public class UserController {
             String encPhoneNumber = EncryptUtil.encAES128CBC(pDTO.getPhoneNumber());
             pDTO.setPhoneNumber(encPhoneNumber);
         }
+
+
         
         pDTO.setChgId(pDTO.getOrgId());
         pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
@@ -579,6 +584,20 @@ public class UserController {
 
         if (res == 1){
             msg = "회원정보 수정 완료";
+
+            if (!pDTO.getMealTime().isEmpty()) {
+                int success = healthService.updateReminderMealTime(pDTO);
+                if (success == 1){
+                    log.info("Reminder's MealTime updated");
+                }
+            }
+
+            if (!CmmUtil.nvl(pDTO.getUserId()).isBlank()){
+                int success = healthService.updatePrescriptionAndReminderUserId(pDTO);
+                if (success == 1){
+                    log.info("Prescription And Reminder's userId updated");
+                }
+            }
         }
 
 
