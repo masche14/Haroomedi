@@ -1,3 +1,4 @@
+/* 공통 레이아웃 */
 .wrapper {
     margin-top: 80px;
     display: flex;
@@ -24,6 +25,7 @@
     width: 100px;
 }
 
+/* 월 선택 UI */
 .month-selector {
     text-align: center;
     font-size: 18px;
@@ -37,26 +39,54 @@
     font-size: 20px;
 }
 
+/* 날짜 슬라이더 */
+.date-slider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+#date-list-wrapper {
+    overflow: hidden;
+    width: 260px;
+}
+
 #date-list {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    gap: 8px;
+    transition: transform 0.3s ease;
 }
 
 .date-btn {
-    padding: 4px 8px;
+    padding: 6px 12px;
     border-radius: 8px;
     /*background-color: #eee;*/
     cursor: pointer;
     font-weight: bold;
+    min-width: 30px;
+    text-align: center;
 }
 
 .date-btn.active {
+    /*background-color: #4cd9c6;*/
     color: #007bff;
 }
 
+/* 날짜 넘김 버튼 */
+.date-nav {
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    /*background-color: #fff;*/
+    /*box-shadow: 2px 2px 5px rgba(0,0,0,0.1);*/
+}
+
+/* 복약 기록 리스트 */
 #intake-list {
     display: flex;
     flex-direction: column;
@@ -70,9 +100,18 @@
     height: 70px;
     padding: 12px 20px;
     border-radius: 10px;
+    background-color: #fff;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.15);
 }
 
-.red { border-left: 9px solid #ff5b5b; background-color: #fff; }
-.green { border-left: 9px solid #36d17d; background-color: #fff; }
-.gray { border-left: 9px solid #aaa; background-color: #fff; }
+.intake-entry.red {
+    border-left: 9px solid #ff5b5b;
+}
+
+.intake-entry.green {
+    border-left: 9px solid #36d17d;
+}
+
+.intake-entry.gray {
+    border-left: 9px solid #aaa;
+}
