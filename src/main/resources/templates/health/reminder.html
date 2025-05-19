@@ -99,7 +99,14 @@
         let currentMonth = "";
 
         $(document).ready(function () {
-            if (!SS_USER || SS_USER.userId !== userId) {
+
+            if (SS_USER == null) {
+                alert("로그인 후 이용 가능합니다.");
+                setReferrer();
+                return;
+            }
+
+            if (SS_USER.userId !== userId) {
                 alert("잘못된 접근입니다.");
                 setReferrer();
                 return;
