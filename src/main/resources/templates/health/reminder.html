@@ -120,17 +120,37 @@
             const entries = dateMap[date];
             if (!entries) return;
 
+            const now = new Date(); // 현재 시간
+
             entries.forEach((entry, idx) => {
-                const color = entry.intakeYn === "Y" ? "green" : "red";
+                const [hour, minute] = entry.time.split(":").map(Number);
+
+                // 해당 날짜의 intakeTime 생성
+                const entryTime = new Date(`${date}T${entry.time}:00`);
+
+                // 조건에 따라 색상 클래스 설정
+                let color = "";
+                if (entry.intakeYn === "Y") {
+                    color = "green";
+                } else if (entryTime > now) {
+                    color = "gray";
+                } else {
+                    color = "red";
+                }
+
                 $('#intake-list').append(`
-                <div class="intake-entry ${color}">
-                  <span>${idx + 1}번째</span>
-                  <span>${entry.time}</span>
-                  <input type="checkbox" ${entry.intakeYn === "Y" ? "checked" : ""} />
-                </div>
-              `);
+            <div class="intake-entry ${color}">
+              <span>${idx + 1}번째</span>
+              <span>${entry.time}</span>
+              <label class="custom-checkbox">
+                <input type="checkbox" ${entry.intakeYn === "Y" ? "checked" : ""} />
+                <span class="checkmark"></span>
+              </label>
+            </div>
+        `);
             });
         }
+
     </script>
 </head>
 <body>
