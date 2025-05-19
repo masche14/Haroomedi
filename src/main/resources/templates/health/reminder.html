@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>복약 일정 관리</title>
+    <link rel="stylesheet" th:href="@{/css/authStyles.css}">
+    <link rel="stylesheet" th:href="@{/css/navStyles.css}">
+    <link rel="stylesheet" href="/css/card.css">
+    <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <script src="/js/setReferrer.js" defer></script>
+
+    <style>
+        .wrapper {
+            margin-top: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 4px 6px 8px rgba(0, 0, 0, 0.2);
+            padding: 40px 60px;
+            width: 420px;
+        }
+
+        .icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .icon img {
+            width: 100px;
+        }
+
+        .month-selector {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .month-selector span {
+            cursor: pointer;
+            padding: 0 10px;
+            font-size: 20px;
+        }
+
+        #date-list {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .date-btn {
+            padding: 4px 8px;
+            border-radius: 8px;
+            background-color: #eee;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .date-btn.active {
+            color: #007bff;
+        }
+
+        #intake-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .intake-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .red { border-left: 6px solid #ff5b5b; background-color: #fff6f6; }
+        .green { border-left: 6px solid #36d17d; background-color: #f6fff9; }
+        .gray { border-left: 6px solid #aaa; background-color: #f2f2f2; }
+    </style>
+
+    <script th:inline="javascript">
+        const intakeLog = /*[[${reminder.intakeLog}]]*/ null;
+        const SS_USER = /*[[${session.SS_USER}]]*/ null;
+        const userId = /*[[${reminder.userId}]]*/ null;
+
+        const dateMap = {};
+        const monthMap = {};
+        let currentMonth = "";
+
+        $(document).ready(function () {
+            if (!SS_USER || SS_USER.userId !== userId) {
+                alert("잘못된 접근입니다.");
+                setReferrer();
+                return;
+            }
+
+            // 1. 데이터 파싱 (KST 기준 날짜 사용)
+            intakeLog.forEach(entry => {
+                const d = new Date(entry.intakeTime);
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const ymd = `${y}-${m}-${day}`;
+                const ym = `${y}-${m}`;
+                const time = d.toTimeString().slice(0, 5);
+
+                if (!dateMap[ymd]) dateMap[ymd] = [];
+                dateMap[ymd].push({ time, intakeYn: entry.intakeYn });
+
+                if (!monthMap[ym]) monthMap[ym] = new Set();
+                monthMap[ym].add(day);
+            });
+
+            // 2. Set → Array 변환 및 정렬
+            Object.keys(monthMap).forEach(ym => {
+                monthMap[ym] = Array.from(monthMap[ym]).sort();
+            });
+
+            // 3. 최신 날짜 기준 default 설정
+            const latestDate = Object.keys(dateMap).sort().pop();
+            const latestMonth = latestDate.slice(0, 7);
+            currentMonth = latestMonth;
+
+            updateMonthDisplay(currentMonth);
+            renderDateButtons(currentMonth);
+
+            const defaultDate = latestDate;
+            $(`.date-btn[data-date="${defaultDate}"]`).addClass('active');
+            renderIntakeList(defaultDate);
+
+            // 월 전환 버튼 이벤트
+            $('#prev-month').on('click', () => changeMonth(-1));
+            $('#next-month').on('click', () => changeMonth(1));
+
+            // 날짜 클릭 이벤트
+            $(document).on('click', '.date-btn', function () {
+                $('.date-btn').removeClass('active');
+                $(this).addClass('active');
+                const selectedDate = $(this).data('date');
+                renderIntakeList(selectedDate);
+            });
+        });
+
+        function changeMonth(offset) {
+            const months = Object.keys(monthMap).sort();
+            let idx = months.indexOf(currentMonth);
+            if (idx === -1) return;
+            idx += offset;
+            if (idx < 0 || idx >= months.length) return;
+
+            currentMonth = months[idx];
+            updateMonthDisplay(currentMonth);
+            renderDateButtons(currentMonth);
+
+            const firstDay = monthMap[currentMonth][0];
+            const newDate = `${currentMonth}-${firstDay}`;
+            $(`.date-btn[data-date="${newDate}"]`).addClass('active');
+            renderIntakeList(newDate);
+        }
+
+        function updateMonthDisplay(month) {
+            const [year, m] = month.split("-");
+            $('#month-display').text(`${year}.${m}`);
+        }
+
+        function renderDateButtons(month) {
+            $('#date-list').empty();
+            if (!monthMap[month]) return;
+
+            monthMap[month].forEach(day => {
+                const ymd = `${month}-${day}`;
+                const btn = $(`<span class="date-btn" data-date="${ymd}">${day}</span>`);
+                $('#date-list').append(btn);
+            });
+        }
+
+        function renderIntakeList(date) {
+            $('#intake-list').empty();
+            const entries = dateMap[date];
+            if (!entries) return;
+
+            entries.forEach((entry, idx) => {
+                const color = entry.intakeYn === "Y" ? "green" : "red";
+                $('#intake-list').append(`
+                <div class="intake-entry ${color}">
+                  <span>${idx + 1}번째</span>
+                  <span>${entry.time}</span>
+                  <input type="checkbox" ${entry.intakeYn === "Y" ? "checked" : ""} />
+                </div>
+              `);
+            });
+        }
+    </script>
+</head>
+<body>
+<nav>
+    <div class="nav-content">
+        <div class="nav-group same_width justify-left">
+            <a href="/user/index">하루약속</a>
+        </div>
+        <div class="nav-group" id="serviceNav">
+            <a href="/health/prescriptionList">처방 내역 조회</a>
+            <a href="/health/auth">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
+            <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
+        </div>
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav" th:if="${session.SS_USER != null}">
+            <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
+            <a href="/user/logout" class="login">로그아웃</a>
+        </div>
+    </div>
+</nav>
+<div class="wrapper">
+    <div class="card">
+        <div class="icon">
+            <img src="/icons/medicine.png" alt="pill-icon">
+        </div>
+
+        <div class="month-selector">
+            <span id="prev-month">&lt;</span>
+            <span id="month-display"></span>
+            <span id="next-month">&gt;</span>
+        </div>
+
+        <div id="date-list"></div>
+        <div id="intake-list"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -155,7 +155,7 @@ public class HealthController {
         return "/health/prescriptionList";
     }
 
-    @PostMapping("removeReminder")
+    @PostMapping("/removeReminder")
     public ResponseEntity<CommonResponse<List<PrescriptionDTO>>> removeReminder(HttpSession session, @RequestBody PrescriptionDTO pDTO) throws Exception {
         log.info("{}.removeReminder Start", this.getClass().getSimpleName());
 
@@ -179,7 +179,7 @@ public class HealthController {
         );
     }
 
-    @PostMapping("setReminder")
+    @PostMapping("/setReminder")
     public ResponseEntity<CommonResponse<List<PrescriptionDTO>>> setReminder(HttpSession session, @RequestBody PrescriptionDTO pDTO) throws Exception {
         log.info("{}.setReminder Start", this.getClass().getSimpleName());
 
@@ -258,5 +258,22 @@ public class HealthController {
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), prescriptionList)
         );
+    }
+
+    @GetMapping("/reminder")
+    public String getReminder(HttpSession session, Model model) throws Exception {
+        log.info("{}.getReminder Start", this.getClass().getSimpleName());
+
+        ReminderDTO pDTO = new ReminderDTO();
+
+        pDTO.setPrescriptionId("682a7318c8f06e4b5401d41e");
+
+        ReminderDTO rDTO = healthService.getReminderByPrescriptionId(pDTO);
+
+        log.info("rDTO : {}", rDTO.toString());
+
+        model.addAttribute("reminder", rDTO);
+
+        return "/health/reminder";
     }
 }

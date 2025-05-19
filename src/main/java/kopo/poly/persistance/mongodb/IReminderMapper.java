@@ -15,4 +15,5 @@ public interface IReminderMapper {
     int appendIntakeLog(String colNm, ReminderDTO pDTO) throws Exception;
     int updateMealTime(String colNm, UserInfoDTO pDTO) throws Exception;
     int updateUserId(String colNm, UserInfoDTO pDTO) throws Exception;
+    ReminderDTO getReminderByPrescriptionId(String colNm, ReminderDTO pDTO) throws Exception;
 }

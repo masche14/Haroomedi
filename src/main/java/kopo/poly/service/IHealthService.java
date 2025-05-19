@@ -31,4 +31,6 @@ public interface IHealthService {
 
     int updatePrescriptionAndReminderUserId(UserInfoDTO pDTO) throws Exception;
 
+    ReminderDTO getReminderByPrescriptionId(ReminderDTO pDTO) throws Exception;
+
 }

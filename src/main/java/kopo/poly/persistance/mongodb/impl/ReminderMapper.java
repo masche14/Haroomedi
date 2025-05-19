@@ -19,9 +19,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -225,5 +223,50 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         log.info("{}.updateMealTimeByUserId End", this.getClass().getSimpleName());
 
         return res;
+    }
+
+    @Override
+    public ReminderDTO getReminderByPrescriptionId(String colNm, ReminderDTO pDTO) throws Exception {
+
+        log.info("{}.getReminderByPrescriptionId Start", this.getClass().getSimpleName());
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        Document query = new Document();
+        query.append("prescriptionId", CmmUtil.nvl(pDTO.getPrescriptionId()));
+
+        Document projection = new Document();
+        projection.append("prescriptionId", "$prescriptionId");
+        projection.append("intakeLog", "$intakeLog");
+        projection.append("userId", "$userId");
+        projection.append("_id", 0);
+
+        Document doc = col.find(query).projection(projection).first();
+
+        ReminderDTO rDTO = null;
+
+        if (doc != null) {
+
+            rDTO = new ReminderDTO();
+
+            rDTO.setPrescriptionId(doc.getString("prescriptionId"));
+            rDTO.setUserId(doc.getString("userId"));
+
+            List<Map<String, Object>> intakeLogs = new ArrayList<>();
+            List<Document> intakeDocList = (List<Document>) doc.get("intakeLog");
+
+            for (Document logDoc : intakeDocList) {
+                Map<String, Object> logMap = new HashMap<>();
+                logMap.put("intakeTime", logDoc.getDate("intakeTime"));
+                logMap.put("intakeYn", logDoc.getString("intakeYn"));
+                intakeLogs.add(logMap);
+            }
+
+            rDTO.setIntakeLog(intakeLogs);
+
+
+        }
+
+        return rDTO;
     }
 }

@@ -587,5 +587,19 @@ public class HealthService implements IHealthService {
 
         return res;
     }
+
+    @Override
+    public ReminderDTO getReminderByPrescriptionId(ReminderDTO pDTO) throws Exception {
+
+        log.info("{}.getReminderByPrescriptionId Start!", this.getClass().getName());
+
+        String colNm = "Reminder";
+
+        ReminderDTO rDTO = reminderMapper.getReminderByPrescriptionId(colNm, pDTO);
+
+        log.info("{}.getReminderByPrescriptionId End!", this.getClass().getName());
+
+        return rDTO;
+    }
 }
 
