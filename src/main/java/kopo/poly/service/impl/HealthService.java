@@ -601,5 +601,48 @@ public class HealthService implements IHealthService {
 
         return rDTO;
     }
+
+    @Override
+    public int updateIntakeLog(ReminderDTO pDTO) throws Exception {
+
+        log.info("{}.updateIntakeLog Start", this.getClass().getSimpleName());
+
+        String colNm = "Reminder"; // 컬렉션 이름 설정
+
+        int res = 0;
+
+        List<Map<String, Object>> intakeLogList = pDTO.getIntakeLog();
+        if (intakeLogList == null || intakeLogList.isEmpty()) {
+            log.warn("intakeLog가 비어있음");
+            return res;
+        }
+
+        Map<String, Object> intakeLogEntry = intakeLogList.get(0);
+
+        String intakeTimeStr = intakeLogEntry.get("intakeTime").toString(); // "2025-05-19T07:30"
+        String intakeYn = intakeLogEntry.get("intakeYn").toString();
+
+        // intakeTime 문자열을 Date로 변환
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+        Date intakeTime = sdf.parse(intakeTimeStr);
+
+        // 다시 intakeLog에 세팅
+        Map<String, Object> convertedEntry = new HashMap<>();
+        convertedEntry.put("intakeTime", intakeTime);
+        convertedEntry.put("intakeYn", intakeYn);
+
+        List<Map<String, Object>> newLogList = new ArrayList<>();
+        newLogList.add(convertedEntry);
+        pDTO.setIntakeLog(newLogList);
+
+        int success = reminderMapper.updateIntakeLog(colNm, pDTO);
+
+        if (success > 1){
+            res = 1;
+        }
+
+        log.info("{}.updateIntakeLog End", this.getClass().getSimpleName());
+        return res;
+    }
 }
 

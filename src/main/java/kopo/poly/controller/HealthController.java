@@ -273,4 +273,19 @@ public class HealthController {
 
         return "/health/reminder";
     }
+
+    @PostMapping("/updateIntakeLog")
+    public ResponseEntity<CommonResponse<ReminderDTO>> updateIntakeLog(HttpSession session, @RequestBody ReminderDTO pDTO) throws Exception {
+        log.info("{}.updateIntakeLog Start", this.getClass().getSimpleName());
+
+        log.info("pDTO: {}", pDTO.toString());
+
+        int res = healthService.updateIntakeLog(pDTO);
+
+        ReminderDTO rDTO = healthService.getReminderByPrescriptionId(pDTO);
+
+        log.info("rDTO : {}", rDTO.toString());
+
+        return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
+    }
 }

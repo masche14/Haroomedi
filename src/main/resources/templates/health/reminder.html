@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>복약 일정 관리</title>
+    <title>¼ö약 일정 관리</title>
     <link rel="stylesheet" href="/css/authStyles.css">
     <link rel="stylesheet" href="/css/navStyles.css">
     <link rel="stylesheet" href="/css/card.css">
@@ -10,184 +10,40 @@
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
     <script src="/js/setReferrer.js" defer></script>
 
+    <!-- 전역 변수와 js의 미리정의 필드 -->
     <script th:inline="javascript">
         const intakeLog = /*[[${reminder.intakeLog}]]*/ null;
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
         const userId = /*[[${reminder.userId}]]*/ null;
+        const prescriptionId = /*[[${reminder.prescriptionId}]]*/ null;
 
         const dateMap = {};
         const monthMap = {};
         let currentMonth = "";
-
         let datePage = 0;
         const datesPerPage = 7;
         let currentMonthDates = [];
-
-        $(document).ready(function () {
-            if (SS_USER == null) {
-                alert("로그인 후 이용 가능합니다.");
-                setReferrer();
-                return;
-            }
-
-            const referrer = document.referrer;
-            const referrer_page = referrer.split('/').pop();
-            if (referrer_page !== "prescriptionList") {
-                alert("올바르지 않은 접근입니다.");
-                window.location.href = "/health/prescriptionList";
-            }
-
-            intakeLog.forEach(entry => {
-                const d = new Date(entry.intakeTime);
-                const y = d.getFullYear();
-                const m = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                const ymd = `${y}-${m}-${day}`;
-                const ym = `${y}-${m}`;
-                const time = d.toTimeString().slice(0, 5);
-
-                if (!dateMap[ymd]) dateMap[ymd] = [];
-                dateMap[ymd].push({ time, intakeYn: entry.intakeYn });
-
-                if (!monthMap[ym]) monthMap[ym] = new Set();
-                monthMap[ym].add(day);
-            });
-
-            Object.keys(monthMap).forEach(ym => {
-                monthMap[ym] = Array.from(monthMap[ym]).sort();
-            });
-
-            const latestDate = Object.keys(dateMap).sort().pop();
-            const latestMonth = latestDate.slice(0, 7);
-            currentMonth = latestMonth;
-
-            updateMonthDisplay(currentMonth);
-            renderDateButtons(currentMonth);
-
-            const defaultDate = latestDate;
-            $(`.date-btn[data-date="${defaultDate}"]`).addClass('active');
-            renderIntakeList(defaultDate);
-
-            $('#prev-month').on('click', () => changeMonth(-1));
-            $('#next-month').on('click', () => changeMonth(1));
-
-            $('#date-prev').on('click', () => {
-                if (datePage > 0) {
-                    datePage--;
-                    renderDatePage();
-                }
-            });
-
-            $('#date-next').on('click', () => {
-                const maxPage = Math.ceil(currentMonthDates.length / datesPerPage) - 1;
-                if (datePage < maxPage) {
-                    datePage++;
-                    renderDatePage();
-                }
-            });
-        });
-
-        function changeMonth(offset) {
-            const months = Object.keys(monthMap).sort();
-            let idx = months.indexOf(currentMonth);
-            if (idx === -1) return;
-            idx += offset;
-            if (idx < 0 || idx >= months.length) return;
-
-            currentMonth = months[idx];
-            updateMonthDisplay(currentMonth);
-            renderDateButtons(currentMonth);
-
-            const firstDay = monthMap[currentMonth][0];
-            const newDate = `${currentMonth}-${firstDay}`;
-            $(`.date-btn[data-date="${newDate}"]`).addClass('active');
-            renderIntakeList(newDate);
-        }
-
-        function updateMonthDisplay(month) {
-            const [year, m] = month.split("-");
-            $('#month-display').text(`${year}.${m}`);
-        }
-
-        function renderDateButtons(month) {
-            $('#date-list').empty();
-            datePage = 0;
-
-            if (!monthMap[month]) return;
-            currentMonthDates = monthMap[month];
-
-            renderDatePage();
-        }
-
-        function renderDatePage() {
-            const start = datePage * datesPerPage;
-            const end = start + datesPerPage;
-            const slicedDates = currentMonthDates.slice(start, end);
-
-            $('#date-list').empty();
-            slicedDates.forEach(day => {
-                const ymd = `${currentMonth}-${day}`;
-                const btn = $(`<span class="date-btn" data-date="${ymd}">${day}</span>`);
-                $('#date-list').append(btn);
-            });
-
-            $('.date-btn').off('click').on('click', function () {
-                $('.date-btn').removeClass('active');
-                $(this).addClass('active');
-                const selectedDate = $(this).data('date');
-                renderIntakeList(selectedDate);
-            });
-        }
-
-        function renderIntakeList(date) {
-            $('#intake-list').empty();
-            const entries = dateMap[date];
-            if (!entries) return;
-
-            const now = new Date();
-
-            entries.forEach((entry, idx) => {
-                const entryTime = new Date(`${date}T${entry.time}:00`);
-                let color = "";
-
-                if (entry.intakeYn === "Y") {
-                    color = "green";
-                } else if (entryTime > now) {
-                    color = "gray";
-                } else {
-                    color = "red";
-                }
-
-                $('#intake-list').append(`
-                    <div class="intake-entry ${color}">
-                        <span>${idx + 1}번째</span>
-                        <span>${entry.time}</span>
-                        <label class="custom-checkbox">
-                            <input type="checkbox" ${entry.intakeYn === "Y" ? "checked" : ""} />
-                            <span class="checkmark"></span>
-                        </label>
-                    </div>
-                `);
-            });
-        }
     </script>
+
+    <!-- 외부 JS 파일 붙여서 활성화 -->
+    <script src="/js/reminder.js" defer></script>
 </head>
 <body>
 <nav>
     <div class="nav-content">
         <div class="nav-group same_width justify-left">
-            <a href="/user/index">하루약속</a>
+            <a href="/user/index">하루야속</a>
         </div>
         <div class="nav-group" id="serviceNav">
-            <a href="/health/prescriptionList">처방 내역 조회</a>
-            <a href="/health/auth">처방 내역 동기화</a>
-            <a href="#">AI 챗봇 상담</a>
-            <a href="#">주변 약국 찾기</a>
+            <a href="/health/prescriptionList">착용 내역 조회</a>
+            <a href="/health/auth">착용 내역 동기화</a>
+            <a href="#">AI 창반 사랑</a>
+            <a href="#">주부에서 약관 찾기</a>
         </div>
-        <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
+        <div class="nav-group same_width justify-right" th:if="${session.SS_USER == null}">
             <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
         </div>
-        <div class="nav-group after_login same_width justify-right" id="afterLoginNav" th:if="${session.SS_USER != null}">
+        <div class="nav-group after_login same_width justify-right" th:if="${session.SS_USER != null}">
             <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>
@@ -199,21 +55,16 @@
         <div class="icon">
             <img src="/icons/medicine.png" alt="pill-icon">
         </div>
-
         <div class="month-selector">
             <span id="prev-month">&lt;</span>
             <span id="month-display"></span>
             <span id="next-month">&gt;</span>
         </div>
-
         <div class="date-slider">
             <span id="date-prev" class="date-nav">&lt;</span>
-            <div id="date-list-wrapper">
-                <div id="date-list"></div>
-            </div>
+            <div id="date-list-wrapper"><div id="date-list"></div></div>
             <span id="date-next" class="date-nav">&gt;</span>
         </div>
-
         <div id="intake-list"></div>
     </div>
 </div>

@@ -269,4 +269,32 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
 
         return rDTO;
     }
+
+    @Override
+    public int updateIntakeLog(String colNm, ReminderDTO pDTO) throws Exception {
+        log.info("{}.updateIntakeLog Start", this.getClass().getSimpleName());
+
+        String prescriptionId = pDTO.getPrescriptionId();
+        Map<String, Object> logEntry = pDTO.getIntakeLog().get(0);
+
+        Date intakeTime = (Date) logEntry.get("intakeTime");
+        String intakeYn = logEntry.get("intakeYn").toString();
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // Query: prescriptionId와 intakeLog.intakeTime이 일치하는 문서
+        Document query = new Document("prescriptionId", prescriptionId)
+                .append("intakeLog.intakeTime", intakeTime);
+
+        // Update: intakeLog.$.intakeYn
+        Document update = new Document("$set", new Document("intakeLog.$.intakeYn", intakeYn));
+
+        UpdateResult result = col.updateOne(query, update);
+
+        int modifiedCount = (int) result.getModifiedCount();
+        log.info("수정된 문서 수: {}", modifiedCount);
+
+        log.info("{}.updateIntakeLog End", this.getClass().getSimpleName());
+        return modifiedCount;
+    }
 }
