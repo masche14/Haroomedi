@@ -62,6 +62,11 @@
                 }
             });
 
+            $(document).on("click", ".manage-btn", function () {
+                selectedPrescriptionId = $(this).data("id");
+                location.href="/health/reminder?prescriptionId="+selectedPrescriptionId;
+            });
+
             // 복용 시기 선택
             $(".meal-btn").on("click", function () {
                 $(this).toggleClass("selected");
