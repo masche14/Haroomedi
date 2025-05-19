@@ -29,21 +29,22 @@
     <script src="/js/reminder.js" defer></script>
 </head>
 <body>
+<!-- 네비게이션 -->
 <nav>
     <div class="nav-content">
         <div class="nav-group same_width justify-left">
-            <a href="/user/index">하루야속</a>
+            <a href="/user/index">하루약속</a>
         </div>
         <div class="nav-group" id="serviceNav">
-            <a href="/health/prescriptionList">착용 내역 조회</a>
-            <a href="/health/auth">착용 내역 동기화</a>
-            <a href="#">AI 창반 사랑</a>
-            <a href="#">주부에서 약관 찾기</a>
+            <a href="/health/prescriptionList">처방 내역 조회</a>
+            <a href="/health/auth">처방 내역 동기화</a>
+            <a href="#">AI 챗봇 상담</a>
+            <a href="#">주변 약국 찾기</a>
         </div>
-        <div class="nav-group same_width justify-right" th:if="${session.SS_USER == null}">
+        <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
         </div>
-        <div class="nav-group after_login same_width justify-right" th:if="${session.SS_USER != null}">
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav" th:if="${session.SS_USER != null}">
             <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
             <a href="/user/logout" class="login">로그아웃</a>
         </div>

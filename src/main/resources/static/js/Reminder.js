@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const referrer = document.referrer;
-    if (!referrer.includes("prescriptionList")) {
+    if (SS_USER.userId !== userId) {
         alert("올바르지 않은 접근입니다.");
-        window.location.href = "/health/prescriptionList";
+        window.location.href = "/user/index";
         return;
     }
 
