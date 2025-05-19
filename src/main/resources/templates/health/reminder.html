@@ -106,10 +106,13 @@
                 return;
             }
 
-            if (SS_USER.userId !== userId) {
-                alert("잘못된 접근입니다.");
-                setReferrer();
-                return;
+            const referrer = document.referrer;
+            const referrer_page = referrer.split('/').pop();
+
+            console.log("referrer : "+referrer_page)
+            if (referrer_page!=="prescriptionList"){
+                alert("올바르지 않은 접근입니다.")
+                window.location.href="/health/prescriptionList";
             }
 
             // 1. 데이터 파싱 (KST 기준 날짜 사용)
