@@ -21,7 +21,10 @@ public class ReminderAppendIntakeLogService {
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 00시에 실행
     public void appendDailyIntakeLog() throws Exception {
+        this.appendReminderLog();
+    }
 
+    public void appendReminderLog() throws Exception {
         log.info("===== 📆 매일 intakeLog 추가 스케줄 시작 =====");
 
         // 1. leftIntakeCnt > 0 인 reminder 조회
@@ -32,6 +35,8 @@ public class ReminderAppendIntakeLogService {
             List<String> mealTime = rDTO.getMealTime(); // ["07:30", "12:30", "19:30"]
             int dailyToIntakeCnt = rDTO.getDailyToIntakeCnt();
 
+            log.info("mealTime: {}", mealTime);
+            log.info("dailyToIntakeCnt: {}", dailyToIntakeCnt);
 
             List<Map<String, Object>> dailyLog = new ArrayList<>();
             List<String> intakeTimes = new ArrayList<>();
@@ -45,6 +50,8 @@ public class ReminderAppendIntakeLogService {
             } else {
                 intakeTimes = mealTime;
             }
+
+            log.info("intakeTimes: {}", intakeTimes.toString());
 
             for (String timeStr : intakeTimes) {
                 Map<String, Object> map = new HashMap<>();
@@ -62,8 +69,12 @@ public class ReminderAppendIntakeLogService {
                 dailyLog.add(map);
             }
 
+            log.info("dailyLog: {}", dailyLog);
+
             // DTO에 세팅
             rDTO.setIntakeLog(dailyLog);
+
+            log.info("rDTO: {}", rDTO.toString());
 
             // 2. 해당 prescriptionId 문서의 intakeLog에 push
             int res = reminderMapper.appendIntakeLog(colNm, rDTO);

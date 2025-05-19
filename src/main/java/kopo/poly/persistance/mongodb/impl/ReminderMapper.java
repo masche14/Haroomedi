@@ -123,6 +123,8 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
             List<String> mealTime = doc.getList("mealTime", String.class);
             rDTO.setMealTime(mealTime);
 
+            rDTO.setDailyToIntakeCnt(doc.getInteger("dailyToIntakeCnt", 0)); // ✅ 실제 값 세팅
+
             rList.add(rDTO);
         }
 

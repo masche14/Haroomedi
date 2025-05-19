@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.*;
 import kopo.poly.service.IHealthService;
+import kopo.poly.service.impl.ReminderAppendIntakeLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -25,6 +26,7 @@ import java.util.*;
 @RequestMapping(value = "/health")
 public class HealthController {
     private final IHealthService healthService;
+    private final ReminderAppendIntakeLogService reminderAppendIntakeLogService;
 
     @GetMapping("/auth")
     public String authPage(HttpSession session, Model model) {
@@ -287,5 +289,11 @@ public class HealthController {
         log.info("rDTO : {}", rDTO.toString());
 
         return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
+    }
+
+    @GetMapping("/appendTest")
+    public ResponseEntity<String> testSyncReminder() throws Exception {
+        reminderAppendIntakeLogService.appendReminderLog();
+        return ResponseEntity.ok("수동 실행 완료");
     }
 }
