@@ -46,7 +46,7 @@ public class MailService implements IMailService {
             messageHelper.setTo(toMail);           // 받는 사람
             messageHelper.setFrom(fromMail);       // 보내는 사람
             messageHelper.setSubject(title);       // 메일 제목
-            messageHelper.setText(contents);       // 메일 내용
+            messageHelper.setText(contents, true);       // 메일 내용
 
             mailSender.send(message);              // 메일 발송
 
