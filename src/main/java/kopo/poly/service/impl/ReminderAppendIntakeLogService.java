@@ -21,10 +21,14 @@ public class ReminderAppendIntakeLogService {
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 00시에 실행
     public void appendSchedule() throws Exception {
-        this.appendIntakeLog();
+        String result = this.appendIntakeLog();
+        log.info("결과 : {}",result);
     }
 
-    public void appendIntakeLog() throws Exception {
+    public String appendIntakeLog() throws Exception {
+
+        String result = "";
+
         log.info("===== 📆 매일 intakeLog 추가 스케줄 시작 =====");
 
         // 1. leftIntakeCnt > 0 인 reminder 조회
@@ -93,14 +97,16 @@ public class ReminderAppendIntakeLogService {
                 int res = reminderMapper.appendIntakeLog(colNm, rDTO);
 
                 if (res > 0) {
-                    log.info("📌 복약일정 추가 성공");
+                    result = "📌 복약일정 추가 성공";
                 }
             } else {
-                log.info("📌 중복된 시간만 존재하여 추가할 일정 없음");
+                result = "📌 중복된 시간만 존재하여 추가 일정 없음";
             }
         }
 
-        log.info("===== ✅ 매일 intakeLog 추가 스케줄 완료 =====");
+        log.info("===== ✅ 매일 intakeLog 추가 스케줄 종료 =====");
+
+        return result;
     }
 
 }

@@ -293,7 +293,7 @@ public class HealthController {
 
     @GetMapping("/selfAppend")
     public ResponseEntity<String> testSyncReminder() throws Exception {
-        reminderAppendIntakeLogService.appendIntakeLog();
-        return ResponseEntity.ok("수동 실행 완료");
+        String result = reminderAppendIntakeLogService.appendIntakeLog();
+        return ResponseEntity.ok("결과 : " + result);
     }
 }

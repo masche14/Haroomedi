@@ -56,9 +56,14 @@ public class ReminderAlarmService {
                     continue;
                 }
 
+                // 복약 관리 페이지 링크 생성
+                String link = String.format("http://localhost:11000/health/reminder?prescriptionId=%s", rDTO.getPrescriptionId());
+                String time = new SimpleDateFormat("HH:mm").format(start);
+                String contents = String.format("복약 시간입니다. (%s)<br><a href=\"%s\">복약 관리 바로가기</a>", time, link);
+
                 MailDTO dto = new MailDTO();
                 dto.setTitle("복약알림 메일 전송");
-                dto.setContents(String.format("복약 시간입니다. (%s)", new SimpleDateFormat("HH:mm").format(start)));
+                dto.setContents(contents);
                 dto.setToMail(uDTO.getUserEmail());
 
                 log.info("메일 DTO: {}", dto);
