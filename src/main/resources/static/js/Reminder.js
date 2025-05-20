@@ -1,18 +1,17 @@
-document.addEventListener("DOMContentLoaded", function () {
+$(function () {
     if (SS_USER == null) {
         alert("로그인 후 이용 가능합니다.");
         setReferrer();
         return;
     }
 
-    const referrer = document.referrer;
     if (SS_USER.userId !== userId) {
         alert("올바르지 않은 접근입니다.");
         window.location.href = "/user/index";
         return;
     }
 
-    intakeLog.forEach(entry => {
+    $.each(intakeLog, function (_, entry) {
         const d = new Date(entry.intakeTime);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -28,8 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
         monthMap[ym].add(day);
     });
 
-    Object.keys(monthMap).forEach(ym => {
-        monthMap[ym] = Array.from(monthMap[ym]).sort();
+    $.each(monthMap, function (ym, set) {
+        monthMap[ym] = Array.from(set).sort();
     });
 
     const latestDate = Object.keys(dateMap).sort().pop();
@@ -41,10 +40,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     $('#prev-month').on('click', () => changeMonth(-1));
     $('#next-month').on('click', () => changeMonth(1));
-    $('#date-prev').on('click', () => { if (datePage > 0) { datePage--; renderDatePage(); } });
+    $('#date-prev').on('click', () => {
+        if (datePage > 0) {
+            datePage--;
+            renderDatePage();
+        }
+    });
     $('#date-next').on('click', () => {
         const maxPage = Math.ceil(currentMonthDates.length / datesPerPage) - 1;
-        if (datePage < maxPage) { datePage++; renderDatePage(); }
+        if (datePage < maxPage) {
+            datePage++;
+            renderDatePage();
+        }
     });
 });
 
@@ -67,7 +74,7 @@ function renderDatePage() {
     const slicedDates = currentMonthDates.slice(start, end);
 
     $('#date-list').empty();
-    slicedDates.forEach(day => {
+    $.each(slicedDates, function (_, day) {
         const ymd = `${currentMonth}-${day}`;
         const btn = $(`<span class="date-btn" data-date="${ymd}">${day}</span>`);
         $('#date-list').append(btn);
@@ -109,7 +116,7 @@ function renderIntakeListUniversal(date, logList) {
     $('#intake-list').empty();
     const now = new Date();
 
-    logList.forEach((entry, idx) => {
+    $.each(logList, function (idx, entry) {
         const time = entry.time;
         const entryTime = new Date(`${date}T${time}:00`);
 
@@ -138,13 +145,8 @@ function renderIntakeListUniversal(date, logList) {
         const intakeYn = $(this).is(':checked') ? "Y" : "N";
         const orgIntakeCnt = reminder.intakeCnt ?? 0;
         const toIntakeCnt = reminder.toIntakeCnt;
-        const intakeCnt = $(this).is(':checked') ? orgIntakeCnt+1:reminder.intakeCnt-1;
+        const intakeCnt = $(this).is(':checked') ? orgIntakeCnt + 1 : reminder.intakeCnt - 1;
         const leftIntakeCnt = toIntakeCnt - intakeCnt;
-
-        console.log("toIntakeCnt : ", toIntakeCnt);
-        console.log("orgintakeCnt : ", orgIntakeCnt);
-        console.log("intakeCnt : ",intakeCnt);
-        console.log("leftIntakeCnt : ", leftIntakeCnt);
 
         const data = {
             prescriptionId: prescriptionId,
@@ -165,8 +167,7 @@ function renderIntakeListUniversal(date, logList) {
             data: JSON.stringify(data),
             success: function (res) {
                 reminder = res.data;
-                console.log("reminder : ", reminder);
-                renderUpdatedLog(res.data.intakeLog);
+                renderUpdatedLog(res.data.intakeLog, date); // ✅ 선택된 날짜 유지
             },
             error: function (err) {
                 console.error("업데이트 실패:", err);
@@ -176,10 +177,10 @@ function renderIntakeListUniversal(date, logList) {
     });
 }
 
-function renderUpdatedLog(updatedLogList) {
+function renderUpdatedLog(updatedLogList, selectedDate) {
     if (!Array.isArray(updatedLogList) || updatedLogList.length === 0) return;
 
-    updatedLogList.forEach(entry => {
+    $.each(updatedLogList, function (_, entry) {
         const d = new Date(entry.intakeTime);
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -196,11 +197,5 @@ function renderUpdatedLog(updatedLogList) {
         }
     });
 
-    const last = updatedLogList[updatedLogList.length - 1];
-    const d = new Date(last.intakeTime);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const lastDate = `${year}-${month}-${day}`;
-    renderIntakeListUniversal(lastDate, dateMap[lastDate]);
+    renderIntakeListUniversal(selectedDate, dateMap[selectedDate]); // ✅ 선택된 날짜 기준 렌더링
 }
