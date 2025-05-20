@@ -136,9 +136,20 @@ function renderIntakeListUniversal(date, logList) {
         const date = $(this).data('date');
         const time = $(this).data('time');
         const intakeYn = $(this).is(':checked') ? "Y" : "N";
+        const orgIntakeCnt = reminder.intakeCnt ?? 0;
+        const toIntakeCnt = reminder.toIntakeCnt;
+        const intakeCnt = $(this).is(':checked') ? orgIntakeCnt+1:reminder.intakeCnt-1;
+        const leftIntakeCnt = toIntakeCnt - intakeCnt;
+
+        console.log("toIntakeCnt : ", toIntakeCnt);
+        console.log("orgintakeCnt : ", orgIntakeCnt);
+        console.log("intakeCnt : ",intakeCnt);
+        console.log("leftIntakeCnt : ", leftIntakeCnt);
 
         const data = {
             prescriptionId: prescriptionId,
+            intakeCnt: intakeCnt,
+            leftIntakeCnt: leftIntakeCnt,
             intakeLog: [
                 {
                     intakeTime: `${date}T${time}`,
@@ -153,6 +164,8 @@ function renderIntakeListUniversal(date, logList) {
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: function (res) {
+                reminder = res.data;
+                console.log("reminder : ", reminder);
                 renderUpdatedLog(res.data.intakeLog);
             },
             error: function (err) {

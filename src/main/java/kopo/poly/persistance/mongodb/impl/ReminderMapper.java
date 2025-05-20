@@ -238,9 +238,12 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         query.append("prescriptionId", CmmUtil.nvl(pDTO.getPrescriptionId()));
 
         Document projection = new Document();
-        projection.append("prescriptionId", "$prescriptionId");
-        projection.append("intakeLog", "$intakeLog");
-        projection.append("userId", "$userId");
+        projection.append("prescriptionId", 1);
+        projection.append("intakeLog", 1);
+        projection.append("userId", 1);
+        projection.append("toIntakeCnt", 1); // ✅ "$toIntakeCnt" → 1
+        projection.append("intakeCnt", 1);
+        projection.append("leftIntakeCnt", 1);
         projection.append("_id", 0);
 
         Document doc = col.find(query).projection(projection).first();
@@ -253,6 +256,9 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
 
             rDTO.setPrescriptionId(doc.getString("prescriptionId"));
             rDTO.setUserId(doc.getString("userId"));
+            rDTO.setIntakeCnt(doc.getInteger("intakeCnt", 0));
+            rDTO.setToIntakeCnt(doc.getInteger("toIntakeCnt"));
+            rDTO.setLeftIntakeCnt(doc.getInteger("leftIntakeCnt"));
 
             List<Map<String, Object>> intakeLogs = new ArrayList<>();
             List<Document> intakeDocList = (List<Document>) doc.get("intakeLog");
@@ -265,8 +271,6 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
             }
 
             rDTO.setIntakeLog(intakeLogs);
-
-
         }
 
         return rDTO;
@@ -282,21 +286,28 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         Date intakeTime = (Date) logEntry.get("intakeTime");
         String intakeYn = logEntry.get("intakeYn").toString();
 
+        int intakeCnt = pDTO.getIntakeCnt();
+        int leftIntakeCnt = pDTO.getLeftIntakeCnt();
+
         MongoCollection<Document> col = mongodb.getCollection(colNm);
 
-        // Query: prescriptionId와 intakeLog.intakeTime이 일치하는 문서
         Document query = new Document("prescriptionId", prescriptionId)
                 .append("intakeLog.intakeTime", intakeTime);
 
-        // Update: intakeLog.$.intakeYn
-        Document update = new Document("$set", new Document("intakeLog.$.intakeYn", intakeYn));
+        Document updateFields = new Document();
+        updateFields.append("intakeLog.$.intakeYn", intakeYn);
+        updateFields.append("intakeCnt", intakeCnt);
+        updateFields.append("leftIntakeCnt", leftIntakeCnt);
+
+        Document update = new Document("$set", updateFields);
 
         UpdateResult result = col.updateOne(query, update);
-
         int modifiedCount = (int) result.getModifiedCount();
-        log.info("수정된 문서 수: {}", modifiedCount);
 
+        log.info("수정된 문서 수: {}", modifiedCount);
         log.info("{}.updateIntakeLog End", this.getClass().getSimpleName());
+
         return modifiedCount;
     }
+
 }

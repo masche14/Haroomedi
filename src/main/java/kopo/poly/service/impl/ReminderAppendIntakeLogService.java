@@ -20,11 +20,11 @@ public class ReminderAppendIntakeLogService {
     private final String colNm = "Reminder";
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 00시에 실행
-    public void appendDailyIntakeLog() throws Exception {
-        this.appendReminderLog();
+    public void appendSchedule() throws Exception {
+        this.appendIntakeLog();
     }
 
-    public void appendReminderLog() throws Exception {
+    public void appendIntakeLog() throws Exception {
         log.info("===== 📆 매일 intakeLog 추가 스케줄 시작 =====");
 
         // 1. leftIntakeCnt > 0 인 reminder 조회

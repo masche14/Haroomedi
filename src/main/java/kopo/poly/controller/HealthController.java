@@ -291,9 +291,9 @@ public class HealthController {
         return ResponseEntity.ok(CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO));
     }
 
-    @GetMapping("/appendTest")
+    @GetMapping("/selfAppend")
     public ResponseEntity<String> testSyncReminder() throws Exception {
-        reminderAppendIntakeLogService.appendReminderLog();
+        reminderAppendIntakeLogService.appendIntakeLog();
         return ResponseEntity.ok("수동 실행 완료");
     }
 }
