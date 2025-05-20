@@ -108,6 +108,7 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         Document projection = new Document("prescriptionId", 1)
                 .append("userId", 1)
                 .append("mealTime", 1)
+                .append("intakeLog", 1)
                 .append("dailyToIntakeCnt", 1);
 
         FindIterable<Document> docs = col.find(query).projection(projection);
@@ -124,6 +125,18 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
             rDTO.setMealTime(mealTime);
 
             rDTO.setDailyToIntakeCnt(doc.getInteger("dailyToIntakeCnt", 0)); // ✅ 실제 값 세팅
+
+            List<Map<String, Object>> intakeLogs = new ArrayList<>();
+            List<Document> intakeDocList = (List<Document>) doc.get("intakeLog");
+
+            for (Document logDoc : intakeDocList) {
+                Map<String, Object> logMap = new HashMap<>();
+                logMap.put("intakeTime", logDoc.getDate("intakeTime"));
+                logMap.put("intakeYn", logDoc.getString("intakeYn"));
+                intakeLogs.add(logMap);
+            }
+
+            rDTO.setIntakeLog(intakeLogs);
 
             rList.add(rDTO);
         }

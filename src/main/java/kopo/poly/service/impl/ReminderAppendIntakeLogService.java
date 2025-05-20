@@ -35,15 +35,16 @@ public class ReminderAppendIntakeLogService {
             List<String> mealTime = rDTO.getMealTime(); // ["07:30", "12:30", "19:30"]
             int dailyToIntakeCnt = rDTO.getDailyToIntakeCnt();
 
+            log.info("prescriptionId: {}", prescriptionId);
             log.info("mealTime: {}", mealTime);
             log.info("dailyToIntakeCnt: {}", dailyToIntakeCnt);
 
             List<Map<String, Object>> dailyLog = new ArrayList<>();
             List<String> intakeTimes = new ArrayList<>();
 
-            if (mealTime.size() > dailyToIntakeCnt) {
+            // ✅ 복용 간격 계산
+            if (mealTime.size() > dailyToIntakeCnt && dailyToIntakeCnt > 1) {
                 for (int i = 0; i < dailyToIntakeCnt; i++) {
-                    // 비례 인덱스 계산: 0, 중간, 마지막 등 간격 유지
                     int index = Math.round((float) i * (mealTime.size() - 1) / (dailyToIntakeCnt - 1));
                     intakeTimes.add(mealTime.get(index));
                 }
@@ -53,37 +54,53 @@ public class ReminderAppendIntakeLogService {
 
             log.info("intakeTimes: {}", intakeTimes.toString());
 
+            // ✅ 기존 intakeLog에서 이미 추가된 시간 수집
+            Set<Date> existingTimes = new HashSet<>();
+            if (rDTO.getIntakeLog() != null) {
+                for (Map<String, Object> log : rDTO.getIntakeLog()) {
+                    existingTimes.add((Date) log.get("intakeTime"));
+                }
+            }
+
+            // ✅ 오늘 기준으로 intakeTime 생성
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String todayStr = dateFormat.format(new Date());
+            SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
             for (String timeStr : intakeTimes) {
-                Map<String, Object> map = new HashMap<>();
-
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String todayStr = dateFormat.format(new Date());
-
                 String dateTimeStr = todayStr + " " + timeStr;
-                SimpleDateFormat fullFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 Date intakeTime = fullFormat.parse(dateTimeStr);
 
+                // ✅ 중복이면 추가하지 않음
+                if (existingTimes.contains(intakeTime)) {
+                    log.info("중복된 시간 {} 은 추가하지 않음", intakeTime);
+                    continue;
+                }
+
+                Map<String, Object> map = new HashMap<>();
                 map.put("intakeTime", intakeTime);
                 map.put("intakeYn", "N");
 
                 dailyLog.add(map);
             }
 
-            log.info("dailyLog: {}", dailyLog);
+            log.info("추가할 dailyLog: {}", dailyLog);
 
-            // DTO에 세팅
-            rDTO.setIntakeLog(dailyLog);
+            // ✅ 새로 추가할 게 있을 경우에만 DB push
+            if (!dailyLog.isEmpty()) {
+                rDTO.setIntakeLog(dailyLog);
 
-            log.info("rDTO: {}", rDTO.toString());
+                int res = reminderMapper.appendIntakeLog(colNm, rDTO);
 
-            // 2. 해당 prescriptionId 문서의 intakeLog에 push
-            int res = reminderMapper.appendIntakeLog(colNm, rDTO);
-
-            if (res > 0) {
-                log.info("복약일정 생성 성공");
+                if (res > 0) {
+                    log.info("📌 복약일정 추가 성공");
+                }
+            } else {
+                log.info("📌 중복된 시간만 존재하여 추가할 일정 없음");
             }
         }
 
         log.info("===== ✅ 매일 intakeLog 추가 스케줄 완료 =====");
     }
+
 }
