@@ -46,17 +46,35 @@ public class ReminderAppendIntakeLogService {
             List<Map<String, Object>> dailyLog = new ArrayList<>();
             List<String> intakeTimes = new ArrayList<>();
 
-            // ✅ 복용 간격 계산
+            // ✅ 복용 간격 계산 (mealTime에서 30분 뒤 시간 추출)
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
             if (mealTime.size() > dailyToIntakeCnt && dailyToIntakeCnt > 1) {
                 for (int i = 0; i < dailyToIntakeCnt; i++) {
                     int index = Math.round((float) i * (mealTime.size() - 1) / (dailyToIntakeCnt - 1));
-                    intakeTimes.add(mealTime.get(index));
+                    String originalTime = mealTime.get(index);
+
+                    Date parsedTime = sdf.parse(originalTime);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(parsedTime);
+                    cal.add(Calendar.MINUTE, 30); // 30분 추가
+
+                    String updatedTime = sdf.format(cal.getTime());
+                    intakeTimes.add(updatedTime);
                 }
             } else {
-                intakeTimes = mealTime;
+                for (String originalTime : mealTime) {
+                    Date parsedTime = sdf.parse(originalTime);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(parsedTime);
+                    cal.add(Calendar.MINUTE, 30); // 30분 추가
+
+                    String updatedTime = sdf.format(cal.getTime());
+                    intakeTimes.add(updatedTime);
+                }
             }
 
-            log.info("intakeTimes: {}", intakeTimes.toString());
+            log.info("intakeTimes (30분 뒤): {}", intakeTimes.toString());
 
             // ✅ 기존 intakeLog에서 이미 추가된 시간 수집
             Set<Date> existingTimes = new HashSet<>();
@@ -108,5 +126,6 @@ public class ReminderAppendIntakeLogService {
 
         return result;
     }
+
 
 }
