@@ -203,16 +203,35 @@ public class HealthController {
             List<Map<String, Object>> dailyLog = new ArrayList<>();
             List<String> intakeTimes = new ArrayList<>();
 
-            if (mealTime.size() > dailyToIntakeCnt) {
+            // ✅ mealTime의 30분 뒤로 intakeTimes 계산
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+
+            if (mealTime.size() > dailyToIntakeCnt && dailyToIntakeCnt > 1) {
                 for (int i = 0; i < dailyToIntakeCnt; i++) {
-                    // 비례 인덱스 계산: 0, 중간, 마지막 등 간격 유지
                     int index = Math.round((float) i * (mealTime.size() - 1) / (dailyToIntakeCnt - 1));
-                    intakeTimes.add(mealTime.get(index));
+                    String originalTime = mealTime.get(index);
+
+                    Date parsedTime = sdf.parse(originalTime);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(parsedTime);
+                    cal.add(Calendar.MINUTE, 30);
+
+                    String updatedTime = sdf.format(cal.getTime());
+                    intakeTimes.add(updatedTime);
                 }
             } else {
-                intakeTimes = mealTime;
+                for (String originalTime : mealTime) {
+                    Date parsedTime = sdf.parse(originalTime);
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(parsedTime);
+                    cal.add(Calendar.MINUTE, 30);
+
+                    String updatedTime = sdf.format(cal.getTime());
+                    intakeTimes.add(updatedTime);
+                }
             }
 
+            // ✅ intakeTime 생성
             for (String timeStr : intakeTimes) {
                 Map<String, Object> map = new HashMap<>();
 
