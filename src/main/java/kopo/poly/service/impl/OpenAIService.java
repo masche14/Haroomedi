@@ -214,7 +214,7 @@ public class OpenAIService implements IOpenAIService {
         List<Map<String, String>> messages = new ArrayList<>();
         Map<String, String> message = new HashMap<>();
         message.put("role", "user");
-        message.put("content", "당신은 약사입니다. 다음 환자의 질문에 대해 경우의 수에 따른 추천 약을 알려주세요. :\n" + textData);
+        message.put("content", "당신은 약사입니다. 다음 환자의 질문에 대해 가장 일반적인 경우의 수 3가지에 따른 추천 약을 알려주세요. :\n" + textData);
         messages.add(message);
         openAiPayload.put("messages", messages);
 
@@ -237,7 +237,8 @@ public class OpenAIService implements IOpenAIService {
             Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
 
             if (message != null) {
-                content = (String) resultMessage.get("content");
+                content = ((String) resultMessage.get("content")).replace("\n", "<br>");
+
                 log.info("응답내용 :\n" + content);
             } else {
                 log.info("Message object is null.");

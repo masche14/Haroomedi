@@ -54,7 +54,7 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     flex-shrink: 0;
 }
 
@@ -82,7 +82,9 @@ html, body {
 .session-item {
     display: flex;
     flex-direction: column;
-    height: 40px;
+    box-sizing: border-box;
+    min-height: 65px;
+    height: 65px;
     padding: 10px 14px;
     border-radius: 10px;
     background-color: #fff;
