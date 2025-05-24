@@ -76,8 +76,6 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-right: 3px;
-    scrollbar-gutter: stable;
 }
 
 .session-item {
@@ -94,7 +92,6 @@ html, body {
     cursor: pointer;
     transition: background 0.2s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 아래로만 떨어지는 그림자 */
-
 }
 
 .session-item:hover {
@@ -143,8 +140,7 @@ html, body {
     padding-bottom: 10px;
     display: flex;
     flex-direction: column;
-    padding-right: 3px;     /* 여백 확보 */
-    scrollbar-gutter: stable;
+    padding-right: 0;
 }
 
 .chat-message {
@@ -191,4 +187,12 @@ html, body {
     flex-direction: column;
     width: 85%;
     height: 100%;
+}
+
+
+#chat-box,
+.session-list {
+    scrollbar-gutter: auto;
+    padding-right: 3px;
+     /* 기본값은 0 */
 }
