@@ -1,0 +1,19 @@
+package kopo.poly.persistance.mongodb;
+
+import kopo.poly.dto.ChatDTO;
+import kopo.poly.dto.ChatMessageDTO;
+
+import java.util.List;
+
+public interface IChatMapper {
+
+    int insertChatSession(String colNm, ChatDTO chatDTO) throws Exception;
+
+    int appendMessage(String colNm, ChatMessageDTO msgDTO) throws Exception;
+
+    ChatDTO getChatBySessionId(String colNm, String sessionId) throws Exception;
+
+    List<ChatDTO> getChatListByUserId(String colNm, String userId) throws Exception;
+
+
+}

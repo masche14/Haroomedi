@@ -202,4 +202,52 @@ public class OpenAIService implements IOpenAIService {
         log.info("{}.getAnalyzeResult end!", this.getClass().getName());
         return content;
     }
+
+    @Override
+    public String getChatRespose(String textData) throws Exception {
+
+        log.info("{}.getChatRespose start!", this.getClass().getName());
+
+        Map<String, Object> openAiPayload = new HashMap<>();
+        openAiPayload.put("model", "gpt-4o");
+        openAiPayload.put("max_tokens", 3000);
+        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> message = new HashMap<>();
+        message.put("role", "user");
+        message.put("content", "당신은 약사입니다. 다음 환자의 질문에 대해 경우의 수에 따른 추천 약을 알려주세요. :\n" + textData);
+        messages.add(message);
+        openAiPayload.put("messages", messages);
+
+        RequestBody openAiBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(openAiPayload));
+        Request openAiRequest = new Request.Builder()
+                .url("https://api.openai.com/v1/chat/completions")
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + openaiApiKey)
+                .post(openAiBody)
+                .build();
+
+        Response openAiResponse = client.newCall(openAiRequest).execute();
+        Map<String, Object> openAiResponseMap = objectMapper.readValue(openAiResponse.body().string(), Map.class);
+
+        // `choices` 배열에서 첫 번째 항목 가져오기
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) openAiResponseMap.get("choices");
+        String content = "";
+        if (choices != null && !choices.isEmpty()) {
+            Map<String, Object> firstChoice = choices.get(0);
+            Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
+
+            if (message != null) {
+                content = (String) resultMessage.get("content");
+                log.info("응답내용 :\n" + content);
+            } else {
+                log.info("Message object is null.");
+            }
+        } else {
+            log.info("Choices array is empty or null.");
+        }
+
+        log.info("{}.getChatResponse end!", this.getClass().getName());
+
+        return content;
+    }
 }

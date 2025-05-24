@@ -1,0 +1,189 @@
+:root {
+    --primary-color: #70d9c5;
+    --highlight-color: rgb(25, 118, 202);
+    --navbar-color: #ffffff;
+    --text-color: #000000;
+    --white-text: #ffffff;
+    --button-color: #1976ca;
+    --divider-color: #e0e0e0;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.container {
+    margin-top: 5rem;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+    height: calc(100vh - 70px);
+    align-items: center;
+}
+
+.chat-wrapper {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 4px 6px 10px rgba(0,0,0,0.2);
+    display: flex;
+    width: 1000px;
+    height: 600px;
+    overflow: hidden;
+}
+
+/* ▶ 변경된 세션 구조 및 스크롤 처리 */
+.chat-sessions {
+    width: 35%;
+    border-right: 1px solid #ccc;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+#new-session-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    background-color: var(--button-color);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* ✅ 세션 목록 스크롤되는 영역 */
+.session-list {
+    flex: 1;
+    width: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 1px;
+}
+
+.session-item {
+    display: flex;
+    flex-direction: column;
+    height: 40px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background-color: #fff;
+    border-left: 9px solid #aaa;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 아래로만 떨어지는 그림자 */
+
+}
+
+.session-item:hover {
+    background: #eee;
+}
+
+.session-item.active {
+    border-left: 9px solid #36d17d;
+}
+
+.session-row {
+    display: flex;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 5px;
+}
+
+.session-date {
+    font-weight: bold;
+    color: #555;
+}
+
+.session-summary {
+    flex: 1;
+    text-align: right;
+    color: #333;
+    white-space: nowrap;         /* 줄바꿈 없이 한 줄로 표시 */
+    overflow: hidden;            /* 넘치는 텍스트 숨김 */
+    text-overflow: ellipsis;     /* 말줄임표(...)로 표시 */
+    max-width: 80px;             /* 적절한 폭 지정 (한글 5자 정도면 70px~80px 정도) */
+}
+
+
+.chat-main {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    align-items: center;
+}
+
+#chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message {
+    padding: 8px 14px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    max-width: 70%;
+}
+
+.chat-message.user {
+    background: #e0f7ff;
+    align-self: flex-end;
+}
+
+.chat-message.bot {
+    background: #fff3cd;
+    align-self: flex-start;
+}
+
+#chat-input-box {
+    display: flex;
+    margin-top: auto;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+#send-btn {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border: none;
+    background: var(--button-color);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.chat-cotent{
+    display: flex;
+    flex-direction: column;
+    width: 85%;
+    height: 100%;
+}
