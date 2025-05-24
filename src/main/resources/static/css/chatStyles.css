@@ -162,7 +162,7 @@ html, body {
 
 #chat-input-box {
     display: flex;
-    margin-top: auto;
+    margin-top: 10px;
 }
 
 #chat-input {
