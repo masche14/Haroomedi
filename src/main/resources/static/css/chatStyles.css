@@ -76,7 +76,8 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 1px;
+    padding-right: 3px;
+    scrollbar-gutter: stable;
 }
 
 .session-item {
@@ -142,6 +143,8 @@ html, body {
     padding-bottom: 10px;
     display: flex;
     flex-direction: column;
+    padding-right: 3px;     /* 여백 확보 */
+    scrollbar-gutter: stable;
 }
 
 .chat-message {
