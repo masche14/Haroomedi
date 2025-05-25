@@ -33,7 +33,7 @@
             <a href="/health/prescriptionList">처방 내역 조회</a>
             <a href="/health/auth">처방 내역 동기화</a>
             <a href="/chat/chat">AI 챗봇 상담</a>
-            <a href="#">주변 약국 찾기</a>
+            <a href="/map/map">주변 약국 찾기</a>
         </div>
         <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="#" class="login" onclick="setReferrer()">로그인</a>
@@ -61,7 +61,7 @@
         <h2>AI 챗봇 상담</h2>
         <p>현재 불편한 곳이 있어서<br>도움이 필요하시면<br>AI 챗봇 상담을 받아보세요</p>
     </a>
-    <a href="#" class="card">
+    <a href="/map/map" class="card">
         <div class="icon">📍</div>
         <h2>주변 약국 찾기</h2>
         <p>약국 방문이 필요하시면<br>현재 위치 주변의 약국을 찾아보세요</p>

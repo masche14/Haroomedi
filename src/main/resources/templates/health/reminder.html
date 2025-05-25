@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <title>복약 일정 관리</title>
     <link rel="stylesheet" href="/css/authStyles.css">
-    <link rel="stylesheet" href="/css/navStyles.css">
     <link rel="stylesheet" href="/css/card.css">
     <link rel="stylesheet" href="/css/reminderStyles.css">
+
+    <!-- 공통 -->
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
+    <link rel="stylesheet" href="/css/navStyles.css">
     <script src="/js/setReferrer.js" defer></script>
 
     <!-- 전역 변수와 js의 미리정의 필드 -->
@@ -42,7 +44,7 @@
             <a href="/health/prescriptionList">처방 내역 조회</a>
             <a href="/health/auth">처방 내역 동기화</a>
             <a href="/chat/chat">AI 챗봇 상담</a>
-            <a href="#">주변 약국 찾기</a>
+            <a href="/map/map">주변 약국 찾기</a>
         </div>
         <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="/user/signin" class="login" onclick="setReferrer()">로그인</a>
