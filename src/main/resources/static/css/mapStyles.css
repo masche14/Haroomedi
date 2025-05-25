@@ -65,7 +65,7 @@ html, body {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    border-left: 5px solid #aaa;
+    border-left: 8px solid #aaa;
     padding: 10px;
     cursor: pointer;
 }
@@ -75,7 +75,7 @@ html, body {
 }
 
 .pharmacy-item.active {
-    border-left: 5px solid #36d17d;
+    border-left: 8px solid #36d17d;
 }
 
 .custom-infowindow {
