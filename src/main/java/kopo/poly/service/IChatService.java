@@ -15,7 +15,9 @@ public interface IChatService {
 
     List<ChatDTO> getChatListByUserId(String userId) throws Exception;
 
-    String getChatResponse(String content) throws Exception;
+    String getChatResponse(List<ChatMessageDTO> pList) throws Exception;
+
+    List<ChatMessageDTO> getChatMessageList(String sessionId) throws Exception;
 
 
 }

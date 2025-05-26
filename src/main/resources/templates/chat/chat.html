@@ -60,13 +60,11 @@
                     appendMessage('USER', payload.content);
                     sessionId = res.sessionId;
 
-                    if (isNewSession) {
-                        loadChatList(() => {
-                            const selector = `.session-item[data-session-id='${sessionId}']`;
-                            $('.session-item').removeClass('active');
-                            $(selector).addClass('active');
-                        });
-                    }
+                    loadChatList(() => {
+                        const selector = `.session-item[data-session-id='${sessionId}']`;
+                        $('.session-item').removeClass('active');
+                        $(selector).addClass('active');
+                    });
 
                     payload = {
                         sessionId: sessionId,

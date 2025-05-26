@@ -69,8 +69,10 @@ public class ChatController {
     public ResponseEntity<ChatMessageDTO> aiRequest(@RequestBody ChatMessageDTO pDTO, HttpSession session) throws Exception {
         String userId = ((UserInfoDTO) session.getAttribute("SS_USER")).getUserId();
 
+        List<ChatMessageDTO> pList = chatService.getChatMessageList(pDTO.getSessionId());
+
         // ✅ AI 응답 요청 및 저장
-        String aiContent = chatService.getChatResponse(pDTO.getContent());
+        String aiContent = chatService.getChatResponse(pList);
         ChatMessageDTO botMsg = new ChatMessageDTO();
         botMsg.setSessionId(pDTO.getSessionId());
         botMsg.setSender("BOT");
@@ -87,5 +89,7 @@ public class ChatController {
 
         return ResponseEntity.ok(botMsg);
     }
+
+
 
 }

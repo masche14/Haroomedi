@@ -15,5 +15,7 @@ public interface IChatMapper {
 
     List<ChatDTO> getChatListByUserId(String colNm, String userId) throws Exception;
 
+    List<ChatMessageDTO> getChatMessageList(String colNm, String sessionId) throws Exception;
+
 
 }

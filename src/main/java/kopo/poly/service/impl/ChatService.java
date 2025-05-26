@@ -57,14 +57,26 @@ public class ChatService implements IChatService {
     }
 
     @Override
-    public String getChatResponse(String content) throws Exception {
+    public String getChatResponse(List<ChatMessageDTO> pList) throws Exception {
 
         log.info("{}.getChatResponse Start!", this.getClass().getSimpleName());
 
-        String answer = openAIService.getChatRespose(content);
+        String answer = openAIService.getChatRespose(pList);
 
         log.info("{}.getChatResponse End!", this.getClass().getSimpleName());
 
         return answer;
+    }
+
+    @Override
+    public List<ChatMessageDTO> getChatMessageList(String sessionId) throws Exception {
+
+        log.info("{}.getChatMessageList Start!", this.getClass().getSimpleName());
+
+        List<ChatMessageDTO> rList = chatMapper.getChatMessageList(colNm, sessionId);
+
+        log.info("{}.getChatMessageList End!", this.getClass().getSimpleName());
+
+        return rList;
     }
 }

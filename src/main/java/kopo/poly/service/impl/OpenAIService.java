@@ -3,6 +3,7 @@ package kopo.poly.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kopo.poly.dto.ChatMessageDTO;
 import kopo.poly.service.IOpenAIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -204,18 +205,31 @@ public class OpenAIService implements IOpenAIService {
     }
 
     @Override
-    public String getChatRespose(String textData) throws Exception {
+    public String getChatRespose(List<ChatMessageDTO> pList) throws Exception {
 
         log.info("{}.getChatRespose start!", this.getClass().getName());
 
         Map<String, Object> openAiPayload = new HashMap<>();
         openAiPayload.put("model", "gpt-4o");
         openAiPayload.put("max_tokens", 3000);
+
         List<Map<String, String>> messages = new ArrayList<>();
-        Map<String, String> message = new HashMap<>();
-        message.put("role", "user");
-        message.put("content", "당신은 약사입니다. 다음 환자의 질문에 대해 가장 일반적인 경우의 수 3가지에 따른 추천 약을 알려주세요. :\n" + textData);
-        messages.add(message);
+
+        // ✅ system 메시지 추가
+        messages.add(Map.of(
+                "role", "system",
+                "content", "당신은 약사입니다. 사용자의 증상에 따라 일반의약품(OTC) 중 적절한 약을 추천하고, 필요 시 병원 방문도 권유하세요."
+        ));
+
+        // ✅ DB에서 불러온 메시지 변환
+        for (ChatMessageDTO dto : pList) {
+            String role = dto.getSender().equalsIgnoreCase("USER") ? "user" : "assistant";
+            messages.add(Map.of(
+                    "role", role,
+                    "content", dto.getContent()
+            ));
+        }
+
         openAiPayload.put("messages", messages);
 
         RequestBody openAiBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(openAiPayload));
@@ -236,7 +250,7 @@ public class OpenAIService implements IOpenAIService {
             Map<String, Object> firstChoice = choices.get(0);
             Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
 
-            if (message != null) {
+            if (messages != null) {
                 content = ((String) resultMessage.get("content")).replace("\n", "<br>");
 
                 log.info("응답내용 :\n" + content);

@@ -136,4 +136,38 @@ public class ChatMapper extends AbstractMongoDBComon implements IChatMapper {
         return rList;
     }
 
+    @Override
+    public List<ChatMessageDTO> getChatMessageList(String colNm, String sessionId) throws Exception {
+
+        log.info("{}.getChatMessageList Start", this.getClass().getSimpleName());
+
+        if (super.createCollection(mongodb, colNm)) {
+            log.info("{} 컬렉션이 생성되었습니다.", colNm);
+        }
+
+        Query query = new Query(Criteria.where("sessionId").is(sessionId));
+        query.fields().include("messages"); // 메시지만 가져옴
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        Document doc = col.find(query.getQueryObject()).first();
+        List<ChatMessageDTO> rList = new ArrayList<>();
+
+        if (doc != null && doc.containsKey("messages")) {
+            List<Document> msgDocs = (List<Document>) doc.get("messages");
+
+            for (Document msg : msgDocs) {
+                ChatMessageDTO dto = new ChatMessageDTO();
+                dto.setSender(msg.getString("sender"));
+                dto.setContent(msg.getString("content"));
+                dto.setTimestamp(msg.getDate("timestamp"));
+
+                rList.add(dto);
+            }
+        }
+
+        log.info("{}.getChatMessageList End", this.getClass().getSimpleName());
+
+        return rList;
+    }
 }
