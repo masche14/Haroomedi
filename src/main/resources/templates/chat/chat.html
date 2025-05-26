@@ -22,6 +22,14 @@
 
             $('#send-btn').on('click', sendMessage);
 
+            // ✅ Enter 키 입력 시 전송
+            $('#chat-input').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $('#send-btn').click();
+                }
+            });
+
             $(document).on('click', '.session-item', function () {
                 $('.session-item').removeClass('active');
                 $(this).addClass('active');
@@ -39,7 +47,10 @@
 
         function sendMessage() {
             const content = $('#chat-input').val().trim();
-            if (!content) return;
+            if (!content) {
+                alert("질문을 입력하세요.");
+                return;
+            }
 
             let payload = {
                 sessionId: sessionId,
