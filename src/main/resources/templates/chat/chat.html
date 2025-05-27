@@ -22,7 +22,7 @@
 
             $('#send-btn').on('click', sendMessage);
 
-            // ✅ Enter 키 입력 시 전송
+            // Enter 키 입력 시 전송
             $('#chat-input').on('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -59,7 +59,6 @@
             };
 
             $('#chat-input').val('');
-
             const isNewSession = (sessionId == null);
 
             $.ajax({
@@ -70,6 +69,10 @@
                 success: function (res) {
                     appendMessage('USER', payload.content);
                     sessionId = res.sessionId;
+
+                    // "응답 생성 중..." 메시지 추가
+                    const loadingId = `loading-${Date.now()}`;
+                    appendMessage('BOT', '응답 생성 중...', loadingId);
 
                     loadChatList(() => {
                         const selector = `.session-item[data-session-id='${sessionId}']`;
@@ -89,15 +92,28 @@
                         data: JSON.stringify(payload),
                         contentType: 'application/json',
                         success: function (res) {
+                            $(`#${loadingId}`).remove();
                             appendMessage('BOT', res.content);
+                        },
+                        error: function () {
+                            $(`#${loadingId}`).remove();
+                            appendMessage('BOT', '⚠️ 응답 생성에 실패했습니다.');
                         }
                     });
                 }
             });
         }
 
-        function appendMessage(sender, content) {
-            const div = $('<div>').addClass('chat-message').addClass(sender.toLowerCase()).html(content);
+        function appendMessage(sender, content, id = null) {
+            const div = $('<div>')
+                .addClass('chat-message')
+                .addClass(sender.toLowerCase())
+                .html(content);
+
+            if (id) {
+                div.attr('id', id);
+            }
+
             $('#chat-box').append(div);
             $('#chat-box').scrollTop($('#chat-box')[0].scrollHeight);
         }
@@ -183,5 +199,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>
