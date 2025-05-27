@@ -35,24 +35,21 @@ $(function () {
     currentMonth = latestDate.slice(0, 7);
     updateMonthDisplay(currentMonth);
     renderDateButtons(currentMonth);
-    $(`.date-btn[data-date="${latestDate}"]`).addClass('active');
+
+    const $latestBtn = $(`.date-btn[data-date="${latestDate}"]`);
+    $latestBtn.addClass('active');
     renderIntakeList(latestDate);
+
+    setTimeout(() => {
+        const wrapper = document.getElementById('date-list-wrapper');
+        const target = $latestBtn[0];
+        if (wrapper && target) {
+            wrapper.scrollLeft = target.offsetLeft - wrapper.offsetLeft;
+        }
+    }, 100);
 
     $('#prev-month').on('click', () => changeMonth(-1));
     $('#next-month').on('click', () => changeMonth(1));
-    $('#date-prev').on('click', () => {
-        if (datePage > 0) {
-            datePage--;
-            renderDatePage();
-        }
-    });
-    $('#date-next').on('click', () => {
-        const maxPage = Math.ceil(currentMonthDates.length / datesPerPage) - 1;
-        if (datePage < maxPage) {
-            datePage++;
-            renderDatePage();
-        }
-    });
 });
 
 function updateMonthDisplay(month) {
@@ -62,20 +59,11 @@ function updateMonthDisplay(month) {
 
 function renderDateButtons(month) {
     $('#date-list').empty();
-    datePage = 0;
     if (!monthMap[month]) return;
     currentMonthDates = monthMap[month];
-    renderDatePage();
-}
 
-function renderDatePage() {
-    const start = datePage * datesPerPage;
-    const end = start + datesPerPage;
-    const slicedDates = currentMonthDates.slice(start, end);
-
-    $('#date-list').empty();
-    $.each(slicedDates, function (_, day) {
-        const ymd = `${currentMonth}-${day}`;
+    $.each(currentMonthDates, function (_, day) {
+        const ymd = `${month}-${day}`;
         const btn = $(`<span class="date-btn" data-date="${ymd}">${day}</span>`);
         $('#date-list').append(btn);
     });
@@ -119,8 +107,8 @@ function renderIntakeListUniversal(date, logList) {
     $.each(logList, function (idx, entry) {
         const time = entry.time;
         const entryTime = new Date(`${date}T${time}:00`);
-
         let color = "";
+
         if (entry.intakeYn === "Y") color = "green";
         else if (entryTime > now) color = "gray";
         else color = "red";
@@ -145,19 +133,14 @@ function renderIntakeListUniversal(date, logList) {
         const intakeYn = $(this).is(':checked') ? "Y" : "N";
         const orgIntakeCnt = reminder.intakeCnt ?? 0;
         const toIntakeCnt = reminder.toIntakeCnt;
-        const intakeCnt = $(this).is(':checked') ? orgIntakeCnt + 1 : reminder.intakeCnt - 1;
+        const intakeCnt = $(this).is(':checked') ? orgIntakeCnt + 1 : orgIntakeCnt - 1;
         const leftIntakeCnt = toIntakeCnt - intakeCnt;
 
         const data = {
             prescriptionId: prescriptionId,
-            intakeCnt: intakeCnt,
-            leftIntakeCnt: leftIntakeCnt,
-            intakeLog: [
-                {
-                    intakeTime: `${date}T${time}`,
-                    intakeYn: intakeYn
-                }
-            ]
+            intakeCnt,
+            leftIntakeCnt,
+            intakeLog: [{ intakeTime: `${date}T${time}`, intakeYn }]
         };
 
         $.ajax({
@@ -167,7 +150,7 @@ function renderIntakeListUniversal(date, logList) {
             data: JSON.stringify(data),
             success: function (res) {
                 reminder = res.data;
-                renderUpdatedLog(res.data.intakeLog, date); // ✅ 선택된 날짜 유지
+                renderUpdatedLog(res.data.intakeLog, date);
             },
             error: function (err) {
                 console.error("업데이트 실패:", err);
@@ -197,5 +180,5 @@ function renderUpdatedLog(updatedLogList, selectedDate) {
         }
     });
 
-    renderIntakeListUniversal(selectedDate, dateMap[selectedDate]); // ✅ 선택된 날짜 기준 렌더링
+    renderIntakeListUniversal(selectedDate, dateMap[selectedDate]);
 }
