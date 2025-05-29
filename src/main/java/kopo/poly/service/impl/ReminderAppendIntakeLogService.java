@@ -4,6 +4,7 @@ import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.ReminderDTO;
 import kopo.poly.persistance.mongodb.IReminderMapper;
 import kopo.poly.service.IMailService;
+import kopo.poly.service.IReminderAppendIntakeLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +16,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ReminderAppendIntakeLogService {
+public class ReminderAppendIntakeLogService implements IReminderAppendIntakeLogService {
 
     private final IReminderMapper reminderMapper;
 
@@ -42,6 +43,7 @@ public class ReminderAppendIntakeLogService {
         log.info("결과 : {}",result);
     }
 
+    @Override
     public String appendIntakeLog() throws Exception {
 
         String result = "";

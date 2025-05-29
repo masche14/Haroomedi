@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.*;
 import kopo.poly.service.IHealthService;
-import kopo.poly.service.impl.ReminderAppendIntakeLogService;
+import kopo.poly.service.IReminderAppendIntakeLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -26,7 +26,7 @@ import java.util.*;
 @RequestMapping(value = "/health")
 public class HealthController {
     private final IHealthService healthService;
-    private final ReminderAppendIntakeLogService reminderAppendIntakeLogService;
+    private final IReminderAppendIntakeLogService reminderAppendIntakeLogService;
 
     @GetMapping("/auth")
     public String authPage(HttpSession session, Model model) {
