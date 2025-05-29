@@ -24,7 +24,7 @@ public class ReminderAppendIntakeLogService implements IReminderAppendIntakeLogS
 
     private final String colNm = "Reminder";
 
-    @Scheduled(cron = "0 0 0 * * *") // 매일 00시에 실행
+    @Scheduled(cron = "0 1 0 * * *") // 매일 00시에 실행
     public void appendSchedule() throws Exception {
         String result = this.appendIntakeLog();
 
