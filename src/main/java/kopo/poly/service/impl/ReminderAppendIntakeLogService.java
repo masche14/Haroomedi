@@ -1,7 +1,9 @@
 package kopo.poly.service.impl;
 
+import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.ReminderDTO;
 import kopo.poly.persistance.mongodb.IReminderMapper;
+import kopo.poly.service.IMailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,11 +19,26 @@ public class ReminderAppendIntakeLogService {
 
     private final IReminderMapper reminderMapper;
 
+    private final IMailService mailService;
+
     private final String colNm = "Reminder";
 
     @Scheduled(cron = "0 0 0 * * *") // 매일 00시에 실행
     public void appendSchedule() throws Exception {
         String result = this.appendIntakeLog();
+
+        MailDTO dto = new MailDTO();
+
+        String toMail = "masche7175@gmail.com";
+
+        String title = "복약 알림 스케줄 생성 결과";
+
+        dto.setToMail(toMail);
+        dto.setTitle(title);
+        dto.setContents(result);
+
+        mailService.doSendMail(dto);
+
         log.info("결과 : {}",result);
     }
 
