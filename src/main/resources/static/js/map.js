@@ -1,4 +1,8 @@
-let openOverlay = null;
+let map, userLocation, openOverlay = null;
+let polygons = [];
+let detailMode = false;
+let currentLevel = 5;
+let pharmacyMarkers = [], resultList = [];
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     const R = 6371;
@@ -18,14 +22,17 @@ $(document).ready(function () {
         return;
     }
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const userLocation = new kakao.maps.LatLng(lat, lng);
+    map = new kakao.maps.Map(document.getElementById('map'), {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: currentLevel
+    });
 
-            const container = $('#map')[0];
-            const map = new kakao.maps.Map(container, { center: userLocation, level: 5 });
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            userLocation = new kakao.maps.LatLng(lat, lng);
+            map.setCenter(userLocation);
 
             const userMarkerImage = new kakao.maps.MarkerImage(
                 "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
@@ -40,87 +47,161 @@ $(document).ready(function () {
                 image: userMarkerImage
             });
 
-            searchNearbyPharmacies(map, userLocation, lat, lng);
+            searchNearbyPharmacies(userLocation);
         });
     }
 
-    function renderPharmacyList(resultList, map) {
-        const $list = $('#pharmacy-list');
-        $list.empty();
+    $('#regionSearchBtn').on('click', function () {
+        clearMarkers();         // 마커 제거
+        removePolygons();       // 폴리곤 제거
 
-        resultList.forEach((item) => {
-            const $item = $(`<div class="pharmacy-item"><strong>${item.name}</strong><br>${item.distance} km</div>`);
-            item.$element = $item;
+        if (openOverlay) {
+            openOverlay.setMap(null); // ✅ 오버레이 제거
+            openOverlay = null;
+        }
 
-            $item.on('click', function () {
-                $('.pharmacy-item').removeClass('active');
-                $item.addClass('active');
-                map.setCenter(item.latlng);
-                if (openOverlay) openOverlay.setMap(null);
-                item.overlay.setMap(map);
-                openOverlay = item.overlay;
-            });
+        map.setLevel(13);
+        map.setCenter(new kakao.maps.LatLng(36.5, 127.9)); // 전국 중심
+        loadPolygons("/geojson/sido.json");
+        detailMode = false;
+    });
+});
 
-            $list.append($item);
-        });
-    }
+function searchNearbyPharmacies(center) {
+    const places = new kakao.maps.services.Places();
 
-    function searchNearbyPharmacies(map, userLocation, userLat, userLng) {
-        const places = new kakao.maps.services.Places();
-        const resultList = [];
+    if (!userLocation) return; // 사용자 위치가 없으면 종료
 
-        places.keywordSearch('약국', function (results, status) {
-            if (status === kakao.maps.services.Status.OK) {
-                results.forEach((pharmacy) => {
-                    const pLat = parseFloat(pharmacy.y);
-                    const pLng = parseFloat(pharmacy.x);
-                    const pLatLng = new kakao.maps.LatLng(pLat, pLng);
-                    const distance = getDistanceFromLatLonInKm(userLat, userLng, pLat, pLng);
+    const lat1 = userLocation.getLat(); // ✅ 무조건 사용자 위치 기준
+    const lng1 = userLocation.getLng();
 
-                    if (distance <= 1.0) {
-                        const marker = new kakao.maps.Marker({ map: map, position: pLatLng });
+    places.keywordSearch("약국", function (data, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            resultList = [];
+            data.forEach(p => {
+                const lat2 = parseFloat(p.y);
+                const lng2 = parseFloat(p.x);
+                const distance = getDistanceFromLatLonInKm(lat1, lng1, lat2, lng2);
 
-                        const overlayContent = `
-                            <div class='custom-infowindow'>
-                                <a href="https://map.kakao.com/link/map/${pharmacy.id}" target="_blank" style="text-decoration:none; color:#000;">
-                                    <span>${pharmacy.place_name}</span>
-                                </a>
-                            </div>`;
+                const latlng = new kakao.maps.LatLng(lat2, lng2);
+                const marker = new kakao.maps.Marker({ map, position: latlng });
 
-                        const overlay = new kakao.maps.CustomOverlay({
-                            position: pLatLng,
-                            content: overlayContent,
-                            yAnchor: 1
-                        });
-
-                        const item = {
-                            name: pharmacy.place_name,
-                            distance: distance.toFixed(2),
-                            latlng: pLatLng,
-                            marker: marker,
-                            overlay: overlay
-                        };
-
-                        kakao.maps.event.addListener(marker, 'click', function () {
-                            $('.pharmacy-item').removeClass('active');
-                            if (item.$element) {
-                                item.$element.addClass('active');
-                                $('#pharmacy-list').animate({
-                                    scrollTop: item.$element.position().top + $('#pharmacy-list').scrollTop()
-                                }, 300);
-                            }
-                            if (openOverlay) openOverlay.setMap(null);
-                            overlay.setMap(map);
-                            openOverlay = overlay;
-                        });
-
-                        resultList.push(item);
-                    }
+                const overlay = new kakao.maps.CustomOverlay({
+                    position: latlng,
+                    content: `<div class="custom-infowindow"><a href="https://map.kakao.com/link/map/${p.id}" target="_blank">${p.place_name}</a></div>`,
+                    yAnchor: 1
                 });
 
-                resultList.sort((a, b) => a.distance - b.distance);
-                renderPharmacyList(resultList, map);
-            }
-        }, { location: userLocation, radius: 1000 });
-    }
-});
+                kakao.maps.event.addListener(marker, 'click', function () {
+                    if (openOverlay) openOverlay.setMap(null);
+                    overlay.setMap(map);
+                    openOverlay = overlay;
+                });
+
+                pharmacyMarkers.push(marker);
+                resultList.push({ name: p.place_name, latlng, marker, overlay, distance: distance.toFixed(2) });
+            });
+
+            resultList.sort((a, b) => a.distance - b.distance);
+            renderPharmacyList();
+        }
+    }, {
+        location: center, // 🔸 지도에 표시할 중심은 클릭한 구역이지만
+        radius: 2000       // 🔹 거리 계산 기준은 userLocation
+    });
+}
+
+function renderPharmacyList() {
+    const $list = $('#pharmacy-list');
+    $list.empty();
+
+    resultList.forEach(item => {
+        const $el = $(`<div class="pharmacy-item"><strong>${item.name}</strong><br>${item.distance} km</div>`);
+        $el.on('click', function () {
+            $('.pharmacy-item').removeClass('active');
+            $el.addClass('active');
+            map.panTo(item.latlng);
+            if (openOverlay) openOverlay.setMap(null);
+            item.overlay.setMap(map);
+            openOverlay = item.overlay;
+        });
+        $list.append($el);
+    });
+}
+
+function loadPolygons(path) {
+    $.getJSON(path, function (geojson) {
+        const areas = geojson.features.map(unit => {
+            const coords = unit.geometry.coordinates[0];
+            return {
+                name: unit.properties.SIG_KOR_NM,
+                code: unit.properties.SIG_CD,
+                path: coords.map(c => new kakao.maps.LatLng(c[1], c[0]))
+            };
+        });
+
+        areas.forEach(area => {
+            const polygon = new kakao.maps.Polygon({
+                map,
+                path: area.path,
+                strokeWeight: 2,
+                strokeColor: '#004c80',
+                fillColor: '#fff',
+                fillOpacity: 0.7
+            });
+
+            polygons.push(polygon);
+
+            const overlay = new kakao.maps.CustomOverlay({
+                content: `<div class="area-label">${area.name}</div>`,
+                map: null,
+                xAnchor: 0.5,
+                yAnchor: 1.5
+            });
+
+            let overlayVisible = true; // 🟢 해당 polygon에 대한 label 표시 여부
+
+            kakao.maps.event.addListener(polygon, 'mouseover', e => {
+                if (!overlayVisible) return;
+                polygon.setOptions({ fillColor: '#09f' });
+                overlay.setPosition(e.latLng);
+                overlay.setMap(map);
+            });
+
+            kakao.maps.event.addListener(polygon, 'mouseout', () => {
+                polygon.setOptions({ fillColor: '#fff' });
+                overlay.setMap(null);
+            });
+
+            kakao.maps.event.addListener(polygon, 'click', e => {
+                overlayVisible = false; // 🟢 클릭 시 이후 label 비표시
+                overlay.setMap(null);
+
+                if (!detailMode) {
+                    detailMode = true;
+                    map.setLevel(10);
+                    map.panTo(e.latLng);
+                    removePolygons();
+                    loadPolygons("/geojson/sig.json");
+                } else {
+                    map.setLevel(5);
+                    map.panTo(e.latLng);
+                    removePolygons();
+                    clearMarkers();
+                    searchNearbyPharmacies(e.latLng);
+                }
+            });
+        });
+    });
+}
+
+function removePolygons() {
+    polygons.forEach(p => p.setMap(null));
+    polygons = [];
+}
+
+function clearMarkers() {
+    pharmacyMarkers.forEach(m => m.setMap(null));
+    pharmacyMarkers = [];
+    $('#pharmacy-list').empty();
+}

@@ -68,6 +68,7 @@ html, body {
     border-left: 7px solid #aaa;
     padding: 10px;
     cursor: pointer;
+    height: 40px;
 }
 
 .pharmacy-item:hover {
@@ -76,6 +77,11 @@ html, body {
 
 .pharmacy-item.active {
     border-left: 7px solid #36d17d;
+}
+
+.custom-infowindow a {
+    text-decoration: none;
+    color: var(--text-color)
 }
 
 .custom-infowindow {
@@ -90,3 +96,36 @@ html, body {
     white-space: nowrap;
     text-align: center;
 }
+
+#regionSearchBtn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 20;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: var(--button-color);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+#regionSearchBtn:hover {
+    background: #145da0;
+}
+
+.area-label {
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+
+
