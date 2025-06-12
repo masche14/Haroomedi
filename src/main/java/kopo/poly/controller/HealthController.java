@@ -33,7 +33,7 @@ public class HealthController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         log.info("SS_USER: {}", SS_USER);
-        return "/health/auth"; // templates/health/auth.html 로 매핑됨
+        return "health/auth"; // templates/health/auth.html 로 매핑됨
     }
 
     @PostMapping("/certificate")
@@ -64,7 +64,7 @@ public class HealthController {
     public String getResult(HttpSession session, Model model){
         String selectedImageSrc = (String) session.getAttribute("selectedImageSrc");
         model.addAttribute("selectedImageSrc", selectedImageSrc);
-        return "/health/result";
+        return "health/result";
     }
 
     @PostMapping("/resultProcess")
@@ -122,7 +122,7 @@ public class HealthController {
 
     @GetMapping("/certificateError")
     public String getCertificateError(){
-        return "/health/certificateError";
+        return "health/certificateError";
     }
 
     @GetMapping("/analyzeResult")
@@ -131,9 +131,9 @@ public class HealthController {
         String analyzeResult = (String) session.getAttribute("analyzeResult");
 
         if (healthResult != null && analyzeResult != null) {
-            return "/health/analyzeResult";
+            return "health/analyzeResult";
         }else {
-            return "/health/auth";
+            return "health/auth";
         }
     }
 
@@ -151,7 +151,7 @@ public class HealthController {
 
         model.addAttribute("prescriptionList", prescriptionList);
 
-        return "/health/prescriptionList";
+        return "health/prescriptionList";
     }
 
     @PostMapping("/removeReminder")
@@ -292,7 +292,7 @@ public class HealthController {
 
         model.addAttribute("reminder", rDTO);
 
-        return "/health/reminder";
+        return "health/reminder";
     }
 
     @PostMapping("/updateIntakeLog")

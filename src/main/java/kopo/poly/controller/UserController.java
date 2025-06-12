@@ -80,7 +80,7 @@ public class UserController {
             model.addAttribute("userId", "");
         }
 
-        return "/user/signin";
+        return "user/signin";
     }
 
     @PostMapping("/signin")
@@ -156,7 +156,7 @@ public class UserController {
         if (SS_USER != null){
             return "redirect:/user/index";
         }
-        return "/user/email_verification";
+        return "user/email_verification";
     }
 
     @PostMapping("/getEmailExists")
@@ -243,7 +243,7 @@ public class UserController {
             model.addAttribute("error", alert);
         }
 
-        return "/user/signup_detail";
+        return "user/signup_detail";
     }
 
     @PostMapping("/signup_detail")
@@ -344,7 +344,7 @@ public class UserController {
         model.addAttribute("existYN", emailResultDTO.getExistYn());
         model.addAttribute("userId", emailResultDTO.getUserId());
 
-        return "/user/reset_pwd";
+        return "user/reset_pwd";
     }
 
     @PostMapping("/reset_pwd")
@@ -410,7 +410,7 @@ public class UserController {
             model.addAttribute("userId", "");
         }
 
-        return "/user/find_id";
+        return "user/find_id";
     }
 
     @GetMapping("/index")
@@ -421,7 +421,7 @@ public class UserController {
             log.info("SS_USER : {}", SS_USER.toString());
         }
 
-        return "/user/index"; // /WEB-INF/views/index.jsp
+        return "user/index"; // /WEB-INF/views/index.jsp
     }
 
     @GetMapping("/pwd_verification")
@@ -429,7 +429,7 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
-            return "/user/pwd_verification";
+            return "user/pwd_verification";
         } else {
             return "redirect:/user/index";
         }
@@ -498,7 +498,7 @@ public class UserController {
             return "redirect:/user/index";
         }
 
-        return "/user/delOrUpdate";
+        return "user/delOrUpdate";
     }
 
     @PostMapping("/delInfo")
@@ -536,7 +536,7 @@ public class UserController {
         if (SS_USER == null){
             return "redirect:/user/index";
         }
-        return "/user/myPage";
+        return "user/myPage";
     }
 
     @PostMapping("/updateInfo")

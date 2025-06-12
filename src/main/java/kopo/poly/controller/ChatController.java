@@ -25,7 +25,7 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String chat(HttpSession session) {
-        return "/chat/chat";
+        return "chat/chat";
     }
 
     @PostMapping("/send")
