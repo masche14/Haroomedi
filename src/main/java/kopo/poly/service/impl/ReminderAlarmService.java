@@ -57,7 +57,7 @@ public class ReminderAlarmService {
                 }
 
                 // 복약 관리 페이지 링크 생성
-                String link = String.format("http://localhost:11000/health/reminder?prescriptionId=%s", rDTO.getPrescriptionId());
+                String link = String.format("https://www.haroomedi.com/health/reminder?prescriptionId=%s", rDTO.getPrescriptionId());
                 String time = new SimpleDateFormat("HH:mm").format(start);
                 String contents = String.format("복약 시간입니다. (%s)<br><a href=\"%s\">복약 관리 바로가기</a>", time, link);
 
