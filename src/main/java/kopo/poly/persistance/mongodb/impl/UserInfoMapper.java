@@ -255,7 +255,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         if (!CmmUtil.nvl(pDTO.getChgDt()).isBlank()) {
             updateFields.set("chgDt", pDTO.getChgDt());
         }
-        if (!pDTO.getMealTime().isEmpty()) {
+        if (pDTO.getMealTime() != null && !pDTO.getMealTime().isEmpty()) {
             updateFields.set("mealTime", pDTO.getMealTime());
         }
         if (pDTO.getMealCnt() != 0) {
