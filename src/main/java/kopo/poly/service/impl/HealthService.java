@@ -643,5 +643,45 @@ public class HealthService implements IHealthService {
         log.info("{}.updateIntakeLog End", this.getClass().getSimpleName());
         return res;
     }
+
+    @Override
+    public int deleteAllPrescription(UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.deleteAllPrescription Start!", this.getClass().getName());
+
+        String colNm = "Prescription";
+
+        int res = 0;
+
+        int success = prescriptionMapper.deleteAllPrescription(colNm, pDTO);
+
+        if (success > 0){
+            res = 1;
+        }
+
+        log.info("{}.deleteAllPrescription End", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public int deleteAllReminder(UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.deleteAllReminder Start", this.getClass().getName());
+
+        String colNm = "Reminder";
+
+        int res = 0;
+
+        int success = reminderMapper.deleteAllReminder(colNm, pDTO);
+
+        if (success > 0){
+            res = 1;
+        }
+
+        log.info("{}.deleteAllReminder End", this.getClass().getName());
+
+        return res;
+    }
 }
 

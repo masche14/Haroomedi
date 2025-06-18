@@ -35,4 +35,8 @@ public interface IHealthService {
 
     int updateIntakeLog(ReminderDTO pDTO) throws Exception;
 
+    int deleteAllPrescription(UserInfoDTO pDTO) throws Exception;
+
+    int deleteAllReminder(UserInfoDTO pDTO) throws Exception;
+
 }

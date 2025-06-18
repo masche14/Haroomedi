@@ -17,4 +17,6 @@ public interface IPrescriptionMapper {
     PrescriptionDTO getPrescriptionById(String colNm, PrescriptionDTO pDTO) throws Exception;
 
     int updateUserId(String colNm, UserInfoDTO pDTO) throws Exception;
+
+    int deleteAllPrescription(String colNm, UserInfoDTO pDTO) throws Exception;
 }

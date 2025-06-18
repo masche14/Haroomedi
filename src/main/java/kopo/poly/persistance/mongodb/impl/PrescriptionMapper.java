@@ -264,4 +264,25 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
 
         return res;
     }
+
+    @Override
+    public int deleteAllPrescription(String colNm, UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.deleteUserInfo Start", this.getClass().getSimpleName());
+
+        // Mongo 컬렉션 가져오기
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // 삭제 조건 (userId 기준)
+        String userId = CmmUtil.nvl(pDTO.getUserId());
+
+        // 실제 삭제 실행 (딱 하나만)
+        long deletedCount = col.deleteMany(Filters.eq("userId", userId)).getDeletedCount();
+
+        log.info("Deleted Prescription count: {}", deletedCount);
+        log.info("{}.deleteUserInfo End", this.getClass().getSimpleName());
+
+        return (int) deletedCount;
+
+    }
 }

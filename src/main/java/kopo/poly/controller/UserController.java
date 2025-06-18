@@ -520,6 +520,19 @@ public class UserController {
 
         if (res>0){
             msg="회원탈퇴가 완료되었습니다.";
+
+            int success = healthService.deleteAllReminder(pDTO);
+
+            if (success > 0){
+                log.info("User's Reminder Deleted!");
+            }
+
+            success = healthService.deleteAllPrescription(pDTO);
+
+            if (success > 0){
+                log.info("User's Prescription Deleted!");
+            }
+
         } else {
             msg="회원탈퇴에 실패하였습니다.";
         }
