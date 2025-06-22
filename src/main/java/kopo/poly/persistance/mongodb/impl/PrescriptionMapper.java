@@ -268,7 +268,7 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
     @Override
     public int deleteAllPrescription(String colNm, UserInfoDTO pDTO) throws Exception {
 
-        log.info("{}.deleteUserInfo Start", this.getClass().getSimpleName());
+        log.info("{}.deleteAllPrescription Start", this.getClass().getSimpleName());
 
         // Mongo 컬렉션 가져오기
         MongoCollection<Document> col = mongodb.getCollection(colNm);
@@ -280,7 +280,8 @@ public class PrescriptionMapper extends AbstractMongoDBComon implements IPrescri
         long deletedCount = col.deleteMany(Filters.eq("userId", userId)).getDeletedCount();
 
         log.info("Deleted Prescription count: {}", deletedCount);
-        log.info("{}.deleteUserInfo End", this.getClass().getSimpleName());
+
+        log.info("{}.deleteAllPrescription End", this.getClass().getSimpleName());
 
         return (int) deletedCount;
 

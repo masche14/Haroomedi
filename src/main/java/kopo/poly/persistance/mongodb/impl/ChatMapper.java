@@ -1,11 +1,14 @@
 package kopo.poly.persistance.mongodb.impl;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.result.UpdateResult;
 import kopo.poly.dto.ChatDTO;
 import kopo.poly.dto.ChatMessageDTO;
+import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.AbstractMongoDBComon;
 import kopo.poly.persistance.mongodb.IChatMapper;
+import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -169,5 +172,26 @@ public class ChatMapper extends AbstractMongoDBComon implements IChatMapper {
         log.info("{}.getChatMessageList End", this.getClass().getSimpleName());
 
         return rList;
+    }
+
+    @Override
+    public int deleteAllChat(String colNm, UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.deleteAllChat Start", this.getClass().getSimpleName());
+
+        // Mongo 컬렉션 가져오기
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // 삭제 조건 (userId 기준)
+        String userId = CmmUtil.nvl(pDTO.getUserId());
+
+        // 실제 삭제 실행 (딱 하나만)
+        long deletedCount = col.deleteMany(Filters.eq("userId", userId)).getDeletedCount();
+
+        log.info("Deleted Prescription count: {}", deletedCount);
+
+        log.info("{}.deleteAllChat End", this.getClass().getSimpleName());
+
+        return (int) deletedCount;
     }
 }

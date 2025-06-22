@@ -2,6 +2,7 @@ package kopo.poly.service;
 
 import kopo.poly.dto.ChatDTO;
 import kopo.poly.dto.ChatMessageDTO;
+import kopo.poly.dto.UserInfoDTO;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ public interface IChatService {
     String getChatResponse(List<ChatMessageDTO> pList) throws Exception;
 
     List<ChatMessageDTO> getChatMessageList(String sessionId) throws Exception;
+
+    int deleteAllChat(UserInfoDTO pDTO) throws Exception;
 
 
 }

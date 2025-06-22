@@ -6,6 +6,7 @@ import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IReminderMapper;
+import kopo.poly.service.IChatService;
 import kopo.poly.service.IHealthService;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
@@ -34,6 +35,7 @@ public class UserController {
 
     private final IUserInfoService userInfoService;
     private final IHealthService healthService;
+    private final IChatService chatService;
 
     @PostMapping("/setReferrer")
     public String setReferrer(HttpSession session, HttpServletRequest request, Model model) {
@@ -531,6 +533,12 @@ public class UserController {
 
             if (success > 0){
                 log.info("User's Prescription Deleted!");
+            }
+
+            success = chatService.deleteAllChat(pDTO);
+
+            if (success > 0){
+                log.info("User's Chat Deleted!");
             }
 
         } else {
