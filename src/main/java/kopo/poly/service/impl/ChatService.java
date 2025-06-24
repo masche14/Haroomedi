@@ -2,6 +2,7 @@ package kopo.poly.service.impl;
 
 import kopo.poly.dto.ChatDTO;
 import kopo.poly.dto.ChatMessageDTO;
+import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IChatMapper;
 import kopo.poly.service.IChatService;
 import kopo.poly.service.IOpenAIService;
@@ -78,5 +79,23 @@ public class ChatService implements IChatService {
         log.info("{}.getChatMessageList End!", this.getClass().getSimpleName());
 
         return rList;
+    }
+
+    @Override
+    public int deleteAllChat(UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.deleteAllChat Start!", this.getClass().getName());
+
+        int res = 0;
+
+        int success = chatMapper.deleteAllChat(colNm, pDTO);
+
+        if (success > 0){
+            res = 1;
+        }
+
+        log.info("{}.deleteAllChat End", this.getClass().getName());
+
+        return res;
     }
 }
