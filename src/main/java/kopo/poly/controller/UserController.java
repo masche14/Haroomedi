@@ -421,7 +421,7 @@ public class UserController {
             log.info("SS_USER : {}", SS_USER.toString());
         }
 
-        return "user/index"; // /WEB-INF/views/index.jsp
+        return "user/index";
     }
 
     @GetMapping("/pwd_verification")
