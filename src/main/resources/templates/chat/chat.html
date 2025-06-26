@@ -105,6 +105,8 @@
         }
 
         function appendMessage(sender, content, id = null) {
+
+            content = content.replace(": ", "")
             const div = $('<div>')
                 .addClass('chat-message')
                 .addClass(sender.toLowerCase())

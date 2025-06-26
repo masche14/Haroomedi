@@ -36,6 +36,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'org.commonmark:commonmark:0.21.0' // 마크다운 > html 변환을 위한 의존성 추가
+
 }
 
 tasks.named('test') {

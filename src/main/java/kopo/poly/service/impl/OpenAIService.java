@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.ChatMessageDTO;
 import kopo.poly.service.IOpenAIService;
+import kopo.poly.util.MarkdownUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -251,7 +252,9 @@ public class OpenAIService implements IOpenAIService {
             Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
 
             if (messages != null) {
-                content = ((String) resultMessage.get("content")).replace("\n", "<br>");
+                content = ((String) resultMessage.get("content"));
+                content = MarkdownUtil.toSafeHtml(content);
+                content = content.replaceAll(":\\s*", " ");
 
                 log.info("응답내용 :\n" + content);
             } else {
