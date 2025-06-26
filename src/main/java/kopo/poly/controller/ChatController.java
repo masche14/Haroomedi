@@ -91,7 +91,7 @@ public class ChatController {
         return ResponseEntity.ok(botMsg);
     }
 
-    @PostMapping("/deleteChat")
+    @PostMapping("/deleteChat") // 챗봇 상담 내역 삭제 기능 추가
     public ResponseEntity<MsgDTO> deleteChat(@RequestBody ChatDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.deleteChat Start", this.getClass().getSimpleName());
