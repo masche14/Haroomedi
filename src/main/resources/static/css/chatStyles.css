@@ -68,6 +68,20 @@ html, body {
     cursor: pointer;
 }
 
+#delete-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    /*background-color: var(--button-color);*/
+    /*color: white;*/
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.displayNone {
+    display: none;
+}
+
 /* ✅ 세션 목록 스크롤되는 영역 */
 .session-list {
     flex: 1;
