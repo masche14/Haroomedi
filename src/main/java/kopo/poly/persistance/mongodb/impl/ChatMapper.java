@@ -194,4 +194,24 @@ public class ChatMapper extends AbstractMongoDBComon implements IChatMapper {
 
         return (int) deletedCount;
     }
+
+    @Override
+    public int deleteChat(String colNm, ChatDTO pDTO) throws Exception {
+        log.info("{}.deleteChat Start", this.getClass().getSimpleName());
+
+        // Mongo 컬렉션 가져오기
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        // 삭제 조건 (userId 기준)
+        String sessionId = CmmUtil.nvl(pDTO.getSessionId());
+
+        // 실제 삭제 실행 (딱 하나만)
+        long deletedCount = col.deleteOne(Filters.eq("sessionId", sessionId)).getDeletedCount();
+
+        log.info("Deleted Prescription count: {}", deletedCount);
+
+        log.info("{}.deleteAllChat End", this.getClass().getSimpleName());
+
+        return (int) deletedCount;
+    }
 }

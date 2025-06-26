@@ -22,5 +22,7 @@ public interface IChatService {
 
     int deleteAllChat(UserInfoDTO pDTO) throws Exception;
 
+    int deleteChat(ChatDTO pDTO) throws Exception;
+
 
 }

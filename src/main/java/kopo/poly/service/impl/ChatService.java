@@ -98,4 +98,21 @@ public class ChatService implements IChatService {
 
         return res;
     }
+
+    @Override
+    public int deleteChat(ChatDTO pDTO) throws Exception {
+        log.info("{}.deleteAllChat Start!", this.getClass().getName());
+
+        int res = 0;
+
+        int success = chatMapper.deleteChat(colNm, pDTO);
+
+        if (success > 0){
+            res = 1;
+        }
+
+        log.info("{}.deleteAllChat End", this.getClass().getName());
+
+        return res;
+    }
 }

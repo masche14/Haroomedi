@@ -33,6 +33,7 @@
             $(document).on('click', '.session-item', function () {
                 $('.session-item').removeClass('active');
                 $(this).addClass('active');
+                $("#delete-btn").removeClass("displayNone");
 
                 sessionId = $(this).data('session-id');
                 loadMessages(sessionId);
@@ -42,6 +43,41 @@
                 sessionId = null;
                 $('#chat-box').empty();
                 $('.session-item').removeClass('active');
+                $('#delete-btn').addClass('displayNone');
+            });
+
+            $('#delete-btn').on('click', function () {
+
+                console.log("삭제할 채팅 세션 : ",sessionId);
+
+                if (confirm("채팅을 삭제하시겠습니까?")){
+                    $.ajax({
+                        type: 'POST',
+                        url: '/chat/deleteChat',
+                        data: JSON.stringify({
+                            sessionId: sessionId
+                        }),
+                        contentType: 'application/json',
+                        success: function (json) {
+
+                            if (json.result === 1){
+
+                                loadChatList(() => {
+                                    sessionId = null;
+                                    $('#chat-box').empty();
+                                    $('.session-item').removeClass('active');
+                                    $('#delete-btn').addClass('displayNone');
+                                });
+
+                                alert(json.msg);
+                            }
+                        },
+                        error: function () {
+                            alert("채팅 삭제에 실패하였습니다.");
+                        }
+                    });
+                }
+
             });
         });
 
@@ -78,6 +114,7 @@
                         const selector = `.session-item[data-session-id='${sessionId}']`;
                         $('.session-item').removeClass('active');
                         $(selector).addClass('active');
+                        $("#delete-btn").removeClass("displayNone");
                     });
 
                     payload = {

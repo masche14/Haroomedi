@@ -3,6 +3,7 @@ package kopo.poly.controller;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.dto.ChatDTO;
 import kopo.poly.dto.ChatMessageDTO;
+import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IChatService;
 import lombok.RequiredArgsConstructor;
@@ -90,6 +91,28 @@ public class ChatController {
         return ResponseEntity.ok(botMsg);
     }
 
+    @PostMapping("/deleteChat")
+    public ResponseEntity<MsgDTO> deleteChat(@RequestBody ChatDTO pDTO, HttpSession session) throws Exception {
 
+        log.info("{}.deleteChat Start", this.getClass().getSimpleName());
+
+        log.info(pDTO.toString());
+
+        int res=0;
+
+        String msg = "";
+
+        res = chatService.deleteChat(pDTO);
+
+        if (res > 0) {
+            msg = "채팅을 성공적으로 삭제하였습니다.";
+        }
+
+        MsgDTO dto = new MsgDTO();
+        dto.setMsg(msg);
+        dto.setResult(res);
+
+        return ResponseEntity.ok(dto);
+    }
 
 }

@@ -20,5 +20,7 @@ public interface IChatMapper {
 
     int deleteAllChat(String colNm, UserInfoDTO pDTO) throws Exception;
 
+    int deleteChat(String colNm, ChatDTO pDTO) throws Exception;
+
 
 }
