@@ -253,10 +253,11 @@ public class OpenAIService implements IOpenAIService {
 
             if (messages != null) {
                 content = ((String) resultMessage.get("content"));
-                content = MarkdownUtil.toSafeHtml(content); // Markdown > HTML
-                content = content.replaceAll(":\\s*", " "); // 챗봇 UI 개선을 위한 replace
-
                 log.info("응답내용 :\n" + content);
+                content = MarkdownUtil.toSafeHtml(content); // Markdown > HTML
+                log.info("1차 변환 내용 :\n" + content);
+                content = content.replaceAll(":\\s*", " "); // 챗봇 UI 개선을 위한 replace
+                log.info("최종 변환 내용 :\n" + content);
             } else {
                 log.info("Message object is null.");
             }

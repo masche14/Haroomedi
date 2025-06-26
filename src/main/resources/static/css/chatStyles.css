@@ -197,7 +197,7 @@ html, body {
      /* 기본값은 0 */
 }
 
-.chat-message.bot ol {
+.chat-message.bot ol, .chat-message.bot ul  {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -210,7 +210,12 @@ html, body {
 }
 
 /* strong 다음 줄바꿈 유도 */
-.chat-message.bot p strong {
+.chat-message.bot li>strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.chat-message.bot li>p>strong {
     display: block;
     margin-bottom: 4px;
 }
