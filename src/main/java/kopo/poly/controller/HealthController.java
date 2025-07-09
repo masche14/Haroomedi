@@ -40,6 +40,11 @@ public class HealthController {
     public String postCertificate(HttpServletRequest request, HttpSession session, @RequestBody TilkoDTO pDTO) throws Exception {
 
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+//        if (!SS_USER.getUserName().equals(pDTO.getUserName())) {
+//
+//        }
+
         String userId = SS_USER.getUserId();
 
         log.info("pDTO: {}", pDTO.toString());
