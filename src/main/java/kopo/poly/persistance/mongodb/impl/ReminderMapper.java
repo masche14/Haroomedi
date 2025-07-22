@@ -83,8 +83,14 @@ public class ReminderMapper extends AbstractMongoDBComon implements IReminderMap
         log.info("{}.getReminderListToSend Start", this.getClass().getSimpleName());
 
         // intakeLog 배열 안에서 intakeTime이 현재 시간 범위에 속하고 intakeYn이 N인 문서 조회
-        Query query = new Query(Criteria.where("intakeLog")
-                .elemMatch(Criteria.where("intakeTime").gte(start).lt(end).and("intakeYn").is("N")));
+        Query query = new Query(
+                new Criteria().andOperator(
+                        Criteria.where("intakeLog").elemMatch(
+                                Criteria.where("intakeTime").gte(start).lt(end).and("intakeYn").is("N")
+                        ),
+                        Criteria.where("leftIntakeCnt").gt(0)
+                )
+        );
 
         List<ReminderDTO> rList = mongodb.find(query, ReminderDTO.class, colNm);
 
