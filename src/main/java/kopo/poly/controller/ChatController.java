@@ -26,6 +26,15 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String chat(HttpSession session) {
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+        if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
+        }
+
         return "chat/chat";
     }
 
