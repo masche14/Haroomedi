@@ -1,5 +1,7 @@
 package kopo.poly.controller;
 
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.dto.UserInfoDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -13,7 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MainController {
 
     @GetMapping("")
-    public String index() {
+    public String index(HttpSession session) {
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+        if (SS_USER != null) {
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
+        }
         return "user/index";
     }
 }

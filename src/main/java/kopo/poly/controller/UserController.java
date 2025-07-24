@@ -3,11 +3,13 @@ package kopo.poly.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
+import kopo.poly.dto.LoginDTO;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IReminderMapper;
 import kopo.poly.service.IChatService;
 import kopo.poly.service.IHealthService;
+import kopo.poly.service.ILoginService;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
@@ -36,6 +38,7 @@ public class UserController {
     private final IUserInfoService userInfoService;
     private final IHealthService healthService;
     private final IChatService chatService;
+    private final ILoginService loginService;
 
     @PostMapping("/setReferrer")
     public String setReferrer(HttpSession session, HttpServletRequest request, Model model) {
@@ -55,6 +58,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null) {
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             return "redirect:/user/index";
         }
 
@@ -116,6 +122,24 @@ public class UserController {
                     msg = "로그인에 성공하였습니다.";
 
                     session.setAttribute("SS_USER", rDTO);
+
+                    LoginDTO loginDTO = new LoginDTO();
+                    loginDTO.setUserId(rDTO.getUserId());
+                    loginDTO.setUserName(rDTO.getUserName());
+                    loginDTO.setLoginAt(new Date());
+
+                    log.info("rDTO role : {}", rDTO.getRole());
+
+                    loginDTO.setRole(rDTO.getRole());
+
+                    int success = loginService.insertLoginInfo(loginDTO);
+
+                    if (success > 0) {
+                        log.info("로그인 기록 저장 완료");
+                    } else {
+                        log.info("로그인 기록 저장 실패");
+                    }
+
                 } else {
                     msg = "비밀번호가 올바르지 않습니다.";
                 }
@@ -156,6 +180,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             return "redirect:/user/index";
         }
         return "user/email_verification";
@@ -229,6 +256,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             return "redirect:/user/index";
         }
 
@@ -271,6 +301,7 @@ public class UserController {
 
         pDTO.setRegId(pDTO.getUserId());
         pDTO.setRegDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
+        pDTO.setRole("user");
 
         MsgDTO dto = new MsgDTO();
         int res=0;
@@ -335,6 +366,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             return "redirect:/user/index";
         }
 
@@ -390,6 +424,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             return "redirect:/user/index";
         }
 
@@ -420,6 +457,9 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             log.info("SS_USER : {}", SS_USER.toString());
         }
 

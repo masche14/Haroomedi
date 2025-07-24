@@ -32,6 +32,10 @@ public class HealthController {
     public String authPage(HttpSession session, Model model) {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
+        if(!SS_USER.getRole().equals("user")){
+            return "redirect:/admin/index";
+        }
+
         log.info("SS_USER: {}", SS_USER);
         return "health/auth"; // templates/health/auth.html 로 매핑됨
     }
@@ -120,23 +124,6 @@ public class HealthController {
         );
     }
 
-    @GetMapping("/certificateError")
-    public String getCertificateError(){
-        return "health/certificateError";
-    }
-
-    @GetMapping("/analyzeResult")
-    public String analyzeResult(HttpSession session) throws Exception {
-        List<Map<String, Object>> healthResult = (List<Map<String, Object>>) session.getAttribute("healthResult");
-        String analyzeResult = (String) session.getAttribute("analyzeResult");
-
-        if (healthResult != null && analyzeResult != null) {
-            return "health/analyzeResult";
-        }else {
-            return "health/auth";
-        }
-    }
-
     @GetMapping("/prescriptionList")
     public String prescriptionList(HttpSession session, Model model) throws Exception {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
@@ -144,6 +131,9 @@ public class HealthController {
         List<PrescriptionDTO> prescriptionList = null;
 
         if (SS_USER != null){
+            if(!SS_USER.getRole().equals("user")){
+                return "redirect:/admin/index";
+            }
             prescriptionList = healthService.getPrescriptionList(SS_USER);
         }
 

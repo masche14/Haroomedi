@@ -32,5 +32,5 @@ public class UserInfoDTO {
     private int mealCnt;
     private List<String> mealTime;
     private String orgId;
-
+    private String role;
 }

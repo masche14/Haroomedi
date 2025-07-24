@@ -188,6 +188,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         projection.append("birthDate", "$birthDate");
         projection.append("mealTime", "$mealTime");
         projection.append("phoneNumber", "$phoneNumber");
+        projection.append("role", "$role");
         projection.append("_id", 0);
 
         FindIterable<Document> rs = col.find(query).projection(projection);
@@ -203,6 +204,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 String birthDate = CmmUtil.nvl(doc.getString("birthDate"));
                 List<String> mealTime = doc.getList("mealTime", String.class);
                 String phoneNumber = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("phoneNumber")));
+                String role = CmmUtil.nvl(doc.getString("role"));
 
 
                 rDTO.setUserId(userId);
@@ -214,6 +216,7 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
                 rDTO.setBirthDate(birthDate);
                 rDTO.setMealTime(mealTime);
                 rDTO.setPhoneNumber(phoneNumber);
+                rDTO.setRole(role);
 
                 break; // 어차피 하나만 찾을 거니까 첫 번째에서 바로 종료
             }
