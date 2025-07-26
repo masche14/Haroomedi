@@ -46,7 +46,7 @@ public class ReminderAppendIntakeLogService implements IReminderAppendIntakeLogS
     @Override
     public String appendIntakeLog() throws Exception {
 
-        String result = "추가할 복약 일정이 없습니다.";
+        String result = "오늘은 추가할 복약 일정이 없습니다.";
 
         log.info("===== 📆 매일 intakeLog 추가 스케줄 시작 =====");
 
