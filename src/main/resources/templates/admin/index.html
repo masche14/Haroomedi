@@ -1,10 +1,73 @@
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta lang="en" xmlns:th="http://www.thymeleaf.org">
+    <title>메인페이지</title>
+    <link rel="stylesheet" href="/css/indexStyles.css">
+    <link rel="stylesheet" href="/css/navStyles.css">
+    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
+    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+    <script src="/js/setReferrer.js" defer></script>
+    <script th:inline="javascript">
+        let userId = /*[[${userId}]]*/ null;
+        let error = /*[[${msg}]]*/ null;
+        let ref = /*[[${ref}]]*/ null;
+
+        $(document).ready(function () {
+
+        });
+    </script>
 </head>
 <body>
+<header></header>
 
+<nav>
+    <div class="nav-content">
+        <div class="nav-group same_width justify-left">
+            <a href="/user/index">하루약속</a>
+        </div>
+        <div class="nav-group" id="serviceNav">
+            <a href="/health/prescriptionList">처방 내역 조회</a>
+            <a href="/health/auth">처방 내역 동기화</a>
+            <a href="/chat/chat">AI 챗봇 상담</a>
+            <a href="/map/map">주변 약국 찾기</a>
+        </div>
+        <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
+            <a href="#" class="login" onclick="setReferrer()">로그인</a>
+        </div>
+        <div class="nav-group after_login same_width justify-right" id="afterLoginNav" th:if="${session.SS_USER != null}">
+            <a href="/user/pwd_verification" class="nav-icon" title="마이페이지">👤</a>
+            <a href="/user/logout" class="login">로그아웃</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <a href="/health/prescriptionList" class="card highlight">
+        <div class="icon">📋</div>
+        <h2>처방 내역 조회</h2>
+        <p class="text-white">처방 내역을 확인 하세요<br>복약 관리가 필요한 처방 내역은<br>알림 신청을 통해 관리 받으세요</p>
+    </a>
+    <a href="/health/auth" class="card">
+        <div class="icon">🔄</div>
+        <h2>처방 내역 동기화</h2>
+        <p>약국을 다녀오셨다면<br>처방 내역을 동기화 하세요</p>
+    </a>
+    <a href="/chat/chat" class="card">
+        <div class="icon">🤖</div>
+        <h2>AI 챗봇 상담</h2>
+        <p>현재 불편한 곳이 있어서<br>도움이 필요하시면<br>AI 챗봇 상담을 받아보세요</p>
+    </a>
+    <a href="/map/map" class="card">
+        <div class="icon">📍</div>
+        <h2>주변 약국 찾기</h2>
+        <p>약국 방문이 필요하시면<br>현재 위치 주변의 약국을 찾아보세요</p>
+    </a>
+</div>
+
+<footer></footer>
 </body>
 </html>
