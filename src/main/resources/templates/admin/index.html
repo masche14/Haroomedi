@@ -1,26 +1,144 @@
-
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta lang="en" xmlns:th="http://www.thymeleaf.org">
     <title>메인페이지</title>
-    <link rel="stylesheet" href="/css/indexStyles.css">
+    <link rel="stylesheet" href="/css/adminIndexStyles.css">
     <link rel="stylesheet" href="/css/navStyles.css">
-    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css' rel='stylesheet' type='text/css'>
-    <link href='//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css' rel='stylesheet' type='text/css'>
-    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script> <!-- JS 경로 수정 -->
+    <link href="//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
+    <link href="//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css" rel="stylesheet">
+    <script src="/js/jquery-3.6.0.min.js"></script>
     <script src="/js/setReferrer.js" defer></script>
+
+    <!-- flatpickr CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+
     <script th:inline="javascript">
-        let userId = /*[[${userId}]]*/ null;
-        let error = /*[[${msg}]]*/ null;
-        let ref = /*[[${ref}]]*/ null;
+        let todayUserCnt;
+        let startDate;
+        let endDate;
 
         $(document).ready(function () {
+            const today = new Date();
+            setDateParam(today.getFullYear(), today.getMonth() + 1);
+            console.log("초기 날짜 기준:", startDate, "~", endDate);
+            getTodayUserCnt();
+
+            flatpickr("#monthPicker", {
+                plugins: [
+                    new monthSelectPlugin({
+                        shorthand: false,
+                        dateFormat: "Y/m",
+                        altFormat: "Y년 m월"
+                    })
+                ],
+                defaultDate: new Date(),
+                allowInput: false,
+                clickOpens: true, // input 클릭 시에만 열기
+                onReady: function (selectedDates, dateStr, instance) {
+                    setTimeout(() => {
+                        instance.setDate(instance.config.defaultDate, true);
+                    }, 100);
+
+                    setMonthLabelsToNumbers(instance);
+                    bindMonthClickManually(instance);
+                },
+                onOpen: function (selectedDates, dateStr, instance) {
+                    setTimeout(() => {
+                        setMonthLabelsToNumbers(instance);
+                        bindMonthClickManually(instance);
+                    }, 10);
+                },
+                onYearChange: function (selectedDates, dateStr, instance) {
+                    setTimeout(() => {
+                        setMonthLabelsToNumbers(instance);
+                        bindMonthClickManually(instance);
+                    }, 10);
+                },
+                onChange: function (selectedDates, dateStr, instance) {
+                    if (!dateStr || dateStr.trim() === "") return;
+                    if (!selectedDates || !selectedDates[0]) return;
+
+                    const [year, month] = dateStr.split("/").map(Number);
+                    setDateParam(year, month);
+                    console.log("선택된 년월 기준:", startDate, "~", endDate);
+                }
+            });
+
 
         });
+
+        function setDateParam(year, month) {
+            const mm = String(month).padStart(2, '0');
+            const lastDay = new Date(year, month, 0).getDate();
+            startDate = `${year}-${mm}-01`;
+            endDate = `${year}-${mm}-${String(lastDay).padStart(2, '0')}`;
+        }
+
+        function getTodayUserCnt() {
+            $.ajax({
+                type: "POST",
+                url: "/admin/getTodayUserCnt",
+                contentType: "application/json",
+                success: function (json) {
+                    todayUserCnt = json.data;
+                    console.log("todayUserCnt : ", todayUserCnt);
+                    $("#todayUserCnt").text(todayUserCnt + "명");
+                },
+                error: function () {
+                    alert("오류발생");
+                }
+            });
+        }
+
+        function setMonthLabelsToNumbers(instance) {
+            const monthLabels = instance.calendarContainer.querySelectorAll(".flatpickr-monthSelect-month");
+            monthLabels.forEach((el, i) => {
+                el.textContent = String(i + 1).padStart(2, '0');
+            });
+        }
+
+        function bindMonthClickManually(instance) {
+            const monthLabels = instance.calendarContainer.querySelectorAll(".flatpickr-monthSelect-month");
+            monthLabels.forEach((el, i) => {
+                const newEl = el.cloneNode(true);
+                el.parentNode.replaceChild(newEl, el);
+
+                newEl.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const selectedYear = parseInt(instance.currentYear);
+                    const selectedMonth = i + 1;
+                    const newDate = `${selectedYear}/${String(selectedMonth).padStart(2, '0')}`;
+
+                    if (selectedYear && selectedMonth) {
+                        instance.setDate(newDate, true);
+                        instance.close();
+                    }
+                });
+            });
+        }
+
+        function preventAutoClose(instance) {
+            instance.calendarContainer.addEventListener("mousedown", function (evt) {
+                evt.stopPropagation();
+            });
+
+            const inputEl = instance._input;
+            inputEl.addEventListener("mousedown", function (e) {
+                e.stopPropagation();
+            });
+
+            // 추가: blur로 닫힘 방지
+            inputEl.addEventListener("blur", function () {
+                setTimeout(() => inputEl.focus(), 10);
+            });
+        }
     </script>
 </head>
+
 <body>
 <header></header>
 
@@ -30,10 +148,8 @@
             <a href="/user/index">하루약속</a>
         </div>
         <div class="nav-group" id="serviceNav">
-            <a href="/health/prescriptionList">처방 내역 조회</a>
-            <a href="/health/auth">처방 내역 동기화</a>
-            <a href="/chat/chat">AI 챗봇 상담</a>
-            <a href="/map/map">주변 약국 찾기</a>
+            <a href="/admin/userManagement">회원 관리</a>
+            <a href="/admin/banUserManagement">차단 회원 관리</a>
         </div>
         <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="#" class="login" onclick="setReferrer()">로그인</a>
@@ -46,26 +162,25 @@
 </nav>
 
 <div class="container">
-    <a href="/health/prescriptionList" class="card highlight">
+    <div class="chart-card">
         <div class="icon">📋</div>
-        <h2>처방 내역 조회</h2>
-        <p class="text-white">처방 내역을 확인 하세요<br>복약 관리가 필요한 처방 내역은<br>알림 신청을 통해 관리 받으세요</p>
-    </a>
-    <a href="/health/auth" class="card">
-        <div class="icon">🔄</div>
-        <h2>처방 내역 동기화</h2>
-        <p>약국을 다녀오셨다면<br>처방 내역을 동기화 하세요</p>
-    </a>
-    <a href="/chat/chat" class="card">
-        <div class="icon">🤖</div>
-        <h2>AI 챗봇 상담</h2>
-        <p>현재 불편한 곳이 있어서<br>도움이 필요하시면<br>AI 챗봇 상담을 받아보세요</p>
-    </a>
-    <a href="/map/map" class="card">
-        <div class="icon">📍</div>
-        <h2>주변 약국 찾기</h2>
-        <p>약국 방문이 필요하시면<br>현재 위치 주변의 약국을 찾아보세요</p>
-    </a>
+        <h2>일일 접속자 수 조회</h2>
+        <input type="text" id="monthPicker" placeholder="년/월 선택" readonly>
+    </div>
+    <div class="others-container" id="others">
+        <div class="card">
+            <h2>오늘 접속자 수</h2>
+            <h2 id="todayUserCnt"></h2>
+        </div>
+        <a href="/admin/userManagement" class="card">
+            <div class="icon">🧾</div>
+            <h2>회원 관리</h2>
+        </a>
+        <a href="/admin/banUserManagenet" class="card">
+            <div class="icon">🚫</div>
+            <h2>차단 회원 관리</h2>
+        </a>
+    </div>
 </div>
 
 <footer></footer>

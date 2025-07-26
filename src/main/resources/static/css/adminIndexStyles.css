@@ -1,0 +1,293 @@
+:root {
+    --primary-color: #70d9c5;
+    --highlight-color: rgb(25, 118, 202);
+    --navbar-color: #ffffff;
+    --text-color: #000000;
+    --white-text: #ffffff;
+    --button-color: #1976ca;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--primary-color);
+}
+
+body {
+    background-color: var(--primary-color);
+    margin: 5rem 0 0 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Spoqa Han Sans Neo', 'Spoqa Han Sans JP', sans-serif;
+}
+
+header {
+    width: 100%;
+    max-height: 15%;
+    text-align: center;
+    margin: 0;
+}
+
+footer {
+    width: 100%;
+    max-height: 15%;
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-white {
+    color: var(--white-text);
+}
+
+.container {
+    min-width: 25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.875rem;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0.625rem;
+}
+
+.card  {
+    width: 250px;
+    height: auto;
+    /*background-color: #eaf7f4;*/
+    background-color: #ffffff;
+    border-radius: 0.625rem;
+    box-shadow: 0.625rem 0.625rem 0.25rem rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.card, .card h2 {
+    text-decoration: none;
+    color: inherit;
+}
+
+.others-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.875rem;
+}
+
+.chart-card {
+    width: 800px;
+    height: 520px;
+    /*background-color: #eaf7f4;*/
+    background-color: #ffffff;
+    border-radius: 0.625rem;
+    box-shadow: 0.625rem 0.625rem 0.25rem rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+/*.card:hover {*/
+/*  cursor: pointer;*/
+/*}*/
+
+.highlight {
+    background-color: var(--highlight-color);
+    color: var(--white-text);
+}
+
+/* 여기 추가 */
+.card:hover {
+    cursor: pointer;
+}
+
+/*.card.highlight:hover {*/
+/*    border: 3px solid black;*/
+/*}*/
+
+.icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.625rem;
+}
+
+h2 {
+    margin: 0.625rem 0;
+    font-size: 1.375rem;
+}
+
+p {
+    font-size: 1rem;
+    color: #555;
+}
+
+@media (max-width: 48rem) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.big-width {
+    width: 500px !important;
+}
+
+.big-height {
+    height: 600px !important;
+}
+
+.myPage-icon{
+    font-size: 5rem !important;
+}
+
+.myPage-icon > h2, p {
+    font-size: large;
+}
+
+/* 모달 기본 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.4); /* 반투명 배경 */
+}
+
+.autoWidth {
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    padding-bottom: 30px !important;
+}
+
+.modal-content {
+    width: 21%;
+    min-width: 21.375rem;
+    height: 25%;
+    min-height: 16.375rem;
+    background-color: #fff;
+    padding: 10px 20px 20px 20px;
+    border: 1px solid #888;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 0.5rem;
+}
+
+.terms-content {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    width: 100%;
+    height: 80%;
+}
+
+.terms-content>p {
+    margin: 0;
+}
+
+.agree-btn {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 0 0.625rem; /* 10px -> 0.625rem */
+    background-color: #4697ff;
+    border: 0;
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    font-weight: 550;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    white-space: nowrap;
+    margin-top: 0.625rem; /* 10px -> 0.625rem */
+    font-size: large;
+}
+
+.close_wrapper {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.extra_top_margin {
+    margin-top: 1.25rem !important; /* 20px -> 1.25rem */
+}
+
+.input_box {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 0.3125rem; /* 5px -> 0.3125rem */
+    height: auto;
+    gap: 0.3125rem; /* 5px -> 0.3125rem */
+}
+
+.two_button {
+    width: 45%;
+    height: 3.125rem; /* 50px -> 3.125rem */
+    background-color: #4697ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1); /* 0 4px 10px -> 0.25rem 0.625rem */
+    border-radius: 0.5rem; /* 8px -> 0.5rem */
+    border: 0;
+    white-space: nowrap;
+    font-weight: 550;
+    font-size: medium;
+    cursor: pointer;
+}
+
+#disagreeButton {
+    background-color: #5ddb5f;
+    color : white;
+}
+
+#agreeButton {
+    background-color: #f72044;
+    color : white;
+}
+
+#agreeButton:hover, #disagreeButton:hover{
+    border: 3px solid black;
+}
