@@ -125,7 +125,7 @@ public class AdminController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         pDTO.setChgId(SS_USER.getUserId());
-        pDTO.setChgDt(DateUtil.getDateTime());
+        pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
 
         log.info("pDTO: {}", pDTO);
 
