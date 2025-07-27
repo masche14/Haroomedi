@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -267,6 +268,9 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
         if (!CmmUtil.nvl(pDTO.getPhoneNumber()).isBlank()) {
             updateFields.set("phoneNumber", pDTO.getPhoneNumber());
         }
+        if (!CmmUtil.nvl(pDTO.getRole()).isBlank()) {
+            updateFields.set("role", pDTO.getRole());
+        }
 
         if (updateFields.getUpdateObject().isEmpty()) {
             res = 1;// 수정할 값 없음
@@ -299,5 +303,71 @@ public class UserInfoMapper extends AbstractMongoDBComon implements IUserInfoMap
 
         return (int) deletedCount;
 
+    }
+
+    @Override
+    public List<UserInfoDTO> getUserInfoList(String colNm) throws Exception {
+
+        log.info("{}.getUserInfoList Start", this.getClass().getSimpleName());
+
+        if (super.createCollection(mongodb, colNm)) {
+            log.info("{} 생성되었습니다.", colNm);
+        }
+
+        MongoCollection<Document> col = mongodb.getCollection(colNm);
+
+        Document query = new Document();
+
+        Document projection = new Document();
+        projection.append("userId", "$userId");
+        projection.append("password", "$password");
+        projection.append("userName", "$userName");
+        projection.append("userEmail", "$userEmail");
+        projection.append("userNickname", "$userNickname");
+        projection.append("gender", "$gender");
+        projection.append("birthDate", "$birthDate");
+        projection.append("mealTime", "$mealTime");
+        projection.append("phoneNumber", "$phoneNumber");
+        projection.append("role", "$role");
+        projection.append("_id", 0);
+
+        FindIterable<Document> rs = col.find(query).projection(projection);
+
+        List<UserInfoDTO> rList = new ArrayList<UserInfoDTO>();
+
+        for (Document doc : rs) {
+            if (doc != null) {
+                UserInfoDTO rDTO = new UserInfoDTO();
+
+                String userId = CmmUtil.nvl(doc.getString("userId"));
+                String password = CmmUtil.nvl(doc.getString("password"));
+                String userName = CmmUtil.nvl(doc.getString("userName"));
+                String userEmail = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("userEmail")));
+                String userNickname = CmmUtil.nvl(doc.getString("userNickname"));
+                String gender = CmmUtil.nvl(doc.getString("gender"));
+                String birthDate = CmmUtil.nvl(doc.getString("birthDate"));
+                List<String> mealTime = doc.getList("mealTime", String.class);
+                String phoneNumber = EncryptUtil.decAES128CBC(CmmUtil.nvl(doc.getString("phoneNumber")));
+                String role = CmmUtil.nvl(doc.getString("role"));
+
+
+                rDTO.setUserId(userId);
+                rDTO.setUserName(userName);
+                rDTO.setUserEmail(userEmail);
+                rDTO.setUserNickname(userNickname);
+                rDTO.setPassword(password);
+                rDTO.setGender(gender);
+                rDTO.setBirthDate(birthDate);
+                rDTO.setMealTime(mealTime);
+                rDTO.setPhoneNumber(phoneNumber);
+                rDTO.setRole(role);
+
+                rList.add(rDTO);
+            }
+        }
+
+        log.info("{}.getUserInfoList End", this.getClass().getSimpleName());
+
+        return rList;
     }
 }

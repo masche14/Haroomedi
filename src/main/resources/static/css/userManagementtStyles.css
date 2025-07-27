@@ -1,0 +1,150 @@
+:root {
+    --primary-color: #70d9c5;
+    --highlight-color: rgb(25, 118, 202);
+    --navbar-color: #ffffff;
+    --text-color: #000000;
+    --white-text: #ffffff;
+    --button-color: #1976ca;
+    --divider-color: #e0e0e0;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    width: auto;
+    text-align: center;
+}
+
+#user-list-column {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.role-options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.role-btn {
+    padding: 16px 24px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: black;
+}
+
+.role-btn.selected {
+    border-color: #007bff;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    flex: 0 0 48%;
+    padding: 10px 0;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#closeRoleModal {
+    background-color: #bdbdbd;
+}
+
+#closeRoleModal:hover {
+    background-color: #aaaaaa;
+}
+
+#confirmRoleBtn {
+    background-color: #3498db;
+}
+
+#confirmRoleBtn:hover {
+    background-color: #2980b9;
+}
+
+.show {
+    display: block;
+}
+
+/*!* 추가 스타일 *!*/
+/*.auth-container {*/
+/*    margin-top: 5rem;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    height: calc(100vh - 70px);*/
+/*}*/
+
+/*.auth-box {*/
+/*    background-color: white;*/
+/*    padding: 30px;*/
+/*    border-radius: 15px;*/
+/*    box-shadow: 0.625rem 0.625rem 0.25rem rgba(0, 0, 0, 0.25);*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*    width: auto;*/
+/*    gap: 20px;*/
+/*}*/
+
+#userList-container {
+    height: 600px;
+    width: 1000px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#user-list {
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+}
+
+.user-role:hover {
+    cursor: pointer;
+}
+
+.items {
+    min-width: 70px;
+    text-align: center;
+}

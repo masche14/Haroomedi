@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -164,5 +165,19 @@ public class UserInfoService implements IUserInfoService {
         log.info("{}.deleteUserInfo End", this.getClass().getName());
 
         return res;
+    }
+
+    @Override
+    public List<UserInfoDTO> getUserList() throws Exception {
+
+        log.info("{}.getUserList Start", this.getClass().getName());
+
+        String colNm = "UserInfo";
+
+        List<UserInfoDTO> rList = userInfoMapper.getUserInfoList(colNm);
+
+        log.info("{}.getUserList End", this.getClass().getName());
+
+        return rList;
     }
 }

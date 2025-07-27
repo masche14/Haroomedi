@@ -3,10 +3,12 @@ package kopo.poly.controller;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.LoginDTO;
+import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IBanService;
 import kopo.poly.service.ILoginService;
 import kopo.poly.service.IUserInfoService;
+import kopo.poly.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -96,6 +98,48 @@ public class AdminController {
         List<LoginDTO> rList = loginService.getDailyDistinctUserCountByMonth(pDTO);
 
         log.info("{}.getDailyUserCntByMonth", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
+
+    @PostMapping("/getUserList")
+    public ResponseEntity<CommonResponse<List<UserInfoDTO>>> getUserList(HttpSession session) throws Exception {
+
+        log.info("{}.getUserList", this.getClass().getName());
+
+        List<UserInfoDTO> rList = userInfoService.getUserList();
+
+        log.info("{}.getUserList", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
+
+    @PostMapping("/updateRole")
+    public ResponseEntity<CommonResponse<List<UserInfoDTO>>> updateRole(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
+        log.info("{}.updateRole Start", this.getClass().getName());
+
+        UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
+
+        pDTO.setChgId(SS_USER.getUserId());
+        pDTO.setChgDt(DateUtil.getDateTime());
+
+        log.info("pDTO: {}", pDTO);
+
+        int res;
+
+        res = userInfoService.updateUserInfo(pDTO);
+
+        List<UserInfoDTO> rList = new ArrayList<>();
+
+        if (res > 0) {
+            rList = userInfoService.getUserList();
+        }
+
+        log.info("{}.updateRole Start", this.getClass().getName());
 
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
