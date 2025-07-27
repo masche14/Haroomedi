@@ -68,8 +68,8 @@
                 console.log("loginRole : ", loginRole);
                 console.log("targetUserOrgRole : ", targetUserOrgRole);
 
-                if (targetUserOrgRole  === "super") {
-                    alert("슈퍼 권한 사용자의 권한은 변경할 수 없습니다.");
+                if (loginRole === "admin" && targetUserOrgRole  === "super") {
+                    alert("상위 권한 사용자는 삭제할 수 없습니다.");
                     closeRoleModal();
                     return
                 }
