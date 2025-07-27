@@ -18,12 +18,20 @@ public class BanService implements IBanService {
     private final String colNm = "Ban";
 
     @Override
-    public int insertBanInfo(BanDTO pDTO) {
-        return 0;
+    public int insertBanInfo(BanDTO pDTO) throws Exception {
+        log.info("{}.insertBanInfo Start", this.getClass().getSimpleName());
+
+        int res;
+
+        res = banMapper.insertBanInfo(colNm, pDTO);
+
+        log.info("{}.insertBanInfo End", this.getClass().getSimpleName());
+
+        return res;
     }
 
     @Override
-    public List<BanDTO> getBanList() {
+    public List<BanDTO> getBanList() throws Exception {
         return List.of();
     }
 }

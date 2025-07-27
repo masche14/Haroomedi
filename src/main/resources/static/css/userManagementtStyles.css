@@ -39,14 +39,14 @@
     justify-content: space-evenly;
 }
 
-.role-options {
+.role-options, .ban-options {
     display: flex;
     justify-content: center;
     gap: 15px;
     margin: 20px 0;
 }
 
-.role-btn {
+.role-btn, .ban-btn {
     padding: 16px 24px;
     border: 2px solid #ccc;
     border-radius: 10px;
@@ -58,7 +58,7 @@
     color: black;
 }
 
-.role-btn.selected {
+.role-btn.selected, .ban-btn.selected {
     border-color: #007bff;
 }
 
@@ -81,24 +81,33 @@
     transition: background-color 0.2s ease;
 }
 
-#closeRoleModal {
+#inputReason {
+    display: none;
+    width: 100%;
+}
+
+#inputReason input{
+    width: 100%;
+}
+
+#closeRoleModal, #closeBanModal {
     background-color: #bdbdbd;
 }
 
-#closeRoleModal:hover {
+#closeRoleModal:hover, #closeBanModal:hover {
     background-color: #aaaaaa;
 }
 
-#confirmRoleBtn {
+#confirmRoleBtn, #confirmBanBtn {
     background-color: #3498db;
 }
 
-#confirmRoleBtn:hover {
+#confirmRoleBtn:hover, #confirmBanBtn:hover {
     background-color: #2980b9;
 }
 
 .show {
-    display: block;
+    display: block !important;
 }
 
 /*!* 추가 스타일 *!*/
