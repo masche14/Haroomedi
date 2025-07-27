@@ -17,9 +17,11 @@
 
     <script th:inline="javascript">
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
+        let loginRole = null;
         let userList;
         let targetUserId = null;
         let targetUserRole = null;
+        let targetUserOrgRole = null;
 
         $(document).ready(function () {
             if (SS_USER == null) {
@@ -28,6 +30,8 @@
                 return;
             }
 
+            loginRole = SS_USER.role;
+
             getUserList();
 
             // 알림 버튼 클릭
@@ -35,7 +39,7 @@
                 targetUserId = $(this).data("id");
                 $("#roleModal").addClass("show");
 
-                const role = $(this).data("role");
+                targetUserOrgRole = $(this).data("role");
             });
 
             $(document).on("click", ".ban-btn", function () {
@@ -57,6 +61,16 @@
 
                 if (targetUserRole === null) {
                     alert("권한을 선택해주세요.");
+                    closeRoleModal();
+                    return
+                }
+
+                console.log("loginRole : ", loginRole);
+                console.log("targetUserOrgRole : ", targetUserOrgRole);
+
+                if (targetUserOrgRole  === "super") {
+                    alert("슈퍼 권한 사용자의 권한은 변경할 수 없습니다.");
+                    closeRoleModal();
                     return
                 }
 
@@ -92,6 +106,8 @@
         function closeRoleModal() {
             $("#roleModal").removeClass("show");
             $(".role-btn").removeClass("selected");
+            targetUserOrgRole = null;
+            targetUserRole = null;
         }
 
         function getUserList() {
