@@ -22,9 +22,13 @@ nav {
 .nav-group {
     display: flex;
     gap: 1.5rem;
+    justify-content: space-around;
     align-items: center;
 }
 
+#serviceNav {
+    min-width: 500px;
+}
 
 .after_login {
     gap: 0 !important;

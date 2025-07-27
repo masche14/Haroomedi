@@ -91,6 +91,8 @@ public class AdminController {
     public ResponseEntity<CommonResponse<List<LoginDTO>>> getDailyUserCntByMonth(HttpSession session, @RequestBody LoginDTO pDTO) throws Exception {
         log.info("{}.getDailyUserCntByMonth", this.getClass().getName());
 
+        log.info("pDTO: {}", pDTO);
+
         List<LoginDTO> rList = loginService.getDailyDistinctUserCountByMonth(pDTO);
 
         log.info("{}.getDailyUserCntByMonth", this.getClass().getName());

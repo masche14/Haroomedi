@@ -28,11 +28,6 @@
                 return;
             }
 
-            if (!prescriptionList || prescriptionList.length === 0) {
-                alert("처방내역DB에 데이터가 없습니다. 동기화를 진행해주세요.");
-                location.href = "/health/auth";
-            }
-
             renderPrescriptionList(prescriptionList);
 
             // 알림 버튼 클릭

@@ -1,30 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
-    <meta lang="en" xmlns:th="http://www.thymeleaf.org">
+    <meta charset="UTF-8">
     <title>메인페이지</title>
     <link rel="stylesheet" href="/css/adminIndexStyles.css">
     <link rel="stylesheet" href="/css/navStyles.css">
     <link href="//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css" rel="stylesheet">
     <link href="//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-jp.css" rel="stylesheet">
+
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script src="/js/setReferrer.js" defer></script>
 
-    <!-- flatpickr CDN -->
+    <!-- flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
-    <script th:inline="javascript">
-        let todayUserCnt;
-        let startDate;
-        let endDate;
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+
+    <script>
+        let startDate, endDate;
+        let myChart;
 
         $(document).ready(function () {
             const today = new Date();
-            setDateParam(today.getFullYear(), today.getMonth() + 1);
-            console.log("초기 날짜 기준:", startDate, "~", endDate);
+            const year = today.getFullYear();
+            const month = today.getMonth() + 1;
+
+            setDateParam(year, month);
             getTodayUserCnt();
 
             flatpickr("#monthPicker", {
@@ -37,12 +42,11 @@
                 ],
                 defaultDate: new Date(),
                 allowInput: false,
-                clickOpens: true, // input 클릭 시에만 열기
+                clickOpens: true,
                 onReady: function (selectedDates, dateStr, instance) {
                     setTimeout(() => {
                         instance.setDate(instance.config.defaultDate, true);
                     }, 100);
-
                     setMonthLabelsToNumbers(instance);
                     bindMonthClickManually(instance);
                 },
@@ -60,15 +64,11 @@
                 },
                 onChange: function (selectedDates, dateStr, instance) {
                     if (!dateStr || dateStr.trim() === "") return;
-                    if (!selectedDates || !selectedDates[0]) return;
-
                     const [year, month] = dateStr.split("/").map(Number);
                     setDateParam(year, month);
                     console.log("선택된 년월 기준:", startDate, "~", endDate);
                 }
             });
-
-
         });
 
         function setDateParam(year, month) {
@@ -76,6 +76,24 @@
             const lastDay = new Date(year, month, 0).getDate();
             startDate = `${year}-${mm}-01`;
             endDate = `${year}-${mm}-${String(lastDay).padStart(2, '0')}`;
+
+            $.ajax({
+                type: "POST",
+                url: "/admin/getDailyUserCntByMonth",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    startDate: startDate,
+                    endDate: endDate
+                }),
+                success: function (json) {
+                    dailyCntList = json.data;
+                    console.log("dailyCntList : ", dailyCntList);
+                    renderChart(dailyCntList, year, month); // ⬅️ year, month 전달
+                },
+                error: function () {
+                    alert("오류발생");
+                }
+            });
         }
 
         function getTodayUserCnt() {
@@ -106,13 +124,11 @@
             monthLabels.forEach((el, i) => {
                 const newEl = el.cloneNode(true);
                 el.parentNode.replaceChild(newEl, el);
-
                 newEl.addEventListener('click', function (e) {
                     e.stopPropagation();
                     const selectedYear = parseInt(instance.currentYear);
                     const selectedMonth = i + 1;
                     const newDate = `${selectedYear}/${String(selectedMonth).padStart(2, '0')}`;
-
                     if (selectedYear && selectedMonth) {
                         instance.setDate(newDate, true);
                         instance.close();
@@ -121,20 +137,84 @@
             });
         }
 
-        function preventAutoClose(instance) {
-            instance.calendarContainer.addEventListener("mousedown", function (evt) {
-                evt.stopPropagation();
+        function renderChart(dataList, year, month) {
+            const lastDay = new Date(year, month, 0).getDate();
+            const labels = [];
+            const values = [];
+            const valueMap = {};
+
+            // 날짜 매핑
+            $.each(dataList, function (i, item) {
+                const d = new Date(item.loginDateString);
+                const label = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                valueMap[label] = item.userCount;
             });
 
-            const inputEl = instance._input;
-            inputEl.addEventListener("mousedown", function (e) {
-                e.stopPropagation();
-            });
+            for (let i = 1; i <= lastDay; i++) {
+                const day = String(i).padStart(2, '0');
+                const label = `${String(month).padStart(2, '0')}-${day}`;
+                labels.push(label);
+                values.push(valueMap[label] || 0);
+            }
 
-            // 추가: blur로 닫힘 방지
-            inputEl.addEventListener("blur", function () {
-                setTimeout(() => inputEl.focus(), 10);
-            });
+            if (myChart) myChart.dispose();
+            myChart = echarts.init($('#dailyChart')[0]);
+
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow',
+                        shadowStyle: {
+                            color: 'rgba(112, 217, 197, 0.1)' // 마우스 영역 하이라이트 색상
+                        }
+                    },
+                    confine: true,
+                    formatter: function (params) {
+                        let result = params[0]; // 단일 시리즈 기준
+                        return `${result.axisValue}<br/>● ${result.seriesName}  :  ${result.data}`;
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: labels,
+                    boundaryGap: false // ✅ 점과 라벨을 정확히 맞추기 위해 추가
+                },
+                yAxis: {
+                    type: 'value',
+                    minInterval: 1,
+                    max: 5 // ✅ y축 최대값 설정
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                series: [{
+                    name: '일일 접속자 수',
+                    type: 'line',
+                    data: values,
+                    smooth: true,
+                    areaStyle: {
+                        color: 'rgba(112, 217, 197, 0.3)' // ✅ 그림자 색상
+                    },
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    symbolSize: 10,
+                    lineStyle: {
+                        color: '#70d9c5' // ✅ 선 색상
+                    },
+                    itemStyle: {
+                        color: '#70d9c5',     // ✅ 원(circle) 안 색상
+                        borderColor: '#70d9c5' // ✅ 원 테두리 색상
+                    }
+                }]
+            };
+
+
+            myChart.setOption(option);
         }
     </script>
 </head>
@@ -163,9 +243,15 @@
 
 <div class="container">
     <div class="chart-card">
-        <div class="icon">📋</div>
-        <h2>일일 접속자 수 조회</h2>
-        <input type="text" id="monthPicker" placeholder="년/월 선택" readonly>
+        <div class="chart-container-title">
+            <h2>일일 접속자 수 그래프</h2>
+            <div class="monthSelect-container">
+                <input type="text" id="monthPicker" placeholder="년/월 선택" readonly>
+            </div>
+        </div>
+        <div class="chart" id="chart">
+            <div id="dailyChart"></div>
+        </div>
     </div>
     <div class="others-container" id="others">
         <div class="card">
@@ -176,7 +262,7 @@
             <div class="icon">🧾</div>
             <h2>회원 관리</h2>
         </a>
-        <a href="/admin/banUserManagenet" class="card">
+        <a href="/admin/banUserManagement" class="card">
             <div class="icon">🚫</div>
             <h2>차단 회원 관리</h2>
         </a>
