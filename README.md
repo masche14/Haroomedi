@@ -1,7 +1,8 @@
-# 프로젝트 명 : 하루약속(Haroomedi)
-# 시연 영상 : [https://youtu.be/oUuN_a7BO98?si=rfn3-ApKK4MtZk1c](https://youtu.be/OzoKi9t20LI?si=E-CLR5JJN_4PuIxQ)
-# 주소 : https://haroomedi.com/
-# 개요 : 복약 관리 및 약품 추천 서비스
+# 프로젝트 소개
+- 프로젝트 명 : 하루약속(Haroomedi)
+- 시연 영상 : [https://youtu.be/oUuN_a7BO98?si=rfn3-ApKK4MtZk1c](https://youtu.be/OzoKi9t20LI?si=E-CLR5JJN_4PuIxQ)
+- 주소 : https://haroomedi.com/
+- 개요 : 복약 관리 및 약품 추천 서비스
 # 개발 배경
 - 약을 먹어야 하는데 깜빡하고 넘어가는 경우가 많음
 - 약을 제 때에 먹지 않으면 위험한 사람들도 있음
