@@ -178,7 +178,7 @@ public class AdminController {
                 int delReminder = healthService.deleteAllReminder(userInfoDTO);
                 int delChat = chatService.deleteAllChat(userInfoDTO);
 
-                if (delPrescription == 1 && delReminder == 1 && delChat == 1) {
+                if (delPrescription > 0 && delReminder > 0 && delChat > 0) {
                     log.info("유저 정보 삭제 완료");
                 }
 
