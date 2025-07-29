@@ -6,10 +6,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling // ✅ 반드시 필요!
-public class PersonalApplication {
+public class HaroomediApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PersonalApplication.class, args);
+        SpringApplication.run(HaroomediApplication.class, args);
     }
 
 }
