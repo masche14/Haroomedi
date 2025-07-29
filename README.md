@@ -1,4 +1,4 @@
-# 프로젝트 명 : Haroomedi
+# 프로젝트 명 : 하루약속(Haroomedi)
 # 시연 영상 : [https://youtu.be/oUuN_a7BO98?si=rfn3-ApKK4MtZk1c](https://youtu.be/OzoKi9t20LI?si=E-CLR5JJN_4PuIxQ)
 # 주소 : https://haroomedi.com/
 # 개요 : 복약 관리 및 약품 추천 서비스
