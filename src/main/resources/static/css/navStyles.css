@@ -81,3 +81,10 @@ nav a:hover {
 .justify-right {
     justify-content: right;
 }
+
+.nav-group {
+    flex-wrap: nowrap;
+}
+nav a {
+    white-space: nowrap;
+}

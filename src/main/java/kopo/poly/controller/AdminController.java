@@ -6,9 +6,7 @@ import kopo.poly.dto.BanDTO;
 import kopo.poly.dto.LoginDTO;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
-import kopo.poly.service.IBanService;
-import kopo.poly.service.ILoginService;
-import kopo.poly.service.IUserInfoService;
+import kopo.poly.service.*;
 import kopo.poly.util.DateUtil;
 import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +31,8 @@ public class AdminController {
     private final IUserInfoService userInfoService;
     private final IBanService banService;
     private final ILoginService loginService;
+    private final IHealthService healthService;
+    private final IChatService chatService;
 
     @GetMapping("/index")
     public String showIndexPage(HttpSession session) {
@@ -174,7 +174,14 @@ public class AdminController {
             userInfoDTO.setUserId(pDTO.getUserId());
             deleteRes = userInfoService.deleteUserInfo(userInfoDTO);
             if (deleteRes > 0) {
-                log.info("삭제 완료");
+                int delPrescription = healthService.deleteAllPrescription(userInfoDTO);
+                int delReminder = healthService.deleteAllReminder(userInfoDTO);
+                int delChat = chatService.deleteAllChat(userInfoDTO);
+
+                if (delPrescription == 1 && delReminder == 1 && delChat == 1) {
+                    log.info("유저 정보 삭제 완료");
+                }
+
                 rList = userInfoService.getUserList();
             }
         }
