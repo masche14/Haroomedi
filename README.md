@@ -21,7 +21,7 @@
 - 프로토콜 : HTTPS
 - 기타 : jQuery, Ajax
 - IDE : IntelliJ
-- API : 
- - TILKO API : 본인 인증 및 사용자 처방 내역 조회
- - OPENAI API : 처방 데이터 전처리 / AI 상담 챗봇
- - KAKAO MAP API : 사용자 위치 주변 / 타 지역 약국 찾기
+- API:
+  - **TILKO API**: 본인 인증 및 사용자 처방 내역 조회
+  - **OPENAI API**: 처방 데이터 전처리 / AI 상담 챗봇
+  - **KAKAO MAP API**: 사용자 위치 주변 / 타 지역 약국 찾기
