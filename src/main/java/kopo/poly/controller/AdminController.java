@@ -4,9 +4,8 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.BanDTO;
 import kopo.poly.dto.LoginDTO;
-import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
-import kopo.poly.service.*;
+import kopo.poly.service.impl.AdminService;
 import kopo.poly.util.DateUtil;
 import kopo.poly.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +18,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping(value = "/admin")
 public class AdminController {
-    private final IUserInfoService userInfoService;
-    private final IBanService banService;
-    private final ILoginService loginService;
-    private final IHealthService healthService;
-    private final IChatService chatService;
+
+    private final AdminService adminService;
 
     @GetMapping("/index")
     public String showIndexPage(HttpSession session) {
@@ -83,7 +77,7 @@ public class AdminController {
 
         log.info("{}.getTodayUserCnt", this.getClass().getName());
 
-        int todayUserCnt = loginService.getTodayDistinctUserCount();
+        int todayUserCnt = adminService.getTodayUserCnt();
 
         log.info("{}.getTodayUserCnt", this.getClass().getName());
 
@@ -98,7 +92,7 @@ public class AdminController {
 
         log.info("pDTO: {}", pDTO);
 
-        List<LoginDTO> rList = loginService.getDailyDistinctUserCountByMonth(pDTO);
+        List<LoginDTO> rList = adminService.getDailyUserCntByMonth(pDTO);
 
         log.info("{}.getDailyUserCntByMonth", this.getClass().getName());
 
@@ -112,7 +106,7 @@ public class AdminController {
 
         log.info("{}.getUserList", this.getClass().getName());
 
-        List<UserInfoDTO> rList = userInfoService.getUserList();
+        List<UserInfoDTO> rList = adminService.getUserList();
 
         log.info("{}.getUserList", this.getClass().getName());
 
@@ -132,15 +126,7 @@ public class AdminController {
 
         log.info("pDTO: {}", pDTO);
 
-        int res;
-
-        res = userInfoService.updateUserInfo(pDTO);
-
-        List<UserInfoDTO> rList = new ArrayList<>();
-
-        if (res > 0) {
-            rList = userInfoService.getUserList();
-        }
+        List<UserInfoDTO> rList = adminService.updateRole(pDTO);
 
         log.info("{}.updateRole Start", this.getClass().getName());
 
@@ -161,30 +147,7 @@ public class AdminController {
         pDTO.setUserEmail(EncryptUtil.encAES128CBC(pDTO.getUserEmail()));
         pDTO.setPhoneNumber(EncryptUtil.encAES128CBC(pDTO.getPhoneNumber()));
 
-
-        int banRes;
-        int deleteRes;
-        List<UserInfoDTO> rList = new ArrayList<>();
-
-        banRes = banService.insertBanInfo(pDTO);
-
-        if (banRes > 0) {
-            log.info("차단 완료");
-            UserInfoDTO userInfoDTO = new UserInfoDTO();
-            userInfoDTO.setUserId(pDTO.getUserId());
-            deleteRes = userInfoService.deleteUserInfo(userInfoDTO);
-            if (deleteRes > 0) {
-                int delPrescription = healthService.deleteAllPrescription(userInfoDTO);
-                int delReminder = healthService.deleteAllReminder(userInfoDTO);
-                int delChat = chatService.deleteAllChat(userInfoDTO);
-
-                if (delPrescription > 0 && delReminder > 0 && delChat > 0) {
-                    log.info("유저 정보 삭제 완료");
-                }
-
-                rList = userInfoService.getUserList();
-            }
-        }
+        List<UserInfoDTO> rList = adminService.banUser(pDTO);
 
         log.info("{}.banUser End", this.getClass().getName());
 
