@@ -25,6 +25,7 @@ public class UserInfoDTO {
     private String gender;
     private String existYn;
     private String banYn;
+    private String banReason;
     private String fieldName;
     private String value;
     private int authNumber;
