@@ -24,6 +24,7 @@ public class UserInfoDTO {
     private String chgDt;
     private String gender;
     private String existYn;
+    private String banYn;
     private String fieldName;
     private String value;
     private int authNumber;
