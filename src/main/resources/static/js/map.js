@@ -198,9 +198,11 @@ function searchNearbyPharmacies(searchCenter, searchPolygon = null, allInPolygon
                 // 오버레이 컨텐츠 생성 (이전과 동일)
                 const $contentDiv = $('<div>').addClass('custom-infowindow');
                 const $link = $('<a>')
-                    .attr('href', `https://map.kakao.com/link/map/${p.id}`)
-                    .attr('target', '_blank')
-                    .text(p.place_name);
+                    .attr('href', `https://place.map.kakao.com/${p.id}`)
+                    .attr('target', '_blank');
+
+                const $pName =  $('<div>').text(p.place_name);
+                const $phone = $('<div>').text(p.phone);
 
                 $link.on('click', function(e) {
                     e.stopPropagation();
@@ -209,6 +211,8 @@ function searchNearbyPharmacies(searchCenter, searchPolygon = null, allInPolygon
                     console.log("--- CustomOverlay link clicked. Extracted ID:", clickedId, "---");
                 });
 
+                $link.append($pName);
+                $link.append($phone);
                 $contentDiv.append($link);
                 $contentDiv.css('pointer-events', 'none');
                 $link.css('pointer-events', 'auto');
