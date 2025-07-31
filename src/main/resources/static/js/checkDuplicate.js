@@ -8,7 +8,7 @@ var check_nick = "";
 function checkDuplicate(type) {
     const $input = $("#" + type);
     const value = $input.val();
-    const fielName = $input.attr("name");
+    const fieldName = $input.attr("name");
     const $message = $("#" + type + "Message");
 
     // 입력값이 없을 때 알림 표시
@@ -23,7 +23,7 @@ function checkDuplicate(type) {
     }
 
     const jsonData = {
-        fieldName: fielName,
+        fieldName: fieldName,
         value: value
     }
 
