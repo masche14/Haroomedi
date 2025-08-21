@@ -220,7 +220,7 @@ public class UserController {
         log.info("{}.getEmailExists End", this.getClass().getSimpleName());
 
         return ResponseEntity.ok(
-          CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO)
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rDTO)
         );
     }
 
@@ -659,7 +659,7 @@ public class UserController {
             String encPhoneNumber = EncryptUtil.encAES128CBC(pDTO.getPhoneNumber());
             pDTO.setPhoneNumber(encPhoneNumber);
         }
-        
+
         pDTO.setChgId(pDTO.getOrgId());
         pDTO.setChgDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
 
