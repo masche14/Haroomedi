@@ -38,6 +38,17 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.commonmark:commonmark:0.21.0' // 마크다운 > html 변환을 위한 의존성 추가
 
+    // 🔽 OpenFeign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+}
+
+dependencyManagement {
+    imports {
+        // Boot 3.4.x 호환 Spring Cloud 릴리즈 (Moorgate)
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.2"
+        // 2024.0.2가 불안하면 2024.0.1 사용 가능
+        // mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.1"
+    }
 }
 
 tasks.named('test') {
