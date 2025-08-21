@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.Transient;
 
 import java.util.List;
 
@@ -24,10 +25,15 @@ public class UserInfoDTO {
     private String chgDt;
     private String gender;
     private String existYn;
+
     private String banYn;
     private String banReason;
+
+    @Transient
     private String fieldName;
+    @Transient
     private String value;
+
     private int authNumber;
     private String birthDate;
     private String phoneNumber;

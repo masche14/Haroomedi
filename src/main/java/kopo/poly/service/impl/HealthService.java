@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.*;
-import kopo.poly.persistance.mongodb.IHealthMapper;
 import kopo.poly.persistance.mongodb.IPrescriptionMapper;
 import kopo.poly.persistance.mongodb.IReminderMapper;
 import kopo.poly.service.IHealthService;
@@ -46,8 +45,6 @@ public class HealthService implements IHealthService {
             .connectionPool(new ConnectionPool(10, 10, TimeUnit.MINUTES)) // 커넥션 풀 크기 증가
             .retryOnConnectionFailure(true)          // 연결 실패 시 자동 재시도
             .build();
-
-    private final IHealthMapper healthMapper;
     private final IPrescriptionMapper prescriptionMapper;
     private final IReminderMapper reminderMapper;
 
@@ -175,189 +172,7 @@ public class HealthService implements IHealthService {
         return result;
     }
 
-    @Transactional
-    @Override
-    public List<PrescriptionDTO> getTestResult(TilkoDTO certificateResult) throws Exception {
-        log.info("{}.getTestResult start!", this.getClass().getName());
 
-        List<PrescriptionDTO> rList = new ArrayList<>();
-
-//        String rsaPublicKey = getPublicKey();
-//        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-//        keyGen.init(128);
-//        SecretKey aesKey = keyGen.generateKey();
-//        IvParameterSpec iv = new IvParameterSpec(new byte[16]);
-//
-//        String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
-//
-//        // 두 번째 API 요청 처리
-//        String url = API_HOST + "api/v1.0/NhisSimpleAuth/Ggpab003M0105";
-//
-//        Map<String, Object> secondRequestBody = new HashMap<>();
-//        secondRequestBody.put("CxId", certificateResult.getCxId());
-//        secondRequestBody.put("PrivateAuthType", certificateResult.getPrivateAuthType());
-//        secondRequestBody.put("ReqTxId", certificateResult.getReqTxId());
-//        secondRequestBody.put("Token", certificateResult.getToken());
-//        secondRequestBody.put("TxId", certificateResult.getTxId());
-//        secondRequestBody.put("UserName", encryptAES(aesKey, iv, certificateResult.getUserName()));
-//        secondRequestBody.put("BirthDate", encryptAES(aesKey, iv, certificateResult.getBirthDate()));
-//        secondRequestBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, certificateResult.getUserCellphoneNumber()));
-//        secondRequestBody.put("기타필요한파라미터", "");
-//
-//        RequestBody secondBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(secondRequestBody));
-//        Request secondRequest = new Request.Builder()
-//                .url(url)
-//                .header("Content-Type", "application/json")
-//                .header("API-KEY", tilkoApiKey)
-//                .header("ENC-KEY", aesCipherKey)
-//                .post(secondBody)
-//                .build();
-//
-//        Response secondResponse = client.newCall(secondRequest).execute();
-//        Map<String, Object> secondResponseMap = objectMapper.readValue(secondResponse.body().string(), Map.class);
-//        List<Map<String, Object>> ResultList = (List<Map<String, Object>>) secondResponseMap.get("ResultList");
-//        log.info("ResultList : {}", ResultList);
-//
-//        PrescriptionDTO dDTO = healthMapper.getLatestRecord(certificateResult);
-//        PrescriptionDTO rDTO = new PrescriptionDTO();
-//
-//        List<Map<String, Object>> testResultList = new ArrayList<>();
-//        List<PrescriptionDTO> rList = new ArrayList<>();
-//
-//        if (dDTO==null){
-//
-//            for (Map<String, Object> resultMap : ResultList) {
-//                Map<String, Object> healthMap = new HashMap<>();
-//                List<Map<String, Object>> health = new ArrayList<>();
-//
-//                String year = (String) resultMap.get("Year");
-//                year = year.replace("년","");
-//                log.info("year: {}", year);
-//
-//                String checkupDate = (String) resultMap.get("CheckUpDate");
-//                String month = checkupDate.split("/")[0];
-//                String day = checkupDate.split("/")[1];
-//                log.info("month: {}", month);
-//                log.info("day: {}", day);
-//
-//                LocalDate date = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
-//                log.info("date: {}", date);
-//                rDTO.setPrescriptionDate(date);
-//
-//                String location = (String) resultMap.get("Location");
-//                log.info("location: {}", location);
-//                rDTO.setStoreName(location);
-//
-//                int success = healthMapper.insertRecord(rDTO);
-//
-//                if (success == 1){
-//                    log.info("레코드 데이터를 성공적으로 저장하였습니다.");
-//                }
-//
-//                List<Map<String, Object>> inspections = (List<Map<String, Object>>) resultMap.get("Inspections");
-//
-//                for (Map<String, Object> inspection : inspections) {
-//
-//                    List<Map<String, Object>> illnesses = (List<Map<String, Object>>) inspection.get("Illnesses");
-//                    for (Map<String, Object> illness : illnesses) {
-//                        List<Map<String, Object>> items = (List<Map<String, Object>>) illness.get("Items");
-//                        for (Map<String, Object> item : items) {
-//                            Map<String, Object> entry = new HashMap<>();
-//                            entry.put("검사명", (String) item.get("Name"));
-//                            entry.put("결과", (String) item.get("Value"));
-//                            health.add(entry);
-////                            healthMap.put((String) item.get("Name"), item.get("Value"));
-//                        }
-//                    }
-//                }
-//
-//                healthMap.put("year", year);
-//                healthMap.put("result", health);
-//
-//                testResultList.add(healthMap);
-//            }
-//
-//        } else {
-//
-//            LocalDate latestDate = rDTO.getPrescriptionDate();
-//
-//            log.info("latestDate: {}", latestDate);
-//
-//            for (Map<String, Object> resultMap : ResultList) {
-//                Map<String, Object> healthMap = new HashMap<>();
-//                List<Map<String, Object>> health = new ArrayList<>();
-//
-//                String year = (String) resultMap.get("Year");
-//                year = year.replace("년","");
-//                log.info("year: {}", year);
-//
-//                String checkupDate = (String) resultMap.get("CheckUpDate");
-//                String month = checkupDate.split("/")[0];
-//                String day = checkupDate.split("/")[1];
-//                log.info("month: {}", month);
-//                log.info("day: {}", day);
-//
-//                LocalDate date = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
-//                log.info("date: {}", date);
-//
-//                String location = (String) resultMap.get("Location");
-//                log.info("location: {}", location);
-//                rDTO.setStoreName(location);
-//
-//                if (date.isAfter(latestDate)) {
-//
-//                    rDTO.setPrescriptionDate(date);
-//
-//                    int success = healthMapper.insertRecord(rDTO);
-//
-//                    if (success == 1){
-//                        log.info("레코드 데이터를 성공적으로 저장하였습니다.");
-//                    }
-//
-//                    List<Map<String, Object>> inspections = (List<Map<String, Object>>) resultMap.get("Inspections");
-//
-//                    for (Map<String, Object> inspection : inspections) {
-//                        List<Map<String, Object>> illnesses = (List<Map<String, Object>>) inspection.get("Illnesses");
-//                        for (Map<String, Object> illness : illnesses) {
-//                            List<Map<String, Object>> items = (List<Map<String, Object>>) illness.get("Items");
-//                            for (Map<String, Object> item : items) {
-//                                Map<String, Object> entry = new HashMap<>();
-//                                entry.put("검사명", (String) item.get("Name"));
-//                                entry.put("결과", (String) item.get("Value"));
-//                                health.add(entry);
-//                                healthMap.put((String) item.get("Name"), item.get("Value"));
-//                            }
-//                        }
-//                    }
-//
-//                    healthMap.put("year", year);
-//                    healthMap.put("result", health);
-//
-//                    testResultList.add(healthMap);
-//                } else {
-//                    log.info("이미 해당 날짜의 검사결과 데이터가 존재합니다.");
-//                }
-//
-//            }
-//
-//        }
-
-        log.info("{}.getTestResult end!", this.getClass().getName());
-        return rList;
-    }
-
-    @Override
-    public String getAnalyzeResult(Map<String, Object> testResult) throws Exception {
-        log.info("{}.getAnalyzeResult start!", this.getClass().getName());
-
-        String textData = testResult.toString();
-        log.info("textData: {}", textData);
-
-        String content = openAIService.getAnalyzeResult(textData);
-
-        log.info("{}.getAnalyzeResult end!", this.getClass().getName());
-        return content;
-    }
 
     @Override
     public int synchronizePrescriptions(TilkoDTO certificateResult) throws Exception {

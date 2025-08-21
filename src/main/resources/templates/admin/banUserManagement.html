@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>처방내역 조회</title>
+    <title>회원 관리</title>
 
     <!-- 공통 스타일 -->
     <link rel="stylesheet" th:href="@{/css/authStyles.css}">
@@ -10,16 +10,15 @@
     <link rel="stylesheet" href="/css/card.css">
 
     <!-- 이 페이지 전용 스타일 -->
-    <link rel="stylesheet" href="/css/prescriptionListStyles.css">
+    <link rel="stylesheet" href="/css/userManagementtStyles.css">
 
     <script type="text/javascript" th:src="@{/js/jquery-3.6.0.min.js}"></script>
     <script src="/js/setReferrer.js" defer></script>
 
     <script th:inline="javascript">
-        const prescriptionList = /*[[${prescriptionList}]]*/ null;
         const SS_USER = /*[[${session.SS_USER}]]*/ null;
-
-        let targetUserId = null;
+        let userList;
+        let banUserId = null;
 
         $(document).ready(function () {
             if (SS_USER == null) {
@@ -28,117 +27,79 @@
                 return;
             }
 
-            if (!prescriptionList || prescriptionList.length === 0) {
-                alert("처방내역DB에 데이터가 없습니다. 동기화를 진행해주세요.");
-                location.href = "/health/auth";
-            }
+            getUserList();
 
-            renderPrescriptionList(prescriptionList);
+            $(document).on("click", ".cancel-ban", function () {
+                banUserId = $(this).data("userId");
 
-            // 알림 버튼 클릭
-            $(document).on("click", ".remind-btn", function () {
-                selectedPrescriptionId = $(this).data("id");
-
-                const remindYn = $(this).data("remind");
-                if (remindYn === 'Y') {
-                    $.ajax({
-                        url: "/health/removeReminder",
-                        type: "POST",
-                        contentType: "application/json",
-                        data: JSON.stringify({
-                            prescriptionId: selectedPrescriptionId,
-                            remindYn: "N"
-                        }),
-                        success: function (json) {
-                            const updatedList = json.data;
-                            renderPrescriptionList(updatedList);
-                        },
-                        error: function () {
-                            alert("알림 해제 실패");
-                        }
-                    });
-                } else {
-                    $("#reminderModal").addClass("show");
-                }
-            });
-
-            $(document).on("click", ".manage-btn", function () {
-                selectedPrescriptionId = $(this).data("id");
-                location.href="/health/reminder?prescriptionId="+selectedPrescriptionId;
-            });
-
-            // 복용 시기 선택
-            $(".meal-btn").on("click", function () {
-                $(this).toggleClass("selected");
-            });
-
-            // 알림 설정 확인
-            $("#confirmReminderBtn").on("click", function () {
-                const selectedMeals = [];
-                $(".meal-btn.selected").each(function () {
-                    selectedMeals.push($(this).data("value"));
-                });
-
-                if (selectedMeals.length === 0) {
-                    alert("복용 시기를 1개 이상 선택해주세요.");
-                    return;
-                }
+                console.log("banUserId : ", banUserId);
 
                 $.ajax({
                     type: "POST",
-                    url: "/health/setReminder",
+                    url: "/admin/cancelBan",
                     contentType: "application/json",
                     data: JSON.stringify({
-                        prescriptionId: selectedPrescriptionId,
-                        remindYn: "Y",
-                        dailyIntakeCnt: selectedMeals.length
+                       userId: banUserId
                     }),
                     success: function (json) {
-                        const updatedList = json.data;
-
-                        $("#reminderModal").removeClass("show");
-                        $(".meal-btn").removeClass("selected");
-                        renderPrescriptionList(updatedList);
+                        alert(json.data.msg);
+                        getUserList();
                     },
                     error: function () {
-                        alert("알림 설정 실패");
+                        alert("오류발생");
                     }
                 });
             });
 
-            // 모달 닫기
-            $("#closeReminderModal").on("click", function () {
-                $("#reminderModal").removeClass("show");
-                $(".meal-btn").removeClass("selected");
-            });
         });
 
-        function renderPrescriptionList(prescriptionList) {
-            const container = $("#prescription-list");
+        function getUserList() {
+            $.ajax({
+                type: "POST",
+                url: "/admin/getBanUserList",
+                contentType: "application/json",
+                success: function (json) {
+                    userList = json.data;
+                    console.log("userList : ", userList);
+                    renderUserList(userList);
+                },
+                error: function () {
+                    alert("오류발생");
+                }
+            });
+        }
+
+        function renderUserList(userList) {
+            const container = $("#user-list");
             container.empty();
 
-            prescriptionList.forEach(item => {
-                const remindYn = item.remindYn;
-                const remindText = remindYn === "Y" ? "알림 해제" : "알림 설정";
-                const formattedDate = new Date(item.prescriptionDate).toISOString().split('T')[0];
+            userList.forEach(item => {
+                const userId = item.userId;
+                const userName = item.userName;
+                const userEmail = item.userEmail;
+                const phoneNumber = item.phoneNumber;
+                const reason = item.reason;
+                const banBy = item.banBy;
+                const banAt = new Date(item.banAt).toISOString().split('T')[0];
+
 
                 const itemHtml = `
-                    <div id="prescription-${item.prescriptionId}" class="status-card">
-                        <div class="indicator ${remindYn === 'Y' ? 'green' : 'grey'}"></div>
+                    <div id="user-${userId}" class="status-card">
                         <div class="content">
-                            <div class="prescription-date">${formattedDate}</div>
-                            <div class="store-name">${item.storeName}</div>
-
-                            <button class="remind-btn"
-                                    data-id="${item.prescriptionId}"
-                                    data-remind="${remindYn}">
-                                ${remindText}
+                            <div class="user-id items">${userId}</div>
+                            <div class="user-name items">${userName}</div>
+                            <div class="user-email items">${userEmail}</div>
+                            <div class="user-phoneNumber items">${phoneNumber}</div>
+                            <div class="user-reason items">${reason}</div>
+                            <div class="user-banBy items">${banBy}</div>
+                            <div class="user-banAt items">${banAt}</div>
+                            <button class="manage-btn cancel-ban"
+                                    data-user-id="${userId}"
+                                    data-user-name="${userName}"
+                                    data-user-email="${userEmail}"
+                                    data-user-phone="${phoneNumber}">
+                                차단 해제
                             </button>
-
-                            ${remindYn === "Y" ? `
-                            <button class="manage-btn" data-id="${item.prescriptionId}">
-                                복약 관리
-                            </button>` : ''}
                         </div>
                     </div>
                 `;
@@ -172,32 +133,15 @@
 <!-- 본문 -->
 <div class="auth-container">
     <div class="auth-box">
-        <div id="prescription-container">
-            <div class="prescription-image">
-                <img src="/icons/ban-user.png" alt="차단 회원 관리 아이콘">
+        <div id="userList-container">
+            <div class="userList-image">
+                <!--                <img src="/icons/userManagement.png" alt="회원 관리 아이콘">-->
             </div>
-            <div class="title" style="font-weight: bold; font-size: x-large">처방내역</div>
-            <div id="prescription-list"></div>
+            <div class="title" style="font-weight: bold; font-size: x-large">차단 회원 관리</div>
+            <div id="user-list"></div>
         </div>
     </div>
 </div>
 
-<!-- 모달 -->
-<div class="modal" id="reminderModal">
-    <div class="modal-content">
-        <h3>처방받은 복용 시기</h3>
-
-        <div class="meal-time-options" id="mealOptionWrapper">
-            <div class="meal-btn" data-value="아침">아침</div>
-            <div class="meal-btn" data-value="점심">점심</div>
-            <div class="meal-btn" data-value="저녁">저녁</div>
-        </div>
-
-        <div class="modal-buttons" id="modalBtnWrapper">
-            <button id="closeReminderModal">닫기</button>
-            <button id="confirmReminderBtn">확인</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>

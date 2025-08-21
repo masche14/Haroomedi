@@ -18,4 +18,8 @@ public interface IAdminService {
 
     List<UserInfoDTO> banUser(BanDTO pDTO) throws Exception;
 
+    List<BanDTO> getUserBanList() throws Exception;
+
+    int cancelBan(BanDTO pDTO) throws Exception;
+
 }

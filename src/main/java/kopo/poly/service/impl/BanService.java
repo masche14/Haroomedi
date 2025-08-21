@@ -1,6 +1,7 @@
 package kopo.poly.service.impl;
 
 import kopo.poly.dto.BanDTO;
+import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IBanMapper;
 import kopo.poly.service.IBanService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,39 @@ public class BanService implements IBanService {
 
     @Override
     public List<BanDTO> getBanList() throws Exception {
-        return List.of();
+
+        log.info("{}.getBanList Start", this.getClass().getSimpleName());
+
+        List<BanDTO> rList = banMapper.getBanList(colNm);
+
+        log.info("{}.getBanList End", this.getClass().getSimpleName());
+
+        return rList;
+    }
+
+    @Override
+    public BanDTO isBaned(UserInfoDTO pDTO) throws Exception {
+
+        log.info("{}.isBaned Start", this.getClass().getSimpleName());
+
+        BanDTO rDTO = banMapper.checkIfBaned(colNm, pDTO);
+
+        log.info("{}.isBaned End", this.getClass().getSimpleName());
+
+        return rDTO;
+    }
+
+    @Override
+    public int cancelBan(BanDTO pDTO) throws Exception {
+
+        log.info("{}.cancelBan Start", this.getClass().getSimpleName());
+
+        int res;
+
+        res = banMapper.cancelBan(colNm, pDTO);
+
+        log.info("{}.cancelBan End", this.getClass().getSimpleName());
+
+        return res;
     }
 }

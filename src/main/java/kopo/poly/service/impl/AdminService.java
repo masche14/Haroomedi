@@ -111,4 +111,30 @@ public class AdminService implements IAdminService {
 
         return rList;
     }
+
+    @Override
+    public List<BanDTO> getUserBanList() throws Exception {
+
+        log.info("{}.getUserBanList", this.getClass().getName());
+
+        List<BanDTO> rList = banService.getBanList();
+
+        log.info("{}.getUserBanList", this.getClass().getName());
+
+        return rList;
+    }
+
+    @Override
+    public int cancelBan(BanDTO pDTO) throws Exception {
+
+        log.info("{}.cancelBan Start", this.getClass().getName());
+
+        int res;
+
+        res = banService.cancelBan(pDTO);
+
+        log.info("{}.cancelBan End", this.getClass().getName());
+
+        return res;
+    }
 }

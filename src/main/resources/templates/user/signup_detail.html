@@ -130,6 +130,8 @@
                         alert(json.data.msg);
                         if (json.data.result == 1){
                             window.location = "/user/signin";
+                        } else if (json.data.result == -1){
+                            window.location = "/";
                         }
                     }
                 );

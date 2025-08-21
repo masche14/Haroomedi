@@ -35,6 +35,13 @@ function getEmailExists(type) {
         contentType: "application/json",
         data: JSON.stringify(jsonData),
         success: function (json) {
+
+            if (json.data.banYn === "Y") {
+                alert("차단된 유저의 이메일 계정입니다\n차단 사유 : "+json.data.banReason);
+                window.location.href = "/";
+                return
+            }
+
             checkEmail = value;
             alert("이메일로 인증번호가 발송되었습니다.\n받은 메일의 인증번호를 입력하기 바랍니다.");
         },

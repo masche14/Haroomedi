@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
 import kopo.poly.dto.BanDTO;
 import kopo.poly.dto.LoginDTO;
+import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.impl.AdminService;
 import kopo.poly.util.DateUtil;
@@ -115,6 +116,20 @@ public class AdminController {
         );
     }
 
+    @PostMapping("/getBanUserList")
+    public ResponseEntity<CommonResponse<List<BanDTO>>> getBanUserList(HttpSession session) throws Exception {
+
+        log.info("{}.getUserList", this.getClass().getName());
+
+        List<BanDTO> rList = adminService.getUserBanList();
+
+        log.info("{}.getUserList", this.getClass().getName());
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
+
     @PostMapping("/updateRole")
     public ResponseEntity<CommonResponse<List<UserInfoDTO>>> updateRole(HttpSession session, @RequestBody UserInfoDTO pDTO) throws Exception {
         log.info("{}.updateRole Start", this.getClass().getName());
@@ -153,6 +168,30 @@ public class AdminController {
 
         return ResponseEntity.ok(
                 CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
+
+    @PostMapping("/cancelBan")
+    public ResponseEntity<CommonResponse<MsgDTO>> cancelBan(HttpSession session, @RequestBody BanDTO pDTO) throws Exception {
+
+        log.info("{}.cancelBan Start", this.getClass().getName());
+
+        log.info("pDTO: {}", pDTO);
+
+        MsgDTO dto = new MsgDTO();
+        String msg = "차단 해제 중 오류가 발샏하였습니다.";
+        int res;
+
+        res = adminService.cancelBan(pDTO);
+
+        if (res == 1) {
+            msg = "차단이 해제되었습니다.";
+        }
+
+        dto.setMsg(msg);
+
+        return ResponseEntity.ok(
+                CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
         );
     }
 }

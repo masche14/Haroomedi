@@ -102,6 +102,12 @@
 
             $(document).on("click", ".banUser", function () {
                 banUser(this);
+
+                if (targetUserRole  === "super") {
+                    alert("슈퍼 권한 사용자는 차단할 수 없습니다.");
+                    return
+                }
+
                 $("#banModal").addClass("show")
             });
 
@@ -132,12 +138,6 @@
                 }
 
                 console.log("reason : ", reason);
-
-                if (loginRole === "admin" && targetUserOrgRole  === "super") {
-                    alert("상위 권한 사용자는 차단할 수 없습니다.");
-                    closeBanModal();
-                    return
-                }
 
                 $.ajax({
                     type: "POST",
@@ -253,6 +253,7 @@
             banUserName = $(btn).data('user-name');
             banUserEmail = $(btn).data('user-email');
             banUserPhoneNumber = $(btn).data('user-phone');
+            targetUserRole = $(btn).data('role');
         }
     </script>
 </head>

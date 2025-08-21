@@ -3,14 +3,12 @@ package kopo.poly.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.controller.response.CommonResponse;
+import kopo.poly.dto.BanDTO;
 import kopo.poly.dto.LoginDTO;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.persistance.mongodb.IReminderMapper;
-import kopo.poly.service.IChatService;
-import kopo.poly.service.IHealthService;
-import kopo.poly.service.ILoginService;
-import kopo.poly.service.IUserInfoService;
+import kopo.poly.service.*;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;
 import kopo.poly.util.EncryptUtil;
@@ -39,6 +37,7 @@ public class UserController {
     private final IHealthService healthService;
     private final IChatService chatService;
     private final ILoginService loginService;
+    private final IBanService banService;
 
     @PostMapping("/setReferrer")
     public String setReferrer(HttpSession session, HttpServletRequest request, Model model) {
@@ -199,7 +198,18 @@ public class UserController {
 
         pDTO.setValue(encEmail);
 
-        log.info("after encoding pDTO : {}", pDTO.toString());
+        log.info("after encoding pDTO : {}", pDTO);
+
+        BanDTO banDTO = banService.isBaned(pDTO);
+
+        if (banDTO.getExistYn()!=null) {
+            pDTO.setBanYn("Y");
+            pDTO.setBanReason(banDTO.getReason());
+
+            return ResponseEntity.ok(
+                    CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), pDTO)
+            );
+        }
 
         UserInfoDTO rDTO = userInfoService.getUserEmailExists(pDTO);
 
@@ -283,6 +293,10 @@ public class UserController {
 
         log.info("{}.signupDetail Start", this.getClass().getSimpleName());
 
+        MsgDTO dto = new MsgDTO();
+        int res=0;
+        String msg="";
+
         log.info("pDTO : {}", pDTO.toString());
 
         UserInfoDTO emailResultDTO = (UserInfoDTO) session.getAttribute("emailResultDTO");
@@ -297,15 +311,31 @@ public class UserController {
 
         String encPassword = EncryptUtil.encHashSHA256(CmmUtil.nvl(pDTO.getPassword()));
         pDTO.setPassword(encPassword);
-        log.info("After Encoding pDTO : {}", pDTO.toString());
+        log.info("After Encoding pDTO : {}", pDTO);
+
+        pDTO.setFieldName("phoneNumber");
+        pDTO.setValue(pDTO.getPhoneNumber());
+
+        BanDTO banDTO = banService.isBaned(pDTO);
+
+        if (banDTO.getExistYn()!=null) {
+            pDTO.setBanYn("Y");
+            pDTO.setBanReason(banDTO.getReason());
+
+            res = -1;
+            msg = "차단된 유저의 핸드폰 번호입니다.\n차단 사유 : "+pDTO.getBanReason();
+
+            dto.setMsg(msg);
+            dto.setResult(res);
+
+            return ResponseEntity.ok(
+                    CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
+            );
+        }
 
         pDTO.setRegId(pDTO.getUserId());
         pDTO.setRegDt(DateUtil.getDateTime("yyyyMMddHHmmss"));
         pDTO.setRole("user");
-
-        MsgDTO dto = new MsgDTO();
-        int res=0;
-        String msg="";
 
         res = userInfoService.insertUserInfo(pDTO);
 

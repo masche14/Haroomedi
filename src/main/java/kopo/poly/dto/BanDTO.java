@@ -15,4 +15,5 @@ public class BanDTO {
     private String reason;
     private String banBy;
     private Date banAt;
+    private String existYn;
 }
