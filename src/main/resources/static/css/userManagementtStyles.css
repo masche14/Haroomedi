@@ -149,6 +149,10 @@
     overflow-y: scroll;
 }
 
+#user-list::-webkit-scrollbar {
+    width: 0;   /* 세로 스크롤바 너비 */
+}
+
 .user-role:hover {
     cursor: pointer;
 }
