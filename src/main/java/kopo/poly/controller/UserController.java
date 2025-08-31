@@ -49,7 +49,7 @@ public class UserController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate(); // 세션 무효화
-        return "redirect:/user/index";
+        return "redirect:/";
     }
 
     @GetMapping("/signin")
@@ -57,10 +57,7 @@ public class UserController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null) {
-            if(!SS_USER.getRole().equals("user")){
-                return "redirect:/admin/index";
-            }
-            return "redirect:/user/index";
+            return "redirect:/";
         }
 
 
@@ -71,7 +68,7 @@ public class UserController {
             ref = referrer.replace("http://localhost:11000", "");
 
         } else {
-            ref = "/user/index";
+            ref = "/";
         }
 
         log.info("ref : {}", ref);

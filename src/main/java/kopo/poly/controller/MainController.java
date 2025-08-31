@@ -18,9 +18,7 @@ public class MainController {
     public String index(HttpSession session) {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
         if (SS_USER != null) {
-            if(!SS_USER.getRole().equals("user")){
-                return "redirect:/admin/index";
-            }
+            log.info("SS_USER: {}", SS_USER);
         }
         return "user/index";
     }
