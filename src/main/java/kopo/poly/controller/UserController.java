@@ -105,6 +105,22 @@ public class UserController {
 
             log.info("encPassword : {}", encPassword);
 
+            log.info("pDTO : {}", pDTO);
+
+            BanDTO banDTO = banService.isBaned(pDTO);
+
+            log.info("banDTO : {}", banDTO.toString());
+
+            if (banDTO.getExistYn()!=null) {
+
+                msg = banDTO.getReason()+" 사유로 차단된 사용자 입니다.";
+                dto.setMsg(msg);
+
+                return ResponseEntity.ok(
+                        CommonResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), dto)
+                );
+            }
+
             UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
 
             if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {

@@ -44,11 +44,20 @@
                 return;
             }
 
+            let formData = $("#signinForm").serializeObject();
+
+            const value = $("#input_id").val();
+
+            let data = $.extend({}, formData, {
+                fieldName: "userId",
+                value: value
+            });
+
             $.ajax({
                 url: "/user/signin",
                 type: "post", // 전송방식은 Post
                 contentType: "application/json",
-                data: JSON.stringify($("#signinForm").serializeObject()), // form 태그 내 input 등 객체를 자동으로 전송할 형태로 변경하기
+                data: JSON.stringify(data),
                 dataType: "JSON", // 전송 결과는 JSON으로 받기
             }).then(
                 function (json) {
