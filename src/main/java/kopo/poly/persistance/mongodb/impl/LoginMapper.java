@@ -92,12 +92,17 @@ public class LoginMapper extends AbstractMongoDBComon implements ILoginMapper {
             log.info("{} 생성되었습니다.", colNm);
         }
 
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Seoul"));
+        cal.setTime(pDTO.getEndDate());
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        Date endExclusive = cal.getTime();
+
         List<LoginDTO> rList = null;
 
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(
                         new Criteria().andOperator(
-                                Criteria.where("loginAt").gte(pDTO.getStartDate()).lt(pDTO.getEndDate()),
+                                Criteria.where("loginAt").gte(pDTO.getStartDate()).lt(endExclusive),
                                 Criteria.where("role").is("user") // ✅ "user" 권한만 포함
                         )
                 ),

@@ -1,22 +1,17 @@
 package kopo.poly.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.ChatMessageDTO;
+import kopo.poly.feign.client.openai.OpenAIClient;
 import kopo.poly.service.IOpenAIService;
 import kopo.poly.util.MarkdownUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import feign.FeignException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,22 +21,12 @@ import java.util.regex.Pattern;
 public class OpenAIService implements IOpenAIService {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)    // 연결 타임아웃
-            .readTimeout(60, TimeUnit.SECONDS)       // 응답 대기 타임아웃
-            .writeTimeout(60, TimeUnit.SECONDS)      // 요청 전송 타임아웃
-            .callTimeout(90, TimeUnit.SECONDS)       // 전체 호출 타임아웃
-            .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES)) // 커넥션 풀 설정
-            .build();
-
-    @Value("${openai.apiKey}")
-    public  String openaiApiKey;
+    private final OpenAIClient openAIClient; // ✅ Feign 주입
 
     @Override
     public Map<String, Object> getDrugSummary(String textData) throws Exception {
         log.info("{}.getDrugSummary start!", this.getClass().getName());
 
-        // OpenAI API 요청 페이로드 설정
         String textExample = """
         {
             "drugSet": [
@@ -59,9 +44,9 @@ public class OpenAIService implements IOpenAIService {
         }
         """;
 
-        Map<String, Object> messageContent = new HashMap<>();
-        messageContent.put("role", "user");
-        messageContent.put("content", String.format("""
+        Map<String, Object> userMessage = new HashMap<>();
+        userMessage.put("role", "user");
+        userMessage.put("content", String.format("""
                 %s
 
                 해당 리스트에 있는 정보를 분석해서
@@ -89,54 +74,12 @@ public class OpenAIService implements IOpenAIService {
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("model", "gpt-4o");
-        payload.put("messages", new Object[]{messageContent});
+        payload.put("messages", List.of(userMessage));
         payload.put("max_tokens", 3000);
 
-        String requestBody = objectMapper.writeValueAsString(payload);
+        Map<String, Object> response = callWith429Retry(payload);
 
-        Request request = new Request.Builder()
-                .url("https://api.openai.com/v1/chat/completions")
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + openaiApiKey)
-                .post(RequestBody.create(MediaType.parse("application/json"), requestBody))
-                .build();
-
-        JsonNode rootNode = null;
-        int retryCount = 0;
-        int maxRetries = 5;
-        int baseDelayMs = 2000;  // 2초 기본 지연 시간
-
-        while (retryCount < maxRetries) {
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String responseBody = response.body().string();
-                    log.info("OpenAI API 응답: {}", responseBody);
-
-                    rootNode = objectMapper.readTree(responseBody);
-                    break;
-                } else if (response.code() == 429) {
-                    log.error("Rate Limit Exceeded (HTTP 429): 재시도 중...");
-                    retryCount++;
-                    int delay = baseDelayMs * (int) Math.pow(2, retryCount - 1);
-                    log.info("대기 시간: {}ms (재시도: {}/{})", delay, retryCount, maxRetries);
-                    Thread.sleep(delay);
-                } else {
-                    log.error("OpenAI API 호출 실패 (HTTP {}): {}", response.code(), response.message());
-                    throw new Exception("OpenAI API 호출 실패");
-                }
-            } catch (Exception e) {
-                log.error("OpenAI API 호출 중 오류 발생: {}", e.getMessage());
-                if (retryCount == maxRetries) {
-                    throw e;
-                }
-            }
-        }
-
-        if (rootNode == null) {
-            throw new Exception("OpenAI 응답에서 데이터를 추출하지 못했습니다.");
-        }
-
-        String content = rootNode.path("choices").get(0).path("message").path("content").asText();
+        String content = extractChoiceContent(response);
         log.info("content: {}", content);
 
         String jsonString = extractJsonFromResponse(content);
@@ -144,129 +87,80 @@ public class OpenAIService implements IOpenAIService {
             throw new Exception("OpenAI 응답에서 JSON 데이터를 추출하지 못했습니다.");
         }
 
-        Map<String, Object> result = objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> result =
+                objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {});
         log.info("result: {}", result);
         log.info("{}.getDrugSummary end!", this.getClass().getName());
         return result;
     }
 
-    private String extractJsonFromResponse(String content) {
-        Pattern pattern = Pattern.compile("```json\\s*(.*?)\\s*```", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(content);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    @Override
-    public String getAnalyzeResult(String textData) throws Exception {
-        log.info("{}.getAnalyzeResult start!", this.getClass().getName());
-
-        Map<String, Object> openAiPayload = new HashMap<>();
-        openAiPayload.put("model", "gpt-4o");
-        openAiPayload.put("max_tokens", 3000);
-        List<Map<String, String>> messages = new ArrayList<>();
-        Map<String, String> message = new HashMap<>();
-        message.put("role", "user");
-        message.put("content", "다음 건강검진 결과를 분석하고 이상 수치가 있는지 확인한 후, 건강 상태를 평가해 주세요. 만약 검사내역이 2회 이상일 경우 분석과 평가 모두 각각 나눠서 해주세요. :\n" + textData);
-        messages.add(message);
-        openAiPayload.put("messages", messages);
-
-        RequestBody openAiBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(openAiPayload));
-        Request openAiRequest = new Request.Builder()
-                .url("https://api.openai.com/v1/chat/completions")
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + openaiApiKey)
-                .post(openAiBody)
-                .build();
-
-        Response openAiResponse = client.newCall(openAiRequest).execute();
-        Map<String, Object> openAiResponseMap = objectMapper.readValue(openAiResponse.body().string(), Map.class);
-
-        // `choices` 배열에서 첫 번째 항목 가져오기
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) openAiResponseMap.get("choices");
-        String content = "";
-        if (choices != null && !choices.isEmpty()) {
-            Map<String, Object> firstChoice = choices.get(0);
-            Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
-
-            if (message != null) {
-                content = (String) resultMessage.get("content");
-                log.info("건강검진 분석결과 :\n" + content);
-            } else {
-                log.info("Message object is null.");
-            }
-        } else {
-            log.info("Choices array is empty or null.");
-        }
-
-        log.info("{}.getAnalyzeResult end!", this.getClass().getName());
-        return content;
-    }
-
     @Override
     public String getChatRespose(List<ChatMessageDTO> pList) throws Exception {
-
         log.info("{}.getChatRespose start!", this.getClass().getName());
-
-        Map<String, Object> openAiPayload = new HashMap<>();
-        openAiPayload.put("model", "gpt-4o");
-        openAiPayload.put("max_tokens", 3000);
 
         List<Map<String, String>> messages = new ArrayList<>();
 
-        // ✅ system 메시지 추가
         messages.add(Map.of(
                 "role", "system",
                 "content", "당신은 약사입니다. 사용자의 증상에 따라 일반의약품(OTC) 중 적절한 약을 추천하고, 필요 시 병원 방문도 권유하세요."
         ));
 
-        // ✅ DB에서 불러온 메시지 변환
         for (ChatMessageDTO dto : pList) {
             String role = dto.getSender().equalsIgnoreCase("USER") ? "user" : "assistant";
-            messages.add(Map.of(
-                    "role", role,
-                    "content", dto.getContent()
-            ));
+            messages.add(Map.of("role", role, "content", dto.getContent()));
         }
 
-        openAiPayload.put("messages", messages);
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("model", "gpt-4o");
+        payload.put("messages", messages);
+        payload.put("max_tokens", 3000);
 
-        RequestBody openAiBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(openAiPayload));
-        Request openAiRequest = new Request.Builder()
-                .url("https://api.openai.com/v1/chat/completions")
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + openaiApiKey)
-                .post(openAiBody)
-                .build();
+        Map<String, Object> response = callWith429Retry(payload);
+        String content = extractChoiceContent(response);
 
-        Response openAiResponse = client.newCall(openAiRequest).execute();
-        Map<String, Object> openAiResponseMap = objectMapper.readValue(openAiResponse.body().string(), Map.class);
-
-        // `choices` 배열에서 첫 번째 항목 가져오기
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) openAiResponseMap.get("choices");
-        String content = "";
-        if (choices != null && !choices.isEmpty()) {
-            Map<String, Object> firstChoice = choices.get(0);
-            Map<String, Object> resultMessage = (Map<String, Object>) firstChoice.get("message");
-
-            if (messages != null) {
-                content = ((String) resultMessage.get("content"));
-                log.info("응답내용 :\n" + content);
-                content = MarkdownUtil.toSafeHtml(content); // Markdown > HTML
-                log.info("1차 변환 내용 :\n" + content);
-                content = content.replaceAll(":\\s*", " "); // 챗봇 UI 개선을 위한 replace
-                log.info("최종 변환 내용 :\n" + content);
-            } else {
-                log.info("Message object is null.");
-            }
-        } else {
-            log.info("Choices array is empty or null.");
-        }
+        // Markdown → HTML 후 UI용 치환
+        content = MarkdownUtil.toSafeHtml(content);
+        content = content.replaceAll(":\\s*", " ");
 
         log.info("{}.getChatResponse end!", this.getClass().getName());
-
         return content;
+    }
+
+    /* ---------- 공통 유틸 ---------- */
+
+    private Map<String, Object> callWith429Retry(Map<String, Object> payload) throws Exception {
+        int retryCount = 0;
+        int maxRetries = 5;
+        int baseDelayMs = 2000; // 2s
+
+        while (true) {
+            try {
+                return openAIClient.chatCompletions(payload);
+            } catch (FeignException e) {
+                if (e.status() == 429 && retryCount < maxRetries) {
+                    retryCount++;
+                    int delay = baseDelayMs * (int) Math.pow(2, retryCount - 1);
+                    log.warn("OpenAI 429 Too Many Requests → {}ms 대기 후 재시도 ({}/{})", delay, retryCount, maxRetries);
+                    Thread.sleep(delay);
+                } else {
+                    log.error("OpenAI 호출 실패 (status={}): {}", e.status(), e.getMessage());
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private String extractChoiceContent(Map<String, Object> response) {
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+        if (choices == null || choices.isEmpty()) return "";
+        Map<String, Object> first = choices.get(0);
+        Map<String, Object> message = (Map<String, Object>) first.get("message");
+        return message == null ? "" : String.valueOf(message.get("content"));
+    }
+
+    private String extractJsonFromResponse(String content) {
+        Pattern pattern = Pattern.compile("```json\\s*(.*?)\\s*```", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(content);
+        return matcher.find() ? matcher.group(1) : null;
     }
 }

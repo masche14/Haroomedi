@@ -1,20 +1,16 @@
 package kopo.poly.service.impl;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kopo.poly.dto.*;
+import kopo.poly.feign.client.tilko.TilkoClient;
 import kopo.poly.persistance.mongodb.IPrescriptionMapper;
 import kopo.poly.persistance.mongodb.IReminderMapper;
 import kopo.poly.service.IHealthService;
 import kopo.poly.service.IOpenAIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -26,7 +22,6 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,35 +30,23 @@ public class HealthService implements IHealthService {
 
     private final IOpenAIService openAIService;
 
-    private static final String API_HOST = "https://api.tilko.net/";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(60, TimeUnit.SECONDS)    // 연결 타임아웃 (기존 30초 → 60초)
-            .readTimeout(180, TimeUnit.SECONDS)      // 응답 대기 타임아웃 (기존 60초 → 180초)
-            .writeTimeout(180, TimeUnit.SECONDS)     // 요청 전송 타임아웃 (기존 60초 → 180초)
-            .callTimeout(240, TimeUnit.SECONDS)      // 전체 호출 타임아웃 (기존 90초 → 240초)
-            .connectionPool(new ConnectionPool(10, 10, TimeUnit.MINUTES)) // 커넥션 풀 크기 증가
-            .retryOnConnectionFailure(true)          // 연결 실패 시 자동 재시도
-            .build();
     private final IPrescriptionMapper prescriptionMapper;
     private final IReminderMapper reminderMapper;
 
-    @Value("${tilko.apiKey}")
-    public  String tilkoApiKey;
+    // ✅ Feign Client 주입
+    private final TilkoClient tilkoClient;
 
-    @Value("${openai.apiKey}")
-    public  String openaiApiKey;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    /* =========================
+       Tilko 공용 유틸
+       ========================= */
     public String getPublicKey() throws Exception {
-        Request request = new Request.Builder()
-                .url(API_HOST + "/api/Auth/GetPublicKey?APIkey=" + tilkoApiKey)
-                .header("Content-Type", "application/json")
-                .build();
-
-        Response response = client.newCall(request).execute();
-        if (!response.isSuccessful()) throw new RuntimeException("Failed to get public key");
-        Map<String, String> responseMap = objectMapper.readValue(response.body().string(), Map.class);
-        return responseMap.get("PublicKey");
+        // 인터셉터가 ?APIkey= 자동 추가 → 파라미터 없이 호출
+        Map<String, Object> res = tilkoClient.getPublicKey();
+        Object key = (res != null) ? res.get("PublicKey") : null;
+        if (key == null) throw new RuntimeException("Failed to get public key");
+        return String.valueOf(key);
     }
 
     public String encryptAES(SecretKey aesKey, IvParameterSpec iv, String plainText) throws Exception {
@@ -83,117 +66,86 @@ public class HealthService implements IHealthService {
         return Base64.getEncoder().encodeToString(encryptedKey);
     }
 
+    /* =========================
+       Tilko 연동 (Feign)
+       ========================= */
+
     @Override
     public TilkoDTO getCertificateResult(TilkoDTO pDTO) throws Exception {
         log.info("{}.getCertificateResult start!", this.getClass().getName());
+
+        // 1) 공개키/AES/ENC-KEY 준비
         String rsaPublicKey = getPublicKey();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(128);
         SecretKey aesKey = keyGen.generateKey();
         IvParameterSpec iv = new IvParameterSpec(new byte[16]);
+        String encKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
-        String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
-
+        // 2) 요청 바디 (민감정보 AES 암호화)
         Map<String, Object> jsonBody = new HashMap<>();
         jsonBody.put("PrivateAuthType", pDTO.getPrivateAuthType());
         jsonBody.put("UserName", encryptAES(aesKey, iv, pDTO.getUserName()));
         jsonBody.put("BirthDate", encryptAES(aesKey, iv, pDTO.getBirthDate()));
         jsonBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, pDTO.getUserCellphoneNumber()));
 
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(jsonBody));
-        Request request = new Request.Builder()
-                .url(API_HOST + "api/v1.0/nhissimpleauth/simpleauthrequest")
-                .header("Content-Type", "application/json")
-                .header("API-KEY", tilkoApiKey)
-                .header("ENC-KEY", aesCipherKey)
-                .post(requestBody)
-                .build();
+        // 3) 호출 (API-KEY는 인터셉터, ENC-KEY는 헤더 인자)
+        Map<String, Object> res = tilkoClient.simpleAuthRequest(encKey, jsonBody);
 
-        Response response = client.newCall(request).execute();
-
-        JsonNode rootNode = objectMapper.readTree(response.body().string());
-        JsonNode resultDataNode = rootNode.get("ResultData");
-
-        TilkoDTO certificateResult = objectMapper.treeToValue(resultDataNode, TilkoDTO.class);
+        // 4) ResultData -> TilkoDTO
+        TilkoDTO certificateResult = objectMapper.convertValue(res.get("ResultData"), TilkoDTO.class);
 
         log.info("{}.getCertificateResult End!", this.getClass().getName());
-
         return certificateResult;
     }
 
     @Override
     public Boolean loginCheck(TilkoDTO pDTO) throws Exception {
-
+        // 1) 공개키/AES/ENC-KEY
         String rsaPublicKey = getPublicKey();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(128);
         SecretKey aesKey = keyGen.generateKey();
         IvParameterSpec iv = new IvParameterSpec(new byte[16]);
+        String encKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
-        String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
+        // 2) 요청 바디
+        Map<String, Object> auth = new HashMap<>();
+        auth.put("CxId", pDTO.getCxId());
+        auth.put("PrivateAuthType", pDTO.getPrivateAuthType());
+        auth.put("ReqTxId", pDTO.getReqTxId());
+        auth.put("Token", pDTO.getToken());
+        auth.put("TxId", pDTO.getTxId());
+        auth.put("UserName", encryptAES(aesKey, iv, pDTO.getUserName()));
+        auth.put("BirthDate", encryptAES(aesKey, iv, pDTO.getBirthDate()));
+        auth.put("UserCellphoneNumber", encryptAES(aesKey, iv, pDTO.getUserCellphoneNumber()));
 
-        String url = API_HOST + "api/v2.0/nhissimpleauth/LoginCheck";
+        Map<String, Object> body = new HashMap<>();
+        body.put("Auth", auth);
 
-        Map<String, Object> loginCheckRequestBody = new HashMap<>();
-        Map<String, Object> Auth = new HashMap<>();
+        // 3) 호출
+        Map<String, Object> res = tilkoClient.loginCheck(encKey, body);
 
-        Auth.put("CxId", pDTO.getCxId());
-        Auth.put("PrivateAuthType", pDTO.getPrivateAuthType());
-        Auth.put("ReqTxId", pDTO.getReqTxId());
-        Auth.put("Token", pDTO.getToken());
-        Auth.put("TxId", pDTO.getTxId());
-        Auth.put("UserName", encryptAES(aesKey, iv, pDTO.getUserName()));
-        Auth.put("BirthDate", encryptAES(aesKey, iv, pDTO.getBirthDate()));
-        Auth.put("UserCellphoneNumber", encryptAES(aesKey, iv, pDTO.getUserCellphoneNumber()));
-
-        loginCheckRequestBody.put("Auth", Auth);
-
-        log.info("loginCheckRequestBody : {}", loginCheckRequestBody.toString());
-
-        RequestBody loginCheckBody = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(loginCheckRequestBody));
-        Request loginCheckRequest = new Request.Builder()
-                .url(url)
-                .header("Content-Type", "application/json")
-                .header("API-KEY", tilkoApiKey)
-                .header("ENC-KEY", aesCipherKey)
-                .post(loginCheckBody)
-                .build();
-
-        log.info("loginCheckBody : {}",loginCheckBody.toString());
-
-        Response loginCheckResponse = client.newCall(loginCheckRequest).execute();
-        Map<String, Object> loginCheckResponseMap = objectMapper.readValue(loginCheckResponse.body().string(), Map.class);
-        log.info("loginCheckResult: " + loginCheckResponseMap);
-
-
-        Boolean result = (Boolean) loginCheckResponseMap.get("Result");
-        log.info("result : {}",result.toString());
-
-        return result;
+        // 4) 결과 파싱
+        Object result = res.get("Result");
+        return (result instanceof Boolean) ? (Boolean) result : Boolean.valueOf(String.valueOf(result));
     }
-
-
 
     @Override
     public int synchronizePrescriptions(TilkoDTO certificateResult) throws Exception {
-        log.info("{}.getPrescriptionList start!", this.getClass().getName());
+        log.info("{}.synchronizePrescriptions start!", this.getClass().getName());
 
         int res = 0;
 
-        // AES 키 및 IV 생성
+        // 1) 공개키/AES/ENC-KEY
         String rsaPublicKey = getPublicKey();
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(128);
         SecretKey aesKey = keyGen.generateKey();
         IvParameterSpec iv = new IvParameterSpec(new byte[16]);
+        String encKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
 
-        // AES 암호화 키 생성
-        String aesCipherKey = encryptRSA(rsaPublicKey, aesKey.getEncoded());
-
-        // API URL 설정
-        String url = API_HOST + "api/v1.0/nhissimpleauth/retrievetreatmentinjectioninformationperson";
-
-        // 요청 파라미터 설정
+        // 2) 요청 바디
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("CxId", certificateResult.getCxId());
         requestBody.put("PrivateAuthType", certificateResult.getPrivateAuthType());
@@ -205,21 +157,16 @@ public class HealthService implements IHealthService {
         requestBody.put("UserCellphoneNumber", encryptAES(aesKey, iv, certificateResult.getUserCellphoneNumber()));
         requestBody.put("기타필요한파라미터", "");
 
-        // API 요청
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), objectMapper.writeValueAsString(requestBody));
-        Request request = new Request.Builder()
-                .url(url)
-                .header("Content-Type", "application/json")
-                .header("API-KEY", tilkoApiKey)
-                .header("ENC-KEY", aesCipherKey)
-                .post(body)
-                .build();
+        // 3) 호출
+        Map<String, Object> responseMap = tilkoClient.retrievePrescription(encKey, requestBody);
 
-        Response response = client.newCall(request).execute();
-        Map<String, Object> responseMap = objectMapper.readValue(response.body().string(), new TypeReference<>() {});
-        List<Map<String, Object>> resultList = (List<Map<String, Object>>) responseMap.get("ResultList");
+        // 4) 결과 파싱
+        List<Map<String, Object>> resultList =
+                objectMapper.convertValue(responseMap.get("ResultList"),
+                        new TypeReference<List<Map<String, Object>>>() {});
 
-        log.info("API 처방데이터 개수 : {}", resultList.size());
+        log.info("API 처방데이터 개수 : {}", (resultList == null) ? 0 : resultList.size());
+        if (resultList == null || resultList.isEmpty()) return 0;
 
         List<PrescriptionDTO> prescriptionList = new ArrayList<>();
 
@@ -231,58 +178,46 @@ public class HealthService implements IHealthService {
 
         for (Map<String, Object> result : resultList) {
             try {
-                // 처방 유형 필터
                 String jinRyoHyungTae = (String) result.get("JinRyoHyungTae");
-                if (!"처방조제".equals(jinRyoHyungTae)) {
-                    continue;
-                }
+                if (!"처방조제".equals(jinRyoHyungTae)) continue;
 
                 String storeName = (String) result.get("ByungEuiwonYakGukMyung");
-                String prescriptionDate = (String) result.get("JinRyoGaesiIl");
-                String period = (String) result.get("TuYakYoYangHoiSoo");
+                String prescriptionDate = String.valueOf(result.get("JinRyoGaesiIl"));
+                String period = String.valueOf(result.get("TuYakYoYangHoiSoo"));
                 int prescriptionPeriod = Integer.parseInt(period);
 
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date date = formatter.parse(prescriptionDate);
 
                 if (latestDTO != null) {
-                    if (date.compareTo(latestDTO.getPrescriptionDate())<0 || (date.compareTo(latestDTO.getPrescriptionDate())==0&&storeName.equals(latestDTO.getStoreName()))) {
+                    boolean older = date.compareTo(latestDTO.getPrescriptionDate()) < 0;
+                    boolean same = date.compareTo(latestDTO.getPrescriptionDate()) == 0
+                            && storeName.equals(latestDTO.getStoreName());
+                    if (older || same) {
                         log.info("DB의 최신 데이터와 일치합니다.");
                         break;
                     }
                 }
 
-                log.info("DB에 존재하지 않는 최신 데이터 입니다.");
-
-                List<Map<String, Object>> detailList = (List<Map<String, Object>>) result.get("RetrieveTreatmentInjectionInformationPersonDetailList");
-
-                if (detailList.isEmpty()){
-                    continue;
-                }
+                List<Map<String, Object>> detailList =
+                        (List<Map<String, Object>>) result.get("RetrieveTreatmentInjectionInformationPersonDetailList");
+                if (detailList == null || detailList.isEmpty()) continue;
 
                 List<Map<String, Object>> drugList = new ArrayList<>();
-
                 for (Map<String, Object> detail : detailList) {
                     Map<String, Object> detailInfo = (Map<String, Object>) detail.get("RetrieveMdsupDtlInfo");
-                    try {
-                        detailInfo.remove("DrugImage");
-                    } catch (Exception e) {
-                        // 아무 작업도 하지 않음 (pass와 동일)
+                    if (detailInfo != null) {
+                        try { detailInfo.remove("DrugImage"); } catch (Exception ignore) {}
+                        drugList.add(detailInfo);
                     }
-                    drugList.add(detailInfo);
                 }
 
-                // 약물 정보 요약 요청
                 String textData = objectMapper.writeValueAsString(drugList);
-
-                log.info("textData : {}", textData);
-
                 Map<String, Object> summaryResult = openAIService.getDrugSummary(textData);
 
-                // 처방 데이터 구성
                 PrescriptionDTO prescription = new PrescriptionDTO();
                 prescription.setUserId(certificateResult.getUserId());
-                prescription.setPrescriptionDate(date);  // 날짜 변환 필요
+                prescription.setPrescriptionDate(date);
                 prescription.setStoreName(storeName);
                 prescription.setPrescriptionPeriod(prescriptionPeriod);
                 prescription.setDrugList((List<Map<String, Object>>) summaryResult.get("drugSet"));
@@ -296,27 +231,24 @@ public class HealthService implements IHealthService {
         }
 
         log.info("추가할 최신 데이터 개수 : {}", prescriptionList.size());
-
-        if (!prescriptionList.isEmpty()){
+        if (!prescriptionList.isEmpty()) {
             res = prescriptionMapper.insertPrescriptionInfo(colNm, prescriptionList);
         }
 
-        log.info("{}.getPrescriptionList end!", this.getClass().getName());
-
+        log.info("{}.synchronizePrescriptions end!", this.getClass().getName());
         return res;
     }
 
+    /* =========================
+       이하 Mongo 연동 (기존 유지)
+       ========================= */
+
     @Override
     public List<PrescriptionDTO> getPrescriptionList(UserInfoDTO pDTO) throws Exception {
-
         log.info("{}.getPrescriptionList Start!", this.getClass().getName());
-
         String colNm = "Prescription";
-
         List<PrescriptionDTO> prescriptionList = prescriptionMapper.getPrescriptionList(colNm, pDTO);
-
         log.info("{}.getPrescriptionList End!", this.getClass().getName());
-
         return prescriptionList;
     }
 
@@ -324,107 +256,67 @@ public class HealthService implements IHealthService {
     public PrescriptionDTO updatePrescriptionInfo(PrescriptionDTO pDTO) throws Exception {
         log.info("{}.updatePrescriptionInfo Start!", this.getClass().getName());
         String colNm = "Prescription";
-
         PrescriptionDTO rDTO = null;
-
         int res = prescriptionMapper.updatePrescriptionInfo(colNm, pDTO);
-        if (res>0){
+        if (res > 0) {
             rDTO = prescriptionMapper.getPrescriptionById(colNm, pDTO);
         }
-
         log.info("{}.updatePrescriptionInfo End!", this.getClass().getName());
-
         return rDTO;
     }
 
     @Override
     public int insertReminder(ReminderDTO pDTO) throws Exception {
-
         log.info("{}.insertReminder Start!", this.getClass().getName());
-
         String colNm = "Reminder";
-
-        int res;
-
-        res = reminderMapper.insertReminder(colNm, pDTO);
-
+        int res = reminderMapper.insertReminder(colNm, pDTO);
         log.info("{}.insertReminder End!", this.getClass().getName());
-
         return res;
     }
 
     @Override
     public int deleteReminder(PrescriptionDTO pDTO) throws Exception {
-
         log.info("{}.deleteReminder Start!", this.getClass().getName());
-
         String colNm = "Reminder";
-
         int res = reminderMapper.deleteReminder(colNm, pDTO);
-
         log.info("{}.deleteReminder End!", this.getClass().getName());
-
         return res;
     }
 
     @Override
     public int updateReminderMealTime(UserInfoDTO pDTO) throws Exception {
-
         log.info("{}.updateReminderMealTime Start!", this.getClass().getName());
-
         String colNm = "Reminder";
-
-        int res = 0;
-
-        res = reminderMapper.updateMealTime(colNm, pDTO);
-
+        int res = reminderMapper.updateMealTime(colNm, pDTO);
         log.info("{}.updateReminderMealTime End!", this.getClass().getName());
-
-        return 0;
+        return res;
     }
 
     public int updatePrescriptionAndReminderUserId(UserInfoDTO pDTO) throws Exception {
         log.info("{}.updatePrescriptionAndReminderUserId Start!", this.getClass().getName());
         String colNm1 = "Prescription";
-
-        int res = 0;
-
-        int success1 = 0;
-        success1 = prescriptionMapper.updateUserId(colNm1, pDTO);
-
         String colNm2 = "Reminder";
+        int success1 = prescriptionMapper.updateUserId(colNm1, pDTO);
         int success2 = reminderMapper.updateUserId(colNm2, pDTO);
-
-        if (success1 == 1 && success2 == 1){
-            res = 1;
-        }
-
-        return res;
+        log.info("{}.updatePrescriptionAndReminderUserId End!", this.getClass().getName());
+        return (success1 == 1 && success2 == 1) ? 1 : 0;
     }
 
     @Override
     public ReminderDTO getReminderByPrescriptionId(ReminderDTO pDTO) throws Exception {
-
         log.info("{}.getReminderByPrescriptionId Start!", this.getClass().getName());
-
         String colNm = "Reminder";
-
         ReminderDTO rDTO = reminderMapper.getReminderByPrescriptionId(colNm, pDTO);
-
         log.info("{}.getReminderByPrescriptionId End!", this.getClass().getName());
-
         return rDTO;
     }
 
     @Override
     public int updateIntakeLog(ReminderDTO pDTO) throws Exception {
-
         log.info("{}.updateIntakeLog Start", this.getClass().getSimpleName());
-
-        String colNm = "Reminder"; // 컬렉션 이름 설정
+        String colNm = "Reminder";
 
         int res = 0;
-
         List<Map<String, Object>> intakeLogList = pDTO.getIntakeLog();
         if (intakeLogList == null || intakeLogList.isEmpty()) {
             log.warn("intakeLog가 비어있음");
@@ -432,15 +324,12 @@ public class HealthService implements IHealthService {
         }
 
         Map<String, Object> intakeLogEntry = intakeLogList.get(0);
+        String intakeTimeStr = String.valueOf(intakeLogEntry.get("intakeTime")); // "2025-05-19T07:30"
+        String intakeYn = String.valueOf(intakeLogEntry.get("intakeYn"));
 
-        String intakeTimeStr = intakeLogEntry.get("intakeTime").toString(); // "2025-05-19T07:30"
-        String intakeYn = intakeLogEntry.get("intakeYn").toString();
-
-        // intakeTime 문자열을 Date로 변환
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
         Date intakeTime = sdf.parse(intakeTimeStr);
 
-        // 다시 intakeLog에 세팅
         Map<String, Object> convertedEntry = new HashMap<>();
         convertedEntry.put("intakeTime", intakeTime);
         convertedEntry.put("intakeYn", intakeYn);
@@ -450,10 +339,7 @@ public class HealthService implements IHealthService {
         pDTO.setIntakeLog(newLogList);
 
         int success = reminderMapper.updateIntakeLog(colNm, pDTO);
-
-        if (success > 1){
-            res = 1;
-        }
+        if (success > 1) res = 1;
 
         log.info("{}.updateIntakeLog End", this.getClass().getSimpleName());
         return res;
@@ -461,42 +347,21 @@ public class HealthService implements IHealthService {
 
     @Override
     public int deleteAllPrescription(UserInfoDTO pDTO) throws Exception {
-
         log.info("{}.deleteAllPrescription Start!", this.getClass().getName());
-
         String colNm = "Prescription";
-
-        int res = 0;
-
         int success = prescriptionMapper.deleteAllPrescription(colNm, pDTO);
-
-        if (success > 0){
-            res = 1;
-        }
-
+        int res = success > 0 ? 1 : 0;
         log.info("{}.deleteAllPrescription End", this.getClass().getName());
-
         return res;
     }
 
     @Override
     public int deleteAllReminder(UserInfoDTO pDTO) throws Exception {
-
         log.info("{}.deleteAllReminder Start", this.getClass().getName());
-
         String colNm = "Reminder";
-
-        int res = 0;
-
         int success = reminderMapper.deleteAllReminder(colNm, pDTO);
-
-        if (success > 0){
-            res = 1;
-        }
-
+        int res = success > 0 ? 1 : 0;
         log.info("{}.deleteAllReminder End", this.getClass().getName());
-
         return res;
     }
 }
-

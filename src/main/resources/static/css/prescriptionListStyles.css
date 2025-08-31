@@ -131,3 +131,7 @@
     width: 100%;
     overflow-y: scroll;
 }
+
+#prescription-list::-webkit-scrollbar {
+    width: 0;   /* 세로 스크롤바 너비 */
+}
