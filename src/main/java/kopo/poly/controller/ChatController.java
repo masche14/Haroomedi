@@ -30,9 +30,7 @@ public class ChatController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null){
-            if(!SS_USER.getRole().equals("user")){
-                return "redirect:/admin/index";
-            }
+            log.info("SS_USER : {}", SS_USER);
         }
 
         return "chat/chat";

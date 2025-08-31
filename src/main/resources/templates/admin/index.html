@@ -21,6 +21,24 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
     <script src="/js/adminIndex.js" defer></script>
+    <script th:inline="javascript">
+        const SS_USER = /*[[${session.SS_USER}]]*/ null;
+        $(document).ready(function () {
+            if (SS_USER == null) {
+                alert("로그인 후 이용 가능합니다.");
+                setReferrer();
+                return;
+            }
+
+            console.log("role :", SS_USER.role);
+
+            if (!(SS_USER.role === "admin" || SS_USER.role === "super")) {
+                alert("관리자 권한이 없습니다.");
+                window.location.href = "/";
+                return;
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -32,8 +50,12 @@
             <a href="/user/index">하루약속</a>
         </div>
         <div class="nav-group" id="serviceNav">
-            <a href="/admin/userManagement">회원 관리</a>
-            <a href="/admin/banUserManagement">차단 회원 관리</a>
+            <a href="/health/prescriptionList">처방 내역 조회</a>
+            <a href="/health/auth">처방 내역 동기화</a>
+            <a href="/chat/chat">AI 챗봇 상담</a>
+            <a href="/map/map">주변 약국 찾기</a>
+            <a href="/admin/index"
+               th:if="${session.SS_USER != null and session.SS_USER.role != 'user'}">관리자</a>
         </div>
         <div class="nav-group same_width justify-right" id="beforeLoginNav" th:if="${session.SS_USER == null}">
             <a href="#" class="login" onclick="setReferrer()">로그인</a>

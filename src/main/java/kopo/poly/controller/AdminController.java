@@ -34,11 +34,7 @@ public class AdminController {
         UserInfoDTO SS_USER = (UserInfoDTO) session.getAttribute("SS_USER");
 
         if (SS_USER != null) {
-            if(SS_USER.getRole().equals("user")) {
-                return "user/index";
-            }
-        } else {
-            return "user/index";
+            log.info(SS_USER.toString());
         }
 
         return "admin/index";
