@@ -11,11 +11,13 @@ import org.bson.Document;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.DateOperators;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -26,6 +28,18 @@ import java.util.*;
 public class LoginMapper extends AbstractMongoDBComon implements ILoginMapper {
 
     private final MongoTemplate mongodb;
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+    private Date kstMonthStart(Date anyDay) {
+        YearMonth ym = YearMonth.from(anyDay.toInstant().atZone(KST));
+        return Date.from(ym.atDay(1).atStartOfDay(KST).toInstant());
+    }
+
+    private Date kstNextMonthStart(Date anyDay) {
+        YearMonth ym = YearMonth.from(anyDay.toInstant().atZone(KST)).plusMonths(1);
+        return Date.from(ym.atDay(1).atStartOfDay(KST).toInstant());
+    }
 
     @Override
     public int insertLoginInfo(String colNm, LoginDTO pDTO) throws Exception {
@@ -92,28 +106,56 @@ public class LoginMapper extends AbstractMongoDBComon implements ILoginMapper {
             log.info("{} 생성되었습니다.", colNm);
         }
 
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Asia/Seoul"));
-        cal.setTime(pDTO.getEndDate());
-        cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date endExclusive = cal.getTime();
+        LocalDate startLocalDate = pDTO.getStartDate().toInstant()
+                .atZone(ZoneId.of("Asia/Seoul"))
+                .toLocalDate();
 
-        List<LoginDTO> rList = null;
+        int selectedYear = startLocalDate.getYear();
+        int selectedMonth = startLocalDate.getMonthValue();
+
+        Date startInclusive = kstMonthStart(pDTO.getStartDate());
+        Date endExclusive   = kstNextMonthStart(pDTO.getStartDate());
+
+        log.info("starDate : {}", pDTO.getStartDate());
+        log.info("endDate : {}", pDTO.getEndDate());
+
+        // 디버깅: UTC로도 찍어서 확인(중요)
+        log.info("startInclusive(UTC): {}", startInclusive.toInstant()); // 예: 2025-07-31T15:00:00Z
+        log.info("endExclusive(UTC)  : {}", endExclusive.toInstant());   // 예: 2025-08-31T15:00:00Z
+
+        log.info("selectedYear : {}", selectedYear);
+        log.info("selectedMonth : {}", selectedMonth);
+
+        List<LoginDTO> rList;
 
         Aggregation agg = Aggregation.newAggregation(
-                Aggregation.match(
-                        new Criteria().andOperator(
-                                Criteria.where("loginAt").gte(pDTO.getStartDate()).lt(endExclusive),
-                                Criteria.where("role").is("user") // ✅ "user" 권한만 포함
-                        )
-                ),
+                // ① KST 자정 경계로 매치
+                Aggregation.match(new Criteria().andOperator(
+                        Criteria.where("loginAt").gte(startInclusive).lt(endExclusive),
+                        Criteria.where("role").is("user")
+                )),
+
+                // ② 날짜 문자열을 KST로 생성 (여기서 'loginAt'에 대해 추가 +9h 하지 말 것!)
                 Aggregation.project("userId")
-                        .andExpression("dateToString('%Y-%m-%d', loginAt)").as("loginDateString"),
+                        .and(
+                                DateOperators.dateOf("loginAt")
+                                        .toString("%Y-%m-%d")
+                                        .withTimezone(DateOperators.Timezone.valueOf("Asia/Seoul"))
+                        ).as("loginDateString"),
+
+                // (선택) ③ 선택 월만 다시 한 번 안전 필터
+                //   ex) 2025-08 월만 남기기
+                Aggregation.match(
+                        Criteria.where("loginDateString").regex("^" + selectedYear + "-" + String.format("%02d", selectedMonth) + "-")
+                ),
+
+                // ④ 날짜+유저로 유니크 만든 뒤 날짜만 카운트
                 Aggregation.group("loginDateString", "userId"),
                 Aggregation.group("_id.loginDateString").count().as("userCount"),
-                Aggregation.project("userCount")
-                        .and("_id").as("loginDateString"),
+                Aggregation.project("userCount").and("_id").as("loginDateString"),
                 Aggregation.sort(Sort.Direction.ASC, "loginDateString")
         );
+
 
         rList = mongodb.aggregate(agg, colNm, LoginDTO.class).getMappedResults();
 
